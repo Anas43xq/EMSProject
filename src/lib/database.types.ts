@@ -451,6 +451,38 @@ export interface Database {
           created_at?: string
         }
       }
+      user_preferences: {
+        Row: {
+          id: string
+          user_id: string
+          email_leave_approvals: boolean
+          email_attendance_reminders: boolean
+          email_performance_reviews: boolean
+          email_payroll_updates: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          email_leave_approvals?: boolean
+          email_attendance_reminders?: boolean
+          email_performance_reviews?: boolean
+          email_payroll_updates?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          email_leave_approvals?: boolean
+          email_attendance_reminders?: boolean
+          email_performance_reviews?: boolean
+          email_payroll_updates?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never
