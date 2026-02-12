@@ -34,6 +34,13 @@ interface LeaveStatusData {
   value: number;
 }
 
+interface EmployeePayroll {
+  status: string;
+  salary: number;
+  month: number;
+  year: number;
+}
+
 export default function Dashboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -50,6 +57,7 @@ export default function Dashboard() {
   const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([]);
   const [departmentData, setDepartmentData] = useState<DepartmentData[]>([]);
   const [leaveStatusData, setLeaveStatusData] = useState<LeaveStatusData[]>([]);
+  const [employeePayroll, setEmployeePayroll] = useState<EmployeePayroll | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -69,6 +77,8 @@ export default function Dashboard() {
       let approvedLeavesQuery = supabase.from('leaves').select('id', { count: 'exact' }).eq('status', 'approved');
       let rejectedLeavesQuery = supabase.from('leaves').select('id', { count: 'exact' }).eq('status', 'rejected');
       let attendanceQuery = supabase.from('attendance').select('id', { count: 'exact' }).eq('date', today).eq('status', 'present');
+      let payrollQuery = supabase.from('payroll').select('id', { count: 'exact' }).eq('status', 'pending').eq('month', currentMonth).eq('year', currentYear);
+      let employeePayrollQuery: any = null;
 
       // For employees, filter to their own data
       if (role === 'employee' && employeeId) {
@@ -76,6 +86,14 @@ export default function Dashboard() {
         approvedLeavesQuery = approvedLeavesQuery.eq('employee_id', employeeId);
         rejectedLeavesQuery = rejectedLeavesQuery.eq('employee_id', employeeId);
         attendanceQuery = attendanceQuery.eq('employee_id', employeeId);
+        // Query employee's personal payroll
+        employeePayrollQuery = supabase
+          .from('payroll')
+          .select('status, salary, month, year')
+          .eq('employee_id', employeeId)
+          .eq('month', currentMonth)
+          .eq('year', currentYear)
+          .single();
       }
 
       const [
@@ -96,11 +114,19 @@ export default function Dashboard() {
         rejectedLeavesQuery,
         supabase.from('activity_logs').select('id, action, created_at, entity_type').order('created_at', { ascending: false }).limit(5),
         attendanceQuery,
-        supabase.from('payroll').select('id', { count: 'exact' }).eq('status', 'pending').eq('month', currentMonth).eq('year', currentYear),
+        payrollQuery,
         supabase.from('employees').select('department_id, departments(name)')
       ]);
 
       const activeEmployees = employeesRes.data?.filter((e: any) => e.status === 'active').length || 0;
+
+      // Load employee's personal payroll if employee role
+      if (role === 'employee' && employeePayrollQuery) {
+        const { data: payrollData } = await employeePayrollQuery;
+        if (payrollData) {
+          setEmployeePayroll(payrollData as EmployeePayroll);
+        }
+      }
 
       setStats({
         totalEmployees: employeesRes.count || 0,
@@ -157,6 +183,15 @@ export default function Dashboard() {
     { id: 'approvedLeaves', name: 'Approved Leaves', value: stats.approvedLeaves, icon: CheckCircle, color: 'bg-emerald-500' },
     { id: 'rejectedLeaves', name: 'Rejected Leaves', value: stats.rejectedLeaves, icon: XCircle, color: 'bg-red-500' },
     { id: 'pendingPayroll', name: 'Pending Payroll', value: stats.pendingPayroll, icon: DollarSign, color: 'bg-yellow-500' },
+    { 
+      id: 'myPayrollStatus', 
+      name: 'My Payroll Status', 
+      value: employeePayroll?.status === 'pending' ? 'Pending' : (employeePayroll?.status === 'paid' ? 'Paid' : 'Not Available'),
+      icon: DollarSign, 
+      color: employeePayroll?.status === 'paid' ? 'bg-green-500' : 'bg-yellow-500',
+      salary: employeePayroll?.salary,
+      isPayroll: true
+    },
   ];
 
   const statCards = allStatCards.filter(card => isWidgetVisible(card.id, user?.role || 'employee'));
@@ -183,12 +218,19 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {statCards.map((stat) => (
+        {statCards.map((stat: any) => (
           <div key={stat.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600 mb-1">{stat.name}</p>
-                <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
+                {stat.isPayroll ? (
+                  <div>
+                    <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+                    {stat.salary && <p className="text-sm text-gray-500 mt-1">₱{stat.salary.toLocaleString()}</p>}
+                  </div>
+                ) : (
+                  <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
+                )}
               </div>
               <div className={`${stat.color} p-3 rounded-lg`}>
                 <stat.icon className="w-6 h-6 text-white" />

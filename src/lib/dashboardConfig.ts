@@ -19,7 +19,7 @@ export interface QuickAction {
 // Define which dashboard widgets are visible for each role
 export const DASHBOARD_WIDGETS: DashboardWidget[] = [
   // Admin sees all stat cards
-  { id: 'totalEmployees', label: 'Total Employees', visibleFor: ['admin', 'hr', 'employee'] },
+  { id: 'totalEmployees', label: 'Total Employees', visibleFor: ['admin', 'hr'] },
   { id: 'activeEmployees', label: 'Active Employees', visibleFor: ['admin', 'hr'] },
   { id: 'departments', label: 'Departments', visibleFor: ['admin', 'hr'] },
   { id: 'pendingLeaves', label: 'Pending Leaves', visibleFor: ['admin', 'hr', 'employee'] },
@@ -27,6 +27,7 @@ export const DASHBOARD_WIDGETS: DashboardWidget[] = [
   { id: 'approvedLeaves', label: 'Approved Leaves', visibleFor: ['admin', 'hr'] },
   { id: 'rejectedLeaves', label: 'Rejected Leaves', visibleFor: ['admin', 'hr'] },
   { id: 'pendingPayroll', label: 'Pending Payroll', visibleFor: ['admin'] },
+  { id: 'myPayrollStatus', label: 'My Payroll Status', visibleFor: ['employee'] },
   { id: 'departmentChart', label: 'Employees by Department', visibleFor: ['admin', 'hr'], isChart: true },
   { id: 'leaveChart', label: 'Leave Status Distribution', visibleFor: ['admin', 'hr', 'employee'], isChart: true },
   { id: 'recentActivities', label: 'Recent Activities', visibleFor: ['admin'] },
