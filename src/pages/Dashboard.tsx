@@ -35,8 +35,8 @@ interface LeaveStatusData {
 }
 
 interface EmployeePayroll {
-  status: string;
-  salary: number;
+  status: 'pending' | 'paid';
+  net_salary: number;
   month: number;
   year: number;
 }
@@ -86,14 +86,14 @@ export default function Dashboard() {
         approvedLeavesQuery = approvedLeavesQuery.eq('employee_id', employeeId);
         rejectedLeavesQuery = rejectedLeavesQuery.eq('employee_id', employeeId);
         attendanceQuery = attendanceQuery.eq('employee_id', employeeId);
-        // Query employee's personal payroll
+        // Query employee's personal payroll - get latest available
         employeePayrollQuery = supabase
           .from('payroll')
-          .select('status, salary, month, year')
+          .select('status, net_salary, month, year')
           .eq('employee_id', employeeId)
-          .eq('month', currentMonth)
-          .eq('year', currentYear)
-          .single();
+          .order('year', { ascending: false })
+          .order('month', { ascending: false })
+          .limit(1);
       }
 
       const [
@@ -122,9 +122,11 @@ export default function Dashboard() {
 
       // Load employee's personal payroll if employee role
       if (role === 'employee' && employeePayrollQuery) {
-        const { data: payrollData } = await employeePayrollQuery;
-        if (payrollData) {
-          setEmployeePayroll(payrollData as EmployeePayroll);
+        const { data: payrollData, error: payrollError } = await employeePayrollQuery;
+        if (payrollError) {
+          console.warn('Error loading employee payroll:', payrollError);
+        } else if (payrollData && payrollData.length > 0) {
+          setEmployeePayroll(payrollData[0] as EmployeePayroll);
         }
       }
 
@@ -189,7 +191,7 @@ export default function Dashboard() {
       value: employeePayroll?.status === 'pending' ? 'Pending' : (employeePayroll?.status === 'paid' ? 'Paid' : 'Not Available'),
       icon: DollarSign, 
       color: employeePayroll?.status === 'paid' ? 'bg-green-500' : 'bg-yellow-500',
-      salary: employeePayroll?.salary,
+      salary: employeePayroll?.net_salary,
       isPayroll: true
     },
   ];
