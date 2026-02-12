@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useNotification } from '../contexts/NotificationContext';
-import { notifyLeaveApproval, notifyLeaveRejection } from '../lib/notifications';
-import { Plus, Calendar, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { notifyLeaveApproval, notifyLeaveRejection, notifyLeavePending } from '../lib/notifications';
+import { Plus, Calendar, CheckCircle, XCircle, Clock, X } from 'lucide-react';
 
 interface Leave {
   id: string;
@@ -23,12 +23,27 @@ interface Leave {
   };
 }
 
+interface LeaveFormData {
+  leave_type: string;
+  start_date: string;
+  end_date: string;
+  reason: string;
+}
+
 export default function Leaves() {
   const [leaves, setLeaves] = useState<Leave[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const { showNotification } = useNotification();
   const [filter, setFilter] = useState('all');
+  const [showApplyModal, setShowApplyModal] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [formData, setFormData] = useState<LeaveFormData>({
+    leave_type: 'Annual',
+    start_date: '',
+    end_date: '',
+    reason: '',
+  });
 
   useEffect(() => {
     loadLeaves();
@@ -61,6 +76,99 @@ export default function Leaves() {
       console.error('Error loading leaves:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const calculateDays = (startDate: string, endDate: string): number => {
+    if (!startDate || !endDate) return 0;
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const diff = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+    return diff > 0 ? diff : 0;
+  };
+
+  const handleApplyLeave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!user?.employeeId) {
+      showNotification('error', 'Employee ID not found');
+      return;
+    }
+
+    if (!formData.start_date || !formData.end_date || !formData.reason) {
+      showNotification('error', 'Please fill in all required fields');
+      return;
+    }
+
+    const daysCount = calculateDays(formData.start_date, formData.end_date);
+    if (daysCount <= 0) {
+      showNotification('error', 'End date must be after start date');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      // Get employee details for the notification
+      const { data: employeeData } = await supabase
+        .from('employees')
+        .select('first_name, last_name')
+        .eq('id', user.employeeId)
+        .single() as { data: { first_name: string; last_name: string } | null };
+
+      // Insert leave request
+      const { error } = await (supabase
+        .from('leaves') as any)
+        .insert({
+          employee_id: user.employeeId,
+          leave_type: formData.leave_type,
+          start_date: formData.start_date,
+          end_date: formData.end_date,
+          days_count: daysCount,
+          reason: formData.reason,
+          status: 'pending',
+        });
+
+      if (error) throw error;
+
+      showNotification('success', 'Leave request submitted successfully');
+
+      // Send email notification to HR/Admin users about the new pending leave request
+      const { data: hrAdminUsers } = await supabase
+        .from('users')
+        .select('email')
+        .in('role', ['admin', 'hr']) as { data: { email: string }[] | null };
+
+      if (hrAdminUsers && hrAdminUsers.length > 0 && employeeData) {
+        const employeeName = `${employeeData.first_name} ${employeeData.last_name}`;
+        const startDateFormatted = new Date(formData.start_date).toLocaleDateString();
+        const endDateFormatted = new Date(formData.end_date).toLocaleDateString();
+
+        // Notify all HR and Admin users
+        for (const adminUser of hrAdminUsers) {
+          await notifyLeavePending(
+            adminUser.email,
+            employeeName,
+            formData.leave_type,
+            startDateFormatted,
+            endDateFormatted
+          );
+        }
+      }
+
+      // Reset form and close modal
+      setFormData({
+        leave_type: 'Annual',
+        start_date: '',
+        end_date: '',
+        reason: '',
+      });
+      setShowApplyModal(false);
+      loadLeaves();
+    } catch (error) {
+      console.error('Error submitting leave request:', error);
+      showNotification('error', 'Failed to submit leave request');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -152,7 +260,10 @@ export default function Leaves() {
           <h1 className="text-3xl font-bold text-gray-900">Leave Management</h1>
           <p className="text-gray-600 mt-2">Manage leave applications and balances</p>
         </div>
-        <button className="flex items-center space-x-2 bg-blue-900 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition-colors">
+        <button 
+          onClick={() => setShowApplyModal(true)}
+          className="flex items-center space-x-2 bg-blue-900 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition-colors"
+        >
           <Plus className="w-5 h-5" />
           <span>Apply Leave</span>
         </button>
@@ -268,6 +379,117 @@ export default function Leaves() {
           </div>
         )}
       </div>
+
+      {/* Apply Leave Modal */}
+      {showApplyModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+              <h2 className="text-xl font-semibold text-gray-900">Apply for Leave</h2>
+              <button
+                onClick={() => setShowApplyModal(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <form onSubmit={handleApplyLeave} className="p-4 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Leave Type
+                </label>
+                <select
+                  value={formData.leave_type}
+                  onChange={(e) => setFormData({ ...formData, leave_type: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="Annual">Annual Leave</option>
+                  <option value="Sick">Sick Leave</option>
+                  <option value="Personal">Personal Leave</option>
+                  <option value="Maternity">Maternity Leave</option>
+                  <option value="Paternity">Paternity Leave</option>
+                  <option value="Emergency">Emergency Leave</option>
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Start Date
+                  </label>
+                  <input
+                    type="date"
+                    value={formData.start_date}
+                    onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    End Date
+                  </label>
+                  <input
+                    type="date"
+                    value={formData.end_date}
+                    onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+                    min={formData.start_date}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+              </div>
+
+              {formData.start_date && formData.end_date && (
+                <div className="bg-blue-50 px-3 py-2 rounded-lg">
+                  <p className="text-sm text-blue-800">
+                    Duration: <strong>{calculateDays(formData.start_date, formData.end_date)} days</strong>
+                  </p>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Reason
+                </label>
+                <textarea
+                  value={formData.reason}
+                  onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
+                  rows={3}
+                  placeholder="Please provide a reason for your leave request..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                  required
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowApplyModal(false)}
+                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="px-4 py-2 bg-blue-900 text-white rounded-lg hover:bg-blue-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                >
+                  {submitting ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      <span>Submitting...</span>
+                    </>
+                  ) : (
+                    <span>Submit Request</span>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

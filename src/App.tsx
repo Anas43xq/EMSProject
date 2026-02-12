@@ -15,7 +15,6 @@ const EmployeeEdit = lazy(() => import('./pages/EmployeeEdit'));
 const Departments = lazy(() => import('./pages/Departments'));
 const Attendance = lazy(() => import('./pages/Attendance'));
 const Leaves = lazy(() => import('./pages/Leaves'));
-const Payroll = lazy(() => import('./pages/Payroll'));
 const Performance = lazy(() => import('./pages/Performance'));
 const Reports = lazy(() => import('./pages/Reports'));
 const Settings = lazy(() => import('./pages/Settings'));
@@ -51,7 +50,6 @@ function App() {
               <Route path="departments" element={<Suspense fallback={<PageLoader />}><Departments /></Suspense>} />
               <Route path="attendance" element={<Suspense fallback={<PageLoader />}><Attendance /></Suspense>} />
               <Route path="leaves" element={<Suspense fallback={<PageLoader />}><Leaves /></Suspense>} />
-              <Route path="payroll" element={<Suspense fallback={<PageLoader />}><Payroll /></Suspense>} />
               <Route path="performance" element={<Suspense fallback={<PageLoader />}><Performance /></Suspense>} />
               <Route path="reports" element={<Suspense fallback={<PageLoader />}><Reports /></Suspense>} />
               <Route path="settings" element={<Suspense fallback={<PageLoader />}><Settings /></Suspense>} />

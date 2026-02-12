@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { Users, Building2, Calendar, TrendingUp, Clock, CheckCircle, DollarSign, UserCheck, XCircle, ArrowRight } from 'lucide-react';
+import { Users, Building2, Calendar, TrendingUp, Clock, CheckCircle, UserCheck, XCircle, ArrowRight } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { useAuth } from '../contexts/AuthContext';
 import { getVisibleQuickActions, isWidgetVisible, UserRole } from '../lib/dashboardConfig';
@@ -14,7 +14,6 @@ interface Stats {
   todayAttendance: number;
   approvedLeaves: number;
   rejectedLeaves: number;
-  pendingPayroll: number;
 }
 
 interface RecentActivity {
@@ -34,13 +33,6 @@ interface LeaveStatusData {
   value: number;
 }
 
-interface EmployeePayroll {
-  status: 'pending' | 'paid';
-  net_salary: number;
-  month: number;
-  year: number;
-}
-
 export default function Dashboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -52,12 +44,10 @@ export default function Dashboard() {
     todayAttendance: 0,
     approvedLeaves: 0,
     rejectedLeaves: 0,
-    pendingPayroll: 0,
   });
   const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([]);
   const [departmentData, setDepartmentData] = useState<DepartmentData[]>([]);
   const [leaveStatusData, setLeaveStatusData] = useState<LeaveStatusData[]>([]);
-  const [employeePayroll, setEmployeePayroll] = useState<EmployeePayroll | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -69,16 +59,12 @@ export default function Dashboard() {
   const loadDashboardData = async (role: UserRole, employeeId: string | null) => {
     try {
       const today = new Date().toISOString().split('T')[0];
-      const currentMonth = new Date().getMonth() + 1;
-      const currentYear = new Date().getFullYear();
 
       // Build queries based on role
       let pendingLeavesQuery = supabase.from('leaves').select('id', { count: 'exact' }).eq('status', 'pending');
       let approvedLeavesQuery = supabase.from('leaves').select('id', { count: 'exact' }).eq('status', 'approved');
       let rejectedLeavesQuery = supabase.from('leaves').select('id', { count: 'exact' }).eq('status', 'rejected');
       let attendanceQuery = supabase.from('attendance').select('id', { count: 'exact' }).eq('date', today).eq('status', 'present');
-      let payrollQuery = supabase.from('payroll').select('id', { count: 'exact' }).eq('status', 'pending').eq('month', currentMonth).eq('year', currentYear);
-      let employeePayrollQuery: any = null;
 
       // For employees, filter to their own data
       if (role === 'employee' && employeeId) {
@@ -86,14 +72,6 @@ export default function Dashboard() {
         approvedLeavesQuery = approvedLeavesQuery.eq('employee_id', employeeId);
         rejectedLeavesQuery = rejectedLeavesQuery.eq('employee_id', employeeId);
         attendanceQuery = attendanceQuery.eq('employee_id', employeeId);
-        // Query employee's personal payroll - get latest available
-        employeePayrollQuery = supabase
-          .from('payroll')
-          .select('status, net_salary, month, year')
-          .eq('employee_id', employeeId)
-          .order('year', { ascending: false })
-          .order('month', { ascending: false })
-          .limit(1);
       }
 
       const [
@@ -104,7 +82,6 @@ export default function Dashboard() {
         rejectedLeavesRes,
         activitiesRes,
         attendanceRes,
-        payrollRes,
         departmentEmployeesRes
       ] = await Promise.all([
         supabase.from('employees').select('id, status', { count: 'exact' }),
@@ -114,21 +91,10 @@ export default function Dashboard() {
         rejectedLeavesQuery,
         supabase.from('activity_logs').select('id, action, created_at, entity_type').order('created_at', { ascending: false }).limit(5),
         attendanceQuery,
-        payrollQuery,
         supabase.from('employees').select('department_id, departments(name)')
       ]);
 
       const activeEmployees = employeesRes.data?.filter((e: any) => e.status === 'active').length || 0;
-
-      // Load employee's personal payroll if employee role
-      if (role === 'employee' && employeePayrollQuery) {
-        const { data: payrollData, error: payrollError } = await employeePayrollQuery;
-        if (payrollError) {
-          console.warn('Error loading employee payroll:', payrollError);
-        } else if (payrollData && payrollData.length > 0) {
-          setEmployeePayroll(payrollData[0] as EmployeePayroll);
-        }
-      }
 
       setStats({
         totalEmployees: employeesRes.count || 0,
@@ -138,7 +104,6 @@ export default function Dashboard() {
         todayAttendance: attendanceRes.count || 0,
         approvedLeaves: approvedLeavesRes.count || 0,
         rejectedLeaves: rejectedLeavesRes.count || 0,
-        pendingPayroll: payrollRes.count || 0,
       });
 
       setRecentActivities(activitiesRes.data || []);
@@ -184,16 +149,6 @@ export default function Dashboard() {
     { id: 'todayAttendance', name: "Today's Attendance", value: stats.todayAttendance, icon: UserCheck, color: 'bg-cyan-500' },
     { id: 'approvedLeaves', name: 'Approved Leaves', value: stats.approvedLeaves, icon: CheckCircle, color: 'bg-emerald-500' },
     { id: 'rejectedLeaves', name: 'Rejected Leaves', value: stats.rejectedLeaves, icon: XCircle, color: 'bg-red-500' },
-    { id: 'pendingPayroll', name: 'Pending Payroll', value: stats.pendingPayroll, icon: DollarSign, color: 'bg-yellow-500' },
-    { 
-      id: 'myPayrollStatus', 
-      name: 'My Payroll Status', 
-      value: employeePayroll?.status === 'pending' ? 'Pending' : (employeePayroll?.status === 'paid' ? 'Paid' : 'Not Available'),
-      icon: DollarSign, 
-      color: employeePayroll?.status === 'paid' ? 'bg-green-500' : 'bg-yellow-500',
-      salary: employeePayroll?.net_salary,
-      isPayroll: true
-    },
   ];
 
   const statCards = allStatCards.filter(card => isWidgetVisible(card.id, user?.role || 'employee'));
@@ -225,14 +180,7 @@ export default function Dashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600 mb-1">{stat.name}</p>
-                {stat.isPayroll ? (
-                  <div>
-                    <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-                    {stat.salary && <p className="text-sm text-gray-500 mt-1">₱{stat.salary.toLocaleString()}</p>}
-                  </div>
-                ) : (
-                  <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
-                )}
+                <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
               </div>
               <div className={`${stat.color} p-3 rounded-lg`}>
                 <stat.icon className="w-6 h-6 text-white" />

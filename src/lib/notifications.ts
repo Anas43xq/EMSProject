@@ -1,4 +1,4 @@
-export type NotificationEmailType = 'leave_approved' | 'leave_rejected' | 'leave_pending' | 'payroll_processed' | 'performance_review' | 'general';
+export type NotificationEmailType = 'leave_approved' | 'leave_rejected' | 'leave_pending' | 'performance_review' | 'general';
 
 interface EmailNotificationData {
   to: string;
@@ -60,15 +60,6 @@ export async function notifyLeavePending(hrEmail: string, employeeName: string, 
     subject: 'New Leave Request Pending',
     body: `${employeeName} has submitted a new ${leaveType} leave request from ${startDate} to ${endDate} that requires your review.`,
     type: 'leave_pending',
-  });
-}
-
-export async function notifyPayrollProcessed(employeeEmail: string, month: string, year: number, netSalary: number) {
-  await sendEmailNotification({
-    to: employeeEmail,
-    subject: 'Payroll Processed',
-    body: `Your salary for ${month} ${year} has been processed. Net salary: $${netSalary.toFixed(2)}`,
-    type: 'payroll_processed',
   });
 }
 
