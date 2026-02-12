@@ -46,8 +46,13 @@ export default function Login() {
     setResetLoading(true);
 
     try {
+      // Use production URL from environment or development URL
+      const redirectUrl = import.meta.env.VITE_APP_URL 
+        ? `${import.meta.env.VITE_APP_URL}/reset-password`
+        : `${window.location.origin}/reset-password`;
+
       const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: redirectUrl,
       });
 
       if (error) throw error;

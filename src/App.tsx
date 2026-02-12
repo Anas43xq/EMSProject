@@ -19,6 +19,7 @@ const Payroll = lazy(() => import('./pages/Payroll'));
 const Performance = lazy(() => import('./pages/Performance'));
 const Reports = lazy(() => import('./pages/Reports'));
 const Settings = lazy(() => import('./pages/Settings'));
+const ResetPassword = lazy(() => import('./pages/ResetPassword'));
 
 // Loading fallback component
 function PageLoader() {
@@ -40,6 +41,7 @@ function App() {
           <NotificationContainer />
           <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/reset-password" element={<Suspense fallback={<PageLoader />}><ResetPassword /></Suspense>} />
             <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
               <Route index element={<Navigate to="/dashboard" replace />} />
               <Route path="dashboard" element={<Suspense fallback={<PageLoader />}><Dashboard /></Suspense>} />
