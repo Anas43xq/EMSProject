@@ -33,7 +33,7 @@ export default function AnnouncementsWidget() {
         .eq('is_active', true)
         .order('priority', { ascending: false })
         .order('created_at', { ascending: false })
-        .limit(5) as any) as { data: Announcement[] | null; error: any };
+        .limit(6) as any) as { data: Announcement[] | null; error: any };
 
       if (error) throw error;
       
@@ -53,10 +53,12 @@ export default function AnnouncementsWidget() {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <div className="flex items-center space-x-3 mb-4">
-          <Megaphone className="w-6 h-6 text-blue-900" />
-          <h2 className="text-xl font-bold text-gray-900">Announcements</h2>
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+        <div className="flex items-center space-x-3 mb-6">
+          <div className="bg-blue-900 p-2 rounded-lg">
+            <Megaphone className="w-6 h-6 text-white" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900">Announcements</h2>
         </div>
         <div className="flex items-center justify-center h-32">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-900"></div>
@@ -66,19 +68,25 @@ export default function AnnouncementsWidget() {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <div className="flex items-center space-x-3 mb-4">
-        <Megaphone className="w-6 h-6 text-blue-900" />
-        <h2 className="text-xl font-bold text-gray-900">Announcements</h2>
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+      <div className="flex items-center space-x-3 mb-6">
+        <div className="bg-blue-900 p-2 rounded-lg">
+          <Megaphone className="w-6 h-6 text-white" />
+        </div>
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">Announcements</h2>
+          <p className="text-sm text-gray-500">Latest company news and updates</p>
+        </div>
       </div>
 
       {sortedAnnouncements.length === 0 ? (
-        <div className="text-center py-8">
-          <Megaphone className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-500">No announcements at this time</p>
+        <div className="text-center py-12">
+          <Megaphone className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+          <p className="text-gray-500 text-lg">No announcements at this time</p>
+          <p className="text-gray-400 text-sm mt-1">Check back later for updates</p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {sortedAnnouncements.map((announcement) => {
             const priorityConfig = PRIORITY_CONFIG[announcement.priority];
             const PriorityIcon = priorityConfig.icon;
@@ -86,16 +94,21 @@ export default function AnnouncementsWidget() {
             return (
               <div
                 key={announcement.id}
-                className={`p-4 rounded-lg border ${priorityConfig.color}`}
+                className={`p-5 rounded-lg border-2 ${priorityConfig.color} transition-shadow hover:shadow-md`}
               >
                 <div className="flex items-start space-x-3">
-                  <PriorityIcon className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                  <PriorityIcon className="w-6 h-6 flex-shrink-0 mt-0.5" />
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-gray-900 truncate">{announcement.title}</h3>
-                    <p className="text-sm text-gray-600 mt-1 line-clamp-2">{announcement.content}</p>
-                    <p className="text-xs text-gray-500 mt-2">
-                      {new Date(announcement.created_at).toLocaleDateString()}
-                    </p>
+                    <h3 className="font-bold text-gray-900 text-base">{announcement.title}</h3>
+                    <p className="text-sm text-gray-600 mt-2 line-clamp-3">{announcement.content}</p>
+                    <div className="flex items-center justify-between mt-3">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${priorityConfig.color}`}>
+                        {priorityConfig.label} Priority
+                      </span>
+                      <p className="text-xs text-gray-500">
+                        {new Date(announcement.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>

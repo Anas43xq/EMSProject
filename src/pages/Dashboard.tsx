@@ -191,6 +191,11 @@ export default function Dashboard() {
         ))}
       </div>
 
+      {/* Announcements - Full width, prominent placement */}
+      {isWidgetVisible('announcements', user?.role || 'employee') && (
+        <AnnouncementsWidget />
+      )}
+
       {(isWidgetVisible('departmentChart', user?.role || 'employee') || isWidgetVisible('leaveChart', user?.role || 'employee')) && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {isWidgetVisible('departmentChart', user?.role || 'employee') && (
@@ -272,10 +277,6 @@ export default function Dashboard() {
               )}
             </div>
           </div>
-        )}
-
-        {isWidgetVisible('announcements', user?.role || 'employee') && (
-          <AnnouncementsWidget />
         )}
 
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
