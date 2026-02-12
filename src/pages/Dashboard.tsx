@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { Users, Building2, Calendar, TrendingUp, Clock, CheckCircle, DollarSign, UserCheck, XCircle } from 'lucide-react';
+import { Users, Building2, Calendar, TrendingUp, Clock, CheckCircle, DollarSign, UserCheck, XCircle, ArrowRight } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 
 interface Stats {
@@ -32,6 +33,7 @@ interface LeaveStatusData {
 }
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [stats, setStats] = useState<Stats>({
     totalEmployees: 0,
     totalDepartments: 0,
@@ -253,20 +255,44 @@ export default function Dashboard() {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h2>
           <div className="grid grid-cols-2 gap-4">
-            <button className="p-4 bg-blue-50 hover:bg-blue-100 rounded-lg text-left transition-colors">
-              <Users className="w-6 h-6 text-blue-900 mb-2" />
+            <button 
+              onClick={() => navigate('/employees?action=add')}
+              className="p-4 bg-blue-50 hover:bg-blue-100 rounded-lg text-left transition-all duration-200 group"
+            >
+              <div className="flex items-start justify-between">
+                <Users className="w-6 h-6 text-blue-900 mb-2" />
+                <ArrowRight className="w-4 h-4 text-blue-900 opacity-0 group-hover:opacity-100 transition-opacity" />
+              </div>
               <p className="text-sm font-medium text-gray-900">Add Employee</p>
             </button>
-            <button className="p-4 bg-green-50 hover:bg-green-100 rounded-lg text-left transition-colors">
-              <Calendar className="w-6 h-6 text-green-900 mb-2" />
+            <button 
+              onClick={() => navigate('/leaves?action=apply')}
+              className="p-4 bg-green-50 hover:bg-green-100 rounded-lg text-left transition-all duration-200 group"
+            >
+              <div className="flex items-start justify-between">
+                <Calendar className="w-6 h-6 text-green-900 mb-2" />
+                <ArrowRight className="w-4 h-4 text-green-900 opacity-0 group-hover:opacity-100 transition-opacity" />
+              </div>
               <p className="text-sm font-medium text-gray-900">Apply Leave</p>
             </button>
-            <button className="p-4 bg-teal-50 hover:bg-teal-100 rounded-lg text-left transition-colors">
-              <Clock className="w-6 h-6 text-teal-900 mb-2" />
+            <button 
+              onClick={() => navigate('/attendance')}
+              className="p-4 bg-teal-50 hover:bg-teal-100 rounded-lg text-left transition-all duration-200 group"
+            >
+              <div className="flex items-start justify-between">
+                <Clock className="w-6 h-6 text-teal-900 mb-2" />
+                <ArrowRight className="w-4 h-4 text-teal-900 opacity-0 group-hover:opacity-100 transition-opacity" />
+              </div>
               <p className="text-sm font-medium text-gray-900">Mark Attendance</p>
             </button>
-            <button className="p-4 bg-orange-50 hover:bg-orange-100 rounded-lg text-left transition-colors">
-              <TrendingUp className="w-6 h-6 text-orange-900 mb-2" />
+            <button 
+              onClick={() => navigate('/reports')}
+              className="p-4 bg-orange-50 hover:bg-orange-100 rounded-lg text-left transition-all duration-200 group"
+            >
+              <div className="flex items-start justify-between">
+                <TrendingUp className="w-6 h-6 text-orange-900 mb-2" />
+                <ArrowRight className="w-4 h-4 text-orange-900 opacity-0 group-hover:opacity-100 transition-opacity" />
+              </div>
               <p className="text-sm font-medium text-gray-900">View Reports</p>
             </button>
           </div>
