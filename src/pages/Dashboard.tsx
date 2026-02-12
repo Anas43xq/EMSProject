@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { Users, Building2, Calendar, TrendingUp, Clock, CheckCircle, DollarSign, UserCheck, XCircle, ArrowRight } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
+import { useAuth } from '../contexts/AuthContext';
+import { getVisibleQuickActions, isWidgetVisible, UserRole } from '../lib/dashboardConfig';
 
 interface Stats {
   totalEmployees: number;
@@ -34,6 +36,7 @@ interface LeaveStatusData {
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [stats, setStats] = useState<Stats>({
     totalEmployees: 0,
     totalDepartments: 0,
@@ -50,14 +53,30 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadDashboardData();
-  }, []);
+    if (user?.role) {
+      loadDashboardData(user.role, user.employeeId);
+    }
+  }, [user?.role, user?.employeeId]);
 
-  const loadDashboardData = async () => {
+  const loadDashboardData = async (role: UserRole, employeeId: string | null) => {
     try {
       const today = new Date().toISOString().split('T')[0];
       const currentMonth = new Date().getMonth() + 1;
       const currentYear = new Date().getFullYear();
+
+      // Build queries based on role
+      let pendingLeavesQuery = supabase.from('leaves').select('id', { count: 'exact' }).eq('status', 'pending');
+      let approvedLeavesQuery = supabase.from('leaves').select('id', { count: 'exact' }).eq('status', 'approved');
+      let rejectedLeavesQuery = supabase.from('leaves').select('id', { count: 'exact' }).eq('status', 'rejected');
+      let attendanceQuery = supabase.from('attendance').select('id', { count: 'exact' }).eq('date', today).eq('status', 'present');
+
+      // For employees, filter to their own data
+      if (role === 'employee' && employeeId) {
+        pendingLeavesQuery = pendingLeavesQuery.eq('employee_id', employeeId);
+        approvedLeavesQuery = approvedLeavesQuery.eq('employee_id', employeeId);
+        rejectedLeavesQuery = rejectedLeavesQuery.eq('employee_id', employeeId);
+        attendanceQuery = attendanceQuery.eq('employee_id', employeeId);
+      }
 
       const [
         employeesRes,
@@ -72,11 +91,11 @@ export default function Dashboard() {
       ] = await Promise.all([
         supabase.from('employees').select('id, status', { count: 'exact' }),
         supabase.from('departments').select('id', { count: 'exact' }),
-        supabase.from('leaves').select('id', { count: 'exact' }).eq('status', 'pending'),
-        supabase.from('leaves').select('id', { count: 'exact' }).eq('status', 'approved'),
-        supabase.from('leaves').select('id', { count: 'exact' }).eq('status', 'rejected'),
+        pendingLeavesQuery,
+        approvedLeavesQuery,
+        rejectedLeavesQuery,
         supabase.from('activity_logs').select('id, action, created_at, entity_type').order('created_at', { ascending: false }).limit(5),
-        supabase.from('attendance').select('id', { count: 'exact' }).eq('date', today).eq('status', 'present'),
+        attendanceQuery,
         supabase.from('payroll').select('id', { count: 'exact' }).eq('status', 'pending').eq('month', currentMonth).eq('year', currentYear),
         supabase.from('employees').select('department_id, departments(name)')
       ]);
@@ -129,16 +148,18 @@ export default function Dashboard() {
     }
   };
 
-  const statCards = [
-    { name: 'Total Employees', value: stats.totalEmployees, icon: Users, color: 'bg-blue-500' },
-    { name: 'Active Employees', value: stats.activeEmployees, icon: CheckCircle, color: 'bg-green-500' },
-    { name: 'Departments', value: stats.totalDepartments, icon: Building2, color: 'bg-teal-500' },
-    { name: 'Pending Leaves', value: stats.pendingLeaves, icon: Calendar, color: 'bg-orange-500' },
-    { name: "Today's Attendance", value: stats.todayAttendance, icon: UserCheck, color: 'bg-cyan-500' },
-    { name: 'Approved Leaves', value: stats.approvedLeaves, icon: CheckCircle, color: 'bg-emerald-500' },
-    { name: 'Rejected Leaves', value: stats.rejectedLeaves, icon: XCircle, color: 'bg-red-500' },
-    { name: 'Pending Payroll', value: stats.pendingPayroll, icon: DollarSign, color: 'bg-yellow-500' },
+  const allStatCards = [
+    { id: 'totalEmployees', name: 'Total Employees', value: stats.totalEmployees, icon: Users, color: 'bg-blue-500' },
+    { id: 'activeEmployees', name: 'Active Employees', value: stats.activeEmployees, icon: CheckCircle, color: 'bg-green-500' },
+    { id: 'departments', name: 'Departments', value: stats.totalDepartments, icon: Building2, color: 'bg-teal-500' },
+    { id: 'pendingLeaves', name: 'Pending Leaves', value: stats.pendingLeaves, icon: Calendar, color: 'bg-orange-500' },
+    { id: 'todayAttendance', name: "Today's Attendance", value: stats.todayAttendance, icon: UserCheck, color: 'bg-cyan-500' },
+    { id: 'approvedLeaves', name: 'Approved Leaves', value: stats.approvedLeaves, icon: CheckCircle, color: 'bg-emerald-500' },
+    { id: 'rejectedLeaves', name: 'Rejected Leaves', value: stats.rejectedLeaves, icon: XCircle, color: 'bg-red-500' },
+    { id: 'pendingPayroll', name: 'Pending Payroll', value: stats.pendingPayroll, icon: DollarSign, color: 'bg-yellow-500' },
   ];
+
+  const statCards = allStatCards.filter(card => isWidgetVisible(card.id, user?.role || 'employee'));
 
   const LEAVE_COLORS = {
     Pending: '#f59e0b',
@@ -163,7 +184,7 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {statCards.map((stat) => (
-          <div key={stat.name} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+          <div key={stat.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600 mb-1">{stat.name}</p>
@@ -177,124 +198,121 @@ export default function Dashboard() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Employees by Department</h2>
-          {departmentData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={departmentData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="count" fill="#3b82f6" />
-              </BarChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="flex items-center justify-center h-64">
-              <p className="text-gray-500">No department data available</p>
-            </div>
-          )}
-        </div>
-
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Leave Status Distribution</h2>
-          {leaveStatusData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={leaveStatusData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {leaveStatusData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={LEAVE_COLORS[entry.name as keyof typeof LEAVE_COLORS]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="flex items-center justify-center h-64">
-              <p className="text-gray-500">No leave data available</p>
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Recent Activities</h2>
-          <div className="space-y-4">
-            {recentActivities.length > 0 ? (
-              recentActivities.map((activity) => (
-                <div key={activity.id} className="flex items-start space-x-3 pb-4 border-b border-gray-100 last:border-0">
-                  <div className="bg-blue-100 p-2 rounded-lg">
-                    <Clock className="w-4 h-4 text-blue-900" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm text-gray-900">{activity.action}</p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {new Date(activity.created_at).toLocaleString()}
-                    </p>
-                  </div>
+      {(isWidgetVisible('departmentChart', user?.role || 'employee') || isWidgetVisible('leaveChart', user?.role || 'employee')) && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {isWidgetVisible('departmentChart', user?.role || 'employee') && (
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">Employees by Department</h2>
+              {departmentData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={departmentData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="count" fill="#3b82f6" />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex items-center justify-center h-64">
+                  <p className="text-gray-500">No department data available</p>
                 </div>
-              ))
-            ) : (
-              <p className="text-gray-500 text-sm">No recent activities</p>
-            )}
-          </div>
+              )}
+            </div>
+          )}
+
+          {isWidgetVisible('leaveChart', user?.role || 'employee') && (
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">Leave Status Distribution</h2>
+              {leaveStatusData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={leaveStatusData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {leaveStatusData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={LEAVE_COLORS[entry.name as keyof typeof LEAVE_COLORS]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex items-center justify-center h-64">
+                  <p className="text-gray-500">No leave data available</p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {isWidgetVisible('recentActivities', user?.role || 'employee') && (
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Recent Activities</h2>
+            <div className="space-y-4">
+              {recentActivities.length > 0 ? (
+                recentActivities.map((activity) => (
+                  <div key={activity.id} className="flex items-start space-x-3 pb-4 border-b border-gray-100 last:border-0">
+                    <div className="bg-blue-100 p-2 rounded-lg">
+                      <Clock className="w-4 h-4 text-blue-900" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm text-gray-900">{activity.action}</p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {new Date(activity.created_at).toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-500 text-sm">No recent activities</p>
+              )}
+            </div>
+          </div>
+        )}
 
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-2 gap-4">
-            <button 
-              onClick={() => navigate('/employees?action=add')}
-              className="p-4 bg-blue-50 hover:bg-blue-100 rounded-lg text-left transition-all duration-200 group"
-            >
-              <div className="flex items-start justify-between">
-                <Users className="w-6 h-6 text-blue-900 mb-2" />
-                <ArrowRight className="w-4 h-4 text-blue-900 opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
-              <p className="text-sm font-medium text-gray-900">Add Employee</p>
-            </button>
-            <button 
-              onClick={() => navigate('/leaves?action=apply')}
-              className="p-4 bg-green-50 hover:bg-green-100 rounded-lg text-left transition-all duration-200 group"
-            >
-              <div className="flex items-start justify-between">
-                <Calendar className="w-6 h-6 text-green-900 mb-2" />
-                <ArrowRight className="w-4 h-4 text-green-900 opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
-              <p className="text-sm font-medium text-gray-900">Apply Leave</p>
-            </button>
-            <button 
-              onClick={() => navigate('/attendance')}
-              className="p-4 bg-teal-50 hover:bg-teal-100 rounded-lg text-left transition-all duration-200 group"
-            >
-              <div className="flex items-start justify-between">
-                <Clock className="w-6 h-6 text-teal-900 mb-2" />
-                <ArrowRight className="w-4 h-4 text-teal-900 opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
-              <p className="text-sm font-medium text-gray-900">Mark Attendance</p>
-            </button>
-            <button 
-              onClick={() => navigate('/reports')}
-              className="p-4 bg-orange-50 hover:bg-orange-100 rounded-lg text-left transition-all duration-200 group"
-            >
-              <div className="flex items-start justify-between">
-                <TrendingUp className="w-6 h-6 text-orange-900 mb-2" />
-                <ArrowRight className="w-4 h-4 text-orange-900 opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
-              <p className="text-sm font-medium text-gray-900">View Reports</p>
-            </button>
+          <div className={`grid gap-4 ${getVisibleQuickActions(user?.role || 'employee').length <= 2 ? 'grid-cols-1' : 'grid-cols-2'}`}>
+            {getVisibleQuickActions(user?.role || 'employee').map((action) => {
+              const iconMap: { [key: string]: any } = {
+                Users,
+                Calendar,
+                Clock,
+                TrendingUp,
+              };
+              const Icon = iconMap[action.icon];
+              const colorMap: { [key: string]: string } = {
+                blue: 'bg-blue-50 hover:bg-blue-100 text-blue-900',
+                green: 'bg-green-50 hover:bg-green-100 text-green-900',
+                teal: 'bg-teal-50 hover:bg-teal-100 text-teal-900',
+                orange: 'bg-orange-50 hover:bg-orange-100 text-orange-900',
+              };
+              
+              return (
+                <button
+                  key={action.id}
+                  onClick={() => navigate(action.to)}
+                  className={`p-4 ${colorMap[action.color]} rounded-lg text-left transition-all duration-200 group`}
+                >
+                  <div className="flex items-start justify-between">
+                    <Icon className="w-6 h-6 mb-2" />
+                    <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                  <p className="text-sm font-medium text-gray-900">{action.label}</p>
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
