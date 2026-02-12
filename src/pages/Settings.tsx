@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNotification } from '../contexts/NotificationContext';
 import { supabase } from '../lib/supabase';
@@ -10,6 +10,65 @@ export default function Settings() {
   const [isEditingEmail, setIsEditingEmail] = useState(false);
   const [newEmail, setNewEmail] = useState(user?.email || '');
   const [updatingEmail, setUpdatingEmail] = useState(false);
+  const [notificationPrefs, setNotificationPrefs] = useState({
+    leave_approvals: true,
+    attendance_reminders: true,
+    performance_reviews: false,
+    payroll_updates: true,
+  });
+  const [savingPrefs, setSavingPrefs] = useState(false);
+
+  // Load notification preferences on mount
+  const loadNotificationPreferences = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('user_preferences')
+        .select('*')
+        .eq('user_id', user?.id)
+        .single();
+
+      if (data) {
+        setNotificationPrefs({
+          leave_approvals: data.email_leave_approvals ?? true,
+          attendance_reminders: data.email_attendance_reminders ?? true,
+          performance_reviews: data.email_performance_reviews ?? false,
+          payroll_updates: data.email_payroll_updates ?? true,
+        });
+      }
+    } catch (error) {
+      console.log('No preferences found, using defaults');
+    }
+  };
+
+  useEffect(() => {
+    if (user?.id) {
+      loadNotificationPreferences();
+    }
+  }, [user?.id]);
+
+  const handleSavePreferences = async () => {
+    setSavingPrefs(true);
+    try {
+      const { error } = await supabase
+        .from('user_preferences')
+        .upsert({
+          user_id: user?.id,
+          email_leave_approvals: notificationPrefs.leave_approvals,
+          email_attendance_reminders: notificationPrefs.attendance_reminders,
+          email_performance_reviews: notificationPrefs.performance_reviews,
+          email_payroll_updates: notificationPrefs.payroll_updates,
+        })
+        .eq('user_id', user?.id);
+
+      if (error) throw error;
+      showNotification('success', 'Notification preferences saved successfully');
+    } catch (error) {
+      console.error('Error saving preferences:', error);
+      showNotification('error', 'Failed to save preferences');
+    } finally {
+      setSavingPrefs(false);
+    }
+  };
 
   const handleEmailUpdate = async () => {
     if (!newEmail || !newEmail.includes('@')) {
@@ -182,21 +241,48 @@ export default function Settings() {
             </div>
             <div className="space-y-4">
               <label className="flex items-center space-x-3">
-                <input type="checkbox" className="rounded text-blue-900 focus:ring-blue-500" defaultChecked />
+                <input
+                  type="checkbox"
+                  checked={notificationPrefs.leave_approvals}
+                  onChange={(e) => setNotificationPrefs(prev => ({ ...prev, leave_approvals: e.target.checked }))}
+                  className="rounded text-blue-900 focus:ring-blue-500"
+                />
                 <span className="text-sm text-gray-700">Email notifications for leave approvals</span>
               </label>
               <label className="flex items-center space-x-3">
-                <input type="checkbox" className="rounded text-blue-900 focus:ring-blue-500" defaultChecked />
+                <input
+                  type="checkbox"
+                  checked={notificationPrefs.attendance_reminders}
+                  onChange={(e) => setNotificationPrefs(prev => ({ ...prev, attendance_reminders: e.target.checked }))}
+                  className="rounded text-blue-900 focus:ring-blue-500"
+                />
                 <span className="text-sm text-gray-700">Email notifications for attendance reminders</span>
               </label>
               <label className="flex items-center space-x-3">
-                <input type="checkbox" className="rounded text-blue-900 focus:ring-blue-500" />
+                <input
+                  type="checkbox"
+                  checked={notificationPrefs.performance_reviews}
+                  onChange={(e) => setNotificationPrefs(prev => ({ ...prev, performance_reviews: e.target.checked }))}
+                  className="rounded text-blue-900 focus:ring-blue-500"
+                />
                 <span className="text-sm text-gray-700">Email notifications for performance reviews</span>
               </label>
               <label className="flex items-center space-x-3">
-                <input type="checkbox" className="rounded text-blue-900 focus:ring-blue-500" defaultChecked />
+                <input
+                  type="checkbox"
+                  checked={notificationPrefs.payroll_updates}
+                  onChange={(e) => setNotificationPrefs(prev => ({ ...prev, payroll_updates: e.target.checked }))}
+                  className="rounded text-blue-900 focus:ring-blue-500"
+                />
                 <span className="text-sm text-gray-700">Email notifications for payroll updates</span>
               </label>
+              <button
+                onClick={handleSavePreferences}
+                disabled={savingPrefs}
+                className="mt-6 bg-blue-900 text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition-colors disabled:opacity-50"
+              >
+                {savingPrefs ? 'Saving...' : 'Save Preferences'}
+              </button>
             </div>
           </div>
         </div>
