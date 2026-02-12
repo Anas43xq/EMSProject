@@ -1,0 +1,468 @@
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
+
+export interface Database {
+  public: {
+    Tables: {
+      users: {
+        Row: {
+          id: string
+          email: string
+          role: 'admin' | 'hr' | 'employee'
+          employee_id: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id: string
+          email: string
+          role?: 'admin' | 'hr' | 'employee'
+          employee_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          email?: string
+          role?: 'admin' | 'hr' | 'employee'
+          employee_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      departments: {
+        Row: {
+          id: string
+          name: string
+          type: 'academic' | 'administrative'
+          head_id: string | null
+          description: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          type: 'academic' | 'administrative'
+          head_id?: string | null
+          description?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          type?: 'academic' | 'administrative'
+          head_id?: string | null
+          description?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      employees: {
+        Row: {
+          id: string
+          employee_number: string
+          first_name: string
+          last_name: string
+          email: string
+          phone: string
+          date_of_birth: string | null
+          gender: 'male' | 'female' | 'other' | null
+          address: string
+          city: string
+          state: string
+          postal_code: string
+          department_id: string | null
+          position: string
+          employment_type: 'full-time' | 'part-time' | 'contract'
+          status: 'active' | 'inactive' | 'on-leave'
+          hire_date: string
+          termination_date: string | null
+          salary: number
+          photo_url: string | null
+          qualifications: Json
+          emergency_contact_name: string
+          emergency_contact_phone: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          employee_number: string
+          first_name: string
+          last_name: string
+          email: string
+          phone?: string
+          date_of_birth?: string | null
+          gender?: 'male' | 'female' | 'other' | null
+          address?: string
+          city?: string
+          state?: string
+          postal_code?: string
+          department_id?: string | null
+          position: string
+          employment_type?: 'full-time' | 'part-time' | 'contract'
+          status?: 'active' | 'inactive' | 'on-leave'
+          hire_date: string
+          termination_date?: string | null
+          salary?: number
+          photo_url?: string | null
+          qualifications?: Json
+          emergency_contact_name?: string
+          emergency_contact_phone?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          employee_number?: string
+          first_name?: string
+          last_name?: string
+          email?: string
+          phone?: string
+          date_of_birth?: string | null
+          gender?: 'male' | 'female' | 'other' | null
+          address?: string
+          city?: string
+          state?: string
+          postal_code?: string
+          department_id?: string | null
+          position?: string
+          employment_type?: 'full-time' | 'part-time' | 'contract'
+          status?: 'active' | 'inactive' | 'on-leave'
+          hire_date?: string
+          termination_date?: string | null
+          salary?: number
+          photo_url?: string | null
+          qualifications?: Json
+          emergency_contact_name?: string
+          emergency_contact_phone?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      leaves: {
+        Row: {
+          id: string
+          employee_id: string
+          leave_type: 'annual' | 'sick' | 'casual' | 'sabbatical'
+          start_date: string
+          end_date: string
+          days_count: number
+          reason: string
+          status: 'pending' | 'approved' | 'rejected'
+          approved_by: string | null
+          approved_at: string | null
+          rejection_reason: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          employee_id: string
+          leave_type: 'annual' | 'sick' | 'casual' | 'sabbatical'
+          start_date: string
+          end_date: string
+          days_count: number
+          reason: string
+          status?: 'pending' | 'approved' | 'rejected'
+          approved_by?: string | null
+          approved_at?: string | null
+          rejection_reason?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          employee_id?: string
+          leave_type?: 'annual' | 'sick' | 'casual' | 'sabbatical'
+          start_date?: string
+          end_date?: string
+          days_count?: number
+          reason?: string
+          status?: 'pending' | 'approved' | 'rejected'
+          approved_by?: string | null
+          approved_at?: string | null
+          rejection_reason?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      leave_balances: {
+        Row: {
+          id: string
+          employee_id: string
+          year: number
+          annual_total: number
+          annual_used: number
+          sick_total: number
+          sick_used: number
+          casual_total: number
+          casual_used: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          employee_id: string
+          year: number
+          annual_total?: number
+          annual_used?: number
+          sick_total?: number
+          sick_used?: number
+          casual_total?: number
+          casual_used?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          employee_id?: string
+          year?: number
+          annual_total?: number
+          annual_used?: number
+          sick_total?: number
+          sick_used?: number
+          casual_total?: number
+          casual_used?: number
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      attendance: {
+        Row: {
+          id: string
+          employee_id: string
+          date: string
+          check_in: string | null
+          check_out: string | null
+          status: 'present' | 'absent' | 'late' | 'half-day'
+          notes: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          employee_id: string
+          date: string
+          check_in?: string | null
+          check_out?: string | null
+          status?: 'present' | 'absent' | 'late' | 'half-day'
+          notes?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          employee_id?: string
+          date?: string
+          check_in?: string | null
+          check_out?: string | null
+          status?: 'present' | 'absent' | 'late' | 'half-day'
+          notes?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      performance_reviews: {
+        Row: {
+          id: string
+          employee_id: string
+          reviewer_id: string
+          review_period: string
+          review_date: string
+          overall_rating: number | null
+          goals: Json
+          achievements: string
+          areas_of_improvement: string
+          comments: string
+          status: 'draft' | 'submitted' | 'completed'
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          employee_id: string
+          reviewer_id: string
+          review_period: string
+          review_date: string
+          overall_rating?: number | null
+          goals?: Json
+          achievements?: string
+          areas_of_improvement?: string
+          comments?: string
+          status?: 'draft' | 'submitted' | 'completed'
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          employee_id?: string
+          reviewer_id?: string
+          review_period?: string
+          review_date?: string
+          overall_rating?: number | null
+          goals?: Json
+          achievements?: string
+          areas_of_improvement?: string
+          comments?: string
+          status?: 'draft' | 'submitted' | 'completed'
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      payroll: {
+        Row: {
+          id: string
+          employee_id: string
+          month: number
+          year: number
+          basic_salary: number
+          allowances: Json
+          deductions: Json
+          gross_salary: number
+          net_salary: number
+          payment_date: string | null
+          status: 'pending' | 'paid'
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          employee_id: string
+          month: number
+          year: number
+          basic_salary: number
+          allowances?: Json
+          deductions?: Json
+          gross_salary: number
+          net_salary: number
+          payment_date?: string | null
+          status?: 'pending' | 'paid'
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          employee_id?: string
+          month?: number
+          year?: number
+          basic_salary?: number
+          allowances?: Json
+          deductions?: Json
+          gross_salary?: number
+          net_salary?: number
+          payment_date?: string | null
+          status?: 'pending' | 'paid'
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      documents: {
+        Row: {
+          id: string
+          employee_id: string
+          document_type: 'contract' | 'certificate' | 'id' | 'other'
+          title: string
+          file_url: string
+          uploaded_by: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          employee_id: string
+          document_type: 'contract' | 'certificate' | 'id' | 'other'
+          title: string
+          file_url: string
+          uploaded_by: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          employee_id?: string
+          document_type?: 'contract' | 'certificate' | 'id' | 'other'
+          title?: string
+          file_url?: string
+          uploaded_by?: string
+          created_at?: string
+        }
+      }
+      notifications: {
+        Row: {
+          id: string
+          user_id: string
+          title: string
+          message: string
+          type: 'leave' | 'attendance' | 'performance' | 'system'
+          is_read: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          title: string
+          message: string
+          type: 'leave' | 'attendance' | 'performance' | 'system'
+          is_read?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          title?: string
+          message?: string
+          type?: 'leave' | 'attendance' | 'performance' | 'system'
+          is_read?: boolean
+          created_at?: string
+        }
+      }
+      activity_logs: {
+        Row: {
+          id: string
+          user_id: string
+          action: string
+          entity_type: string
+          entity_id: string | null
+          details: Json
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          action: string
+          entity_type: string
+          entity_id?: string | null
+          details?: Json
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          action?: string
+          entity_type?: string
+          entity_id?: string | null
+          details?: Json
+          created_at?: string
+        }
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      [_ in never]: never
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
+}
