@@ -20,12 +20,19 @@ export default function Settings() {
 
   // Load notification preferences on mount
   const loadNotificationPreferences = async () => {
+    if (!user?.id) return;
+    
     try {
       const { data, error } = await supabase
         .from('user_preferences')
         .select('*')
-        .eq('user_id', user?.id)
+        .eq('user_id', user.id)
         .single();
+
+      if (error) {
+        console.log('No preferences found, using defaults');
+        return;
+      }
 
       if (data) {
         setNotificationPrefs({
@@ -35,7 +42,7 @@ export default function Settings() {
           payroll_updates: data.email_payroll_updates ?? true,
         });
       }
-    } catch (error) {
+    } catch (err) {
       console.log('No preferences found, using defaults');
     }
   };
@@ -47,23 +54,28 @@ export default function Settings() {
   }, [user?.id]);
 
   const handleSavePreferences = async () => {
+    if (!user?.id) {
+      showNotification('error', 'User not authenticated');
+      return;
+    }
+
     setSavingPrefs(true);
     try {
       const { error } = await supabase
         .from('user_preferences')
         .upsert({
-          user_id: user?.id,
+          user_id: user.id,
           email_leave_approvals: notificationPrefs.leave_approvals,
           email_attendance_reminders: notificationPrefs.attendance_reminders,
           email_performance_reviews: notificationPrefs.performance_reviews,
           email_payroll_updates: notificationPrefs.payroll_updates,
         })
-        .eq('user_id', user?.id);
+        .eq('user_id', user.id);
 
       if (error) throw error;
       showNotification('success', 'Notification preferences saved successfully');
-    } catch (error) {
-      console.error('Error saving preferences:', error);
+    } catch (err) {
+      console.error('Error saving preferences:', err);
       showNotification('error', 'Failed to save preferences');
     } finally {
       setSavingPrefs(false);
@@ -73,6 +85,11 @@ export default function Settings() {
   const handleEmailUpdate = async () => {
     if (!newEmail || !newEmail.includes('@')) {
       showNotification('error', 'Please enter a valid email address');
+      return;
+    }
+
+    if (!user?.id) {
+      showNotification('error', 'User not authenticated');
       return;
     }
 
