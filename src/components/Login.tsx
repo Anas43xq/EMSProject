@@ -46,10 +46,10 @@ export default function Login() {
     setResetLoading(true);
 
     try {
-      // Use production URL from environment or development URL
-      const redirectUrl = import.meta.env.VITE_APP_URL 
-        ? `${import.meta.env.VITE_APP_URL}/reset-password`
-        : `${window.location.origin}/reset-password`;
+      // Use production URL from environment variable
+      // IMPORTANT: Make sure VITE_APP_URL is set in Vercel environment variables
+      const appUrl = import.meta.env.VITE_APP_URL || window.location.origin;
+      const redirectUrl = `${appUrl}/reset-password`;
 
       const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
         redirectTo: redirectUrl,
