@@ -3,6 +3,9 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNotification } from '../contexts/NotificationContext';
 import { supabase } from '../lib/supabase';
 import { User, Lock, Bell, Shield, Edit2, Save, X } from 'lucide-react';
+import type { Database } from '../lib/database.types';
+
+type UserPreferences = Database['public']['Tables']['user_preferences']['Row'];
 
 export default function Settings() {
   const { user } = useAuth();
@@ -35,11 +38,12 @@ export default function Settings() {
       }
 
       if (data) {
+        const prefs = data as UserPreferences;
         setNotificationPrefs({
-          leave_approvals: data.email_leave_approvals ?? true,
-          attendance_reminders: data.email_attendance_reminders ?? true,
-          performance_reviews: data.email_performance_reviews ?? false,
-          payroll_updates: data.email_payroll_updates ?? true,
+          leave_approvals: prefs.email_leave_approvals ?? true,
+          attendance_reminders: prefs.email_attendance_reminders ?? true,
+          performance_reviews: prefs.email_performance_reviews ?? false,
+          payroll_updates: prefs.email_payroll_updates ?? true,
         });
       }
     } catch (err) {
@@ -61,8 +65,8 @@ export default function Settings() {
 
     setSavingPrefs(true);
     try {
-      const { error } = await supabase
-        .from('user_preferences')
+      const { error } = await (supabase
+        .from('user_preferences') as any)
         .upsert({
           user_id: user.id,
           email_leave_approvals: notificationPrefs.leave_approvals,
