@@ -270,35 +270,6 @@ export interface Database {
           updated_at?: string
         }
       }
-      documents: {
-        Row: {
-          id: string
-          employee_id: string
-          document_type: 'contract' | 'certificate' | 'id' | 'other'
-          title: string
-          file_url: string
-          uploaded_by: string
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          employee_id: string
-          document_type: 'contract' | 'certificate' | 'id' | 'other'
-          title: string
-          file_url: string
-          uploaded_by: string
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          employee_id?: string
-          document_type?: 'contract' | 'certificate' | 'id' | 'other'
-          title?: string
-          file_url?: string
-          uploaded_by?: string
-          created_at?: string
-        }
-      }
       notifications: {
         Row: {
           id: string

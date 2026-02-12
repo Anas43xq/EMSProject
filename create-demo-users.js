@@ -33,7 +33,7 @@ const demoUsers = [
   },
   {
     email: 'employee@university.edu',
-    password: 'emp123',
+    password: 'employee123',
     role: 'employee',
     employeeId: '650e8400-e29b-41d4-a716-446655440003'
   }
@@ -54,7 +54,7 @@ async function createDemoUsers() {
       });
 
       if (authError) {
-        if (authError.message.includes('already registered')) {
+        if (authError.message.includes('already') || authError.message.includes('exists') || authError.message.includes('registered')) {
           console.log(`✓ User ${user.email} already exists`);
 
           const { data: existingUser } = await supabase.auth.admin.listUsers();

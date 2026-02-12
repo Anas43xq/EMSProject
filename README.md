@@ -114,9 +114,6 @@ The system uses a comprehensive PostgreSQL database with the following tables:
 - `leaves` - Leave applications and approvals
 - `leave_balances` - Annual leave balance tracking
 - `attendance` - Daily attendance records
-- `performance_reviews` - Performance evaluations
-- `payroll` - Salary and payment records
-- `documents` - Employee document storage
 - `notifications` - System notifications
 - `activity_logs` - Audit trail
 
@@ -201,7 +198,6 @@ Potential areas for expansion:
 - Email notifications for leave approvals
 - Biometric integration for attendance
 - Advanced analytics and charts
-- Document upload functionality
 - Multi-language support
 - Mobile app version
 - Calendar integration
