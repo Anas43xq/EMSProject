@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useNotification } from '../contexts/NotificationContext';
-import { FileText, Download, Users, Calendar, Clock, TrendingUp } from 'lucide-react';
+import { Download, Users, Calendar, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface Department {
@@ -51,37 +51,6 @@ interface Attendance {
   hours_worked: number | null;
 }
 
-interface PerformanceReview {
-  id: string;
-  employees: {
-    first_name: string;
-    last_name: string;
-    departments: { name: string } | null;
-  };
-  review_period: string;
-  rating: number;
-  goals: string | null;
-  achievements: string | null;
-  areas_for_improvement: string | null;
-  reviewer_notes: string | null;
-}
-
-interface Payroll {
-  id: string;
-  employees: {
-    first_name: string;
-    last_name: string;
-    departments: { name: string } | null;
-  };
-  pay_period: string;
-  basic_salary: number;
-  allowances: number;
-  deductions: number;
-  net_salary: number;
-  payment_date: string | null;
-  payment_status: string;
-}
-
 interface DepartmentReport {
   id: string;
   name: string;
@@ -90,7 +59,7 @@ interface DepartmentReport {
   employees: { count: number }[];
 }
 
-type ReportType = 'employee' | 'leave' | 'attendance' | 'performance' | 'payroll' | 'department';
+type ReportType = 'employee' | 'leave' | 'attendance' | 'department';
 
 export default function Reports() {
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -255,98 +224,6 @@ export default function Reports() {
     }));
   };
 
-  const generatePerformanceReport = async () => {
-    let query = supabase
-      .from('performance_reviews')
-      .select(`
-        id,
-        employees!employee_id (
-          first_name,
-          last_name,
-          departments!department_id (name)
-        ),
-        review_period,
-        rating,
-        goals,
-        achievements,
-        areas_for_improvement,
-        reviewer_notes
-      `)
-      .order('review_period', { ascending: false });
-
-    const dateFilter = getDateFilter();
-    if (dateFilter) {
-      query = query.gte('review_period', dateFilter);
-    }
-
-    if (selectedDepartment) {
-      query = query.eq('employees.department_id', selectedDepartment);
-    }
-
-    const { data, error } = await query as { data: PerformanceReview[] | null; error: any };
-    if (error) throw error;
-    if (!data) return [];
-
-    return data.map(perf => ({
-      'Review ID': perf.id,
-      'Employee': `${perf.employees.first_name} ${perf.employees.last_name}`,
-      'Department': perf.employees.departments?.name || 'N/A',
-      'Review Period': format(new Date(perf.review_period), 'yyyy-MM-dd'),
-      'Rating': perf.rating,
-      'Goals': perf.goals || 'N/A',
-      'Achievements': perf.achievements || 'N/A',
-      'Areas for Improvement': perf.areas_for_improvement || 'N/A',
-      'Reviewer Notes': perf.reviewer_notes || 'N/A',
-    }));
-  };
-
-  const generatePayrollReport = async () => {
-    let query = supabase
-      .from('payroll')
-      .select(`
-        id,
-        employees!employee_id (
-          first_name,
-          last_name,
-          departments!department_id (name)
-        ),
-        pay_period,
-        basic_salary,
-        allowances,
-        deductions,
-        net_salary,
-        payment_date,
-        payment_status
-      `)
-      .order('pay_period', { ascending: false });
-
-    const dateFilter = getDateFilter();
-    if (dateFilter) {
-      query = query.gte('pay_period', dateFilter);
-    }
-
-    if (selectedDepartment) {
-      query = query.eq('employees.department_id', selectedDepartment);
-    }
-
-    const { data, error } = await query as { data: Payroll[] | null; error: any };
-    if (error) throw error;
-    if (!data) return [];
-
-    return data.map(pay => ({
-      'Payroll ID': pay.id,
-      'Employee': `${pay.employees.first_name} ${pay.employees.last_name}`,
-      'Department': pay.employees.departments?.name || 'N/A',
-      'Pay Period': format(new Date(pay.pay_period), 'yyyy-MM-dd'),
-      'Basic Salary': pay.basic_salary,
-      'Allowances': pay.allowances,
-      'Deductions': pay.deductions,
-      'Net Salary': pay.net_salary,
-      'Payment Date': pay.payment_date ? format(new Date(pay.payment_date), 'yyyy-MM-dd') : 'Pending',
-      'Payment Status': pay.payment_status,
-    }));
-  };
-
   const generateDepartmentReport = async () => {
     let query = supabase
       .from('departments')
@@ -394,14 +271,6 @@ export default function Reports() {
         case 'attendance':
           reportData = await generateAttendanceReport();
           filename = 'attendance-report';
-          break;
-        case 'performance':
-          reportData = await generatePerformanceReport();
-          filename = 'performance-report';
-          break;
-        case 'payroll':
-          reportData = await generatePayrollReport();
-          filename = 'payroll-report';
           break;
         case 'department':
           reportData = await generateDepartmentReport();
@@ -475,20 +344,6 @@ export default function Reports() {
       color: 'bg-cyan-500',
     },
     {
-      id: 'performance' as ReportType,
-      name: 'Performance Report',
-      description: 'Performance reviews and ratings summary',
-      icon: TrendingUp,
-      color: 'bg-orange-500',
-    },
-    {
-      id: 'payroll' as ReportType,
-      name: 'Payroll Report',
-      description: 'Salary disbursement and payroll summary',
-      icon: FileText,
-      color: 'bg-red-500',
-    },
-    {
       id: 'department' as ReportType,
       name: 'Department Report',
       description: 'Department-wise employee distribution',
@@ -550,8 +405,6 @@ export default function Reports() {
               <option value="employee">Employee Report</option>
               <option value="leave">Leave Report</option>
               <option value="attendance">Attendance Report</option>
-              <option value="performance">Performance Report</option>
-              <option value="payroll">Payroll Report</option>
               <option value="department">Department Report</option>
             </select>
           </div>

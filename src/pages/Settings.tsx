@@ -16,8 +16,6 @@ export default function Settings() {
   const [notificationPrefs, setNotificationPrefs] = useState({
     leave_approvals: true,
     attendance_reminders: true,
-    performance_reviews: false,
-    payroll_updates: true,
   });
   const [savingPrefs, setSavingPrefs] = useState(false);
 
@@ -42,8 +40,6 @@ export default function Settings() {
         setNotificationPrefs({
           leave_approvals: prefs.email_leave_approvals ?? true,
           attendance_reminders: prefs.email_attendance_reminders ?? true,
-          performance_reviews: prefs.email_performance_reviews ?? false,
-          payroll_updates: prefs.email_payroll_updates ?? true,
         });
       }
     } catch (err) {
@@ -71,8 +67,6 @@ export default function Settings() {
           user_id: user.id,
           email_leave_approvals: notificationPrefs.leave_approvals,
           email_attendance_reminders: notificationPrefs.attendance_reminders,
-          email_performance_reviews: notificationPrefs.performance_reviews,
-          email_payroll_updates: notificationPrefs.payroll_updates,
         })
         .eq('user_id', user.id);
 
@@ -278,24 +272,6 @@ export default function Settings() {
                   className="rounded text-blue-900 focus:ring-blue-500"
                 />
                 <span className="text-sm text-gray-700">Email notifications for attendance reminders</span>
-              </label>
-              <label className="flex items-center space-x-3">
-                <input
-                  type="checkbox"
-                  checked={notificationPrefs.performance_reviews}
-                  onChange={(e) => setNotificationPrefs(prev => ({ ...prev, performance_reviews: e.target.checked }))}
-                  className="rounded text-blue-900 focus:ring-blue-500"
-                />
-                <span className="text-sm text-gray-700">Email notifications for performance reviews</span>
-              </label>
-              <label className="flex items-center space-x-3">
-                <input
-                  type="checkbox"
-                  checked={notificationPrefs.payroll_updates}
-                  onChange={(e) => setNotificationPrefs(prev => ({ ...prev, payroll_updates: e.target.checked }))}
-                  className="rounded text-blue-900 focus:ring-blue-500"
-                />
-                <span className="text-sm text-gray-700">Email notifications for payroll updates</span>
               </label>
               <button
                 onClick={handleSavePreferences}

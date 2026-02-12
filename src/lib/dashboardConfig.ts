@@ -29,6 +29,7 @@ export const DASHBOARD_WIDGETS: DashboardWidget[] = [
   { id: 'departmentChart', label: 'Employees by Department', visibleFor: ['admin', 'hr'], isChart: true },
   { id: 'leaveChart', label: 'Leave Status Distribution', visibleFor: ['admin', 'hr', 'employee'], isChart: true },
   { id: 'recentActivities', label: 'Recent Activities', visibleFor: ['admin'] },
+  { id: 'announcements', label: 'Announcements', visibleFor: ['admin', 'hr', 'employee'] },
 ];
 
 export const QUICK_ACTIONS: QuickAction[] = [

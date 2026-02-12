@@ -1,4 +1,4 @@
-export type NotificationEmailType = 'leave_approved' | 'leave_rejected' | 'leave_pending' | 'performance_review' | 'general';
+export type NotificationEmailType = 'leave_approved' | 'leave_rejected' | 'leave_pending' | 'general';
 
 interface EmailNotificationData {
   to: string;
@@ -60,14 +60,5 @@ export async function notifyLeavePending(hrEmail: string, employeeName: string, 
     subject: 'New Leave Request Pending',
     body: `${employeeName} has submitted a new ${leaveType} leave request from ${startDate} to ${endDate} that requires your review.`,
     type: 'leave_pending',
-  });
-}
-
-export async function notifyPerformanceReview(employeeEmail: string, reviewPeriod: string, rating: number) {
-  await sendEmailNotification({
-    to: employeeEmail,
-    subject: 'Performance Review Completed',
-    body: `Your performance review for ${reviewPeriod} has been completed. Rating: ${rating}/5`,
-    type: 'performance_review',
   });
 }

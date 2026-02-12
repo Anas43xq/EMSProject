@@ -15,10 +15,10 @@ const EmployeeEdit = lazy(() => import('./pages/EmployeeEdit'));
 const Departments = lazy(() => import('./pages/Departments'));
 const Attendance = lazy(() => import('./pages/Attendance'));
 const Leaves = lazy(() => import('./pages/Leaves'));
-const Performance = lazy(() => import('./pages/Performance'));
 const Reports = lazy(() => import('./pages/Reports'));
 const Settings = lazy(() => import('./pages/Settings'));
 const ResetPassword = lazy(() => import('./pages/ResetPassword'));
+const Announcements = lazy(() => import('./pages/Announcements'));
 
 // Loading fallback component
 function PageLoader() {
@@ -50,7 +50,7 @@ function App() {
               <Route path="departments" element={<Suspense fallback={<PageLoader />}><Departments /></Suspense>} />
               <Route path="attendance" element={<Suspense fallback={<PageLoader />}><Attendance /></Suspense>} />
               <Route path="leaves" element={<Suspense fallback={<PageLoader />}><Leaves /></Suspense>} />
-              <Route path="performance" element={<Suspense fallback={<PageLoader />}><Performance /></Suspense>} />
+              <Route path="announcements" element={<Suspense fallback={<PageLoader />}><Announcements /></Suspense>} />
               <Route path="reports" element={<Suspense fallback={<PageLoader />}><Reports /></Suspense>} />
               <Route path="settings" element={<Suspense fallback={<PageLoader />}><Settings /></Suspense>} />
             </Route>

@@ -8,13 +8,13 @@ import {
   Building2,
   Calendar,
   Clock,
-  TrendingUp,
   FileText,
   Settings,
   LogOut,
   Menu,
   X,
   GraduationCap,
+  Megaphone,
 } from 'lucide-react';
 
 export default function Layout() {
@@ -29,7 +29,7 @@ export default function Layout() {
     { name: 'Departments', href: '/departments', icon: Building2, roles: ['admin', 'hr'] },
     { name: 'Leave Management', href: '/leaves', icon: Calendar, roles: ['admin', 'hr', 'employee'] },
     { name: 'Attendance', href: '/attendance', icon: Clock, roles: ['admin', 'hr', 'employee'] },
-    { name: 'Performance', href: '/performance', icon: TrendingUp, roles: ['admin', 'hr', 'employee'] },
+    { name: 'Announcements', href: '/announcements', icon: Megaphone, roles: ['admin', 'hr'] },
     { name: 'Reports', href: '/reports', icon: FileText, roles: ['admin', 'hr'] },
     { name: 'Settings', href: '/settings', icon: Settings, roles: ['admin', 'hr', 'employee'] },
   ];

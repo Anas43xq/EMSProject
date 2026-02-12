@@ -5,6 +5,7 @@ import { Users, Building2, Calendar, TrendingUp, Clock, CheckCircle, UserCheck, 
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { useAuth } from '../contexts/AuthContext';
 import { getVisibleQuickActions, isWidgetVisible, UserRole } from '../lib/dashboardConfig';
+import AnnouncementsWidget from '../components/AnnouncementsWidget';
 
 interface Stats {
   totalEmployees: number;
@@ -271,6 +272,10 @@ export default function Dashboard() {
               )}
             </div>
           </div>
+        )}
+
+        {isWidgetVisible('announcements', user?.role || 'employee') && (
+          <AnnouncementsWidget />
         )}
 
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">

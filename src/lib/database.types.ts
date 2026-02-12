@@ -270,100 +270,6 @@ export interface Database {
           updated_at?: string
         }
       }
-      performance_reviews: {
-        Row: {
-          id: string
-          employee_id: string
-          reviewer_id: string
-          review_period: string
-          review_date: string
-          overall_rating: number | null
-          goals: Json
-          achievements: string
-          areas_of_improvement: string
-          comments: string
-          status: 'draft' | 'submitted' | 'completed'
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          employee_id: string
-          reviewer_id: string
-          review_period: string
-          review_date: string
-          overall_rating?: number | null
-          goals?: Json
-          achievements?: string
-          areas_of_improvement?: string
-          comments?: string
-          status?: 'draft' | 'submitted' | 'completed'
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          employee_id?: string
-          reviewer_id?: string
-          review_period?: string
-          review_date?: string
-          overall_rating?: number | null
-          goals?: Json
-          achievements?: string
-          areas_of_improvement?: string
-          comments?: string
-          status?: 'draft' | 'submitted' | 'completed'
-          created_at?: string
-          updated_at?: string
-        }
-      }
-      payroll: {
-        Row: {
-          id: string
-          employee_id: string
-          month: number
-          year: number
-          basic_salary: number
-          allowances: Json
-          deductions: Json
-          gross_salary: number
-          net_salary: number
-          payment_date: string | null
-          status: 'pending' | 'paid'
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          employee_id: string
-          month: number
-          year: number
-          basic_salary: number
-          allowances?: Json
-          deductions?: Json
-          gross_salary: number
-          net_salary: number
-          payment_date?: string | null
-          status?: 'pending' | 'paid'
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          employee_id?: string
-          month?: number
-          year?: number
-          basic_salary?: number
-          allowances?: Json
-          deductions?: Json
-          gross_salary?: number
-          net_salary?: number
-          payment_date?: string | null
-          status?: 'pending' | 'paid'
-          created_at?: string
-          updated_at?: string
-        }
-      }
       documents: {
         Row: {
           id: string
@@ -399,7 +305,7 @@ export interface Database {
           user_id: string
           title: string
           message: string
-          type: 'leave' | 'attendance' | 'performance' | 'system'
+          type: 'leave' | 'attendance' | 'system'
           is_read: boolean
           created_at: string
         }
@@ -408,7 +314,7 @@ export interface Database {
           user_id: string
           title: string
           message: string
-          type: 'leave' | 'attendance' | 'performance' | 'system'
+          type: 'leave' | 'attendance' | 'system'
           is_read?: boolean
           created_at?: string
         }
@@ -417,7 +323,7 @@ export interface Database {
           user_id?: string
           title?: string
           message?: string
-          type?: 'leave' | 'attendance' | 'performance' | 'system'
+          type?: 'leave' | 'attendance' | 'system'
           is_read?: boolean
           created_at?: string
         }
@@ -457,8 +363,6 @@ export interface Database {
           user_id: string
           email_leave_approvals: boolean
           email_attendance_reminders: boolean
-          email_performance_reviews: boolean
-          email_payroll_updates: boolean
           created_at: string
           updated_at: string
         }
@@ -467,8 +371,6 @@ export interface Database {
           user_id: string
           email_leave_approvals?: boolean
           email_attendance_reminders?: boolean
-          email_performance_reviews?: boolean
-          email_payroll_updates?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -477,8 +379,41 @@ export interface Database {
           user_id?: string
           email_leave_approvals?: boolean
           email_attendance_reminders?: boolean
-          email_performance_reviews?: boolean
-          email_payroll_updates?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      announcements: {
+        Row: {
+          id: string
+          title: string
+          content: string
+          priority: 'low' | 'normal' | 'high' | 'urgent'
+          created_by: string
+          is_active: boolean
+          expires_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          title: string
+          content: string
+          priority?: 'low' | 'normal' | 'high' | 'urgent'
+          created_by: string
+          is_active?: boolean
+          expires_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          title?: string
+          content?: string
+          priority?: 'low' | 'normal' | 'high' | 'urgent'
+          created_by?: string
+          is_active?: boolean
+          expires_at?: string | null
           created_at?: string
           updated_at?: string
         }
