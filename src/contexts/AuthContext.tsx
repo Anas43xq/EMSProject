@@ -24,6 +24,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshAttempted, setRefreshAttempted] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -41,6 +42,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           await loadUserData(session.user);
         } else {
           setUser(null);
+          setRefreshAttempted(false); // Reset on logout
         }
       })();
     });
@@ -50,8 +52,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const loadUserData = async (authUser: User) => {
     try {
-      // Try to get role from JWT metadata first
-      const role = authUser.app_metadata?.role as UserRole | undefined;
+      // Try to get role from JWT metadata first (app_metadata or user_metadata)
+      const role = (authUser.app_metadata?.role || authUser.user_metadata?.role) as UserRole | undefined;
 
       if (role) {
         // Role is available in JWT, query for employee_id only
@@ -72,10 +74,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           employeeId: (data as any)?.employee_id || null,
         });
       } else {
-        // Role not in JWT - need to refresh session to get updated JWT
-        console.warn('Role not found in JWT, refreshing session...');
-
-        // Query for user data from database
+        // Role not in JWT - query database for role
         const { data, error } = await supabase
           .from('users')
           .select('role, employee_id')
@@ -84,7 +83,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         if (error) {
           console.error('Error loading user data:', error);
-          // Set minimal user data
           setUser({
             id: authUser.id,
             email: authUser.email || '',
@@ -103,9 +101,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             employeeId: (data as any).employee_id,
           });
 
-          // Refresh session to get updated JWT with role
-          console.log('Refreshing session to update JWT...');
-          await supabase.auth.refreshSession();
+          // Only attempt refresh once to prevent infinite loop
+          if (!refreshAttempted) {
+            setRefreshAttempted(true);
+            console.log('Refreshing session to update JWT...');
+            await supabase.auth.refreshSession();
+          }
         } else {
           console.warn('No user data found');
           setUser({
@@ -118,7 +119,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     } catch (error) {
       console.error('Unexpected error in loadUserData:', error);
-      // Set user with minimal data to prevent auth loop
       setUser({
         id: authUser.id,
         email: authUser.email || '',

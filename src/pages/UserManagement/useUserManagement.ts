@@ -112,6 +112,8 @@ export function useUserManagement() {
 
     setSubmitting(true);
     try {
+      // Create auth user with role in user_metadata
+      // The database trigger handle_new_auth_user will automatically create the public.users record
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -125,26 +127,22 @@ export function useUserManagement() {
       if (authError) throw authError;
 
       if (authData.user) {
-        const { error: insertError } = await (supabase
-          .from('users') as any)
-          .insert({
-            id: authData.user.id,
-            email: formData.email,
-            role: formData.role,
-            employee_id: formData.employee_id,
-          });
+        // Wait a moment for the database trigger to create the user record
+        await new Promise(resolve => setTimeout(resolve, 500));
 
-        // If insert fails, try upsert as fallback
-        if (insertError) {
-          const { error: upsertError } = await (supabase
+        // Only update the employee_id if one was selected (the trigger already created the user)
+        if (formData.employee_id) {
+          const { error: updateError } = await (supabase
             .from('users') as any)
-            .upsert({
-              id: authData.user.id,
-              email: formData.email,
-              role: formData.role,
+            .update({
               employee_id: formData.employee_id,
-            });
-          if (upsertError) throw upsertError;
+              role: formData.role,
+            })
+            .eq('id', authData.user.id);
+
+          if (updateError) {
+            console.warn('Could not update employee_id:', updateError);
+          }
         }
       }
 
