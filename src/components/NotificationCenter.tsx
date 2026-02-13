@@ -154,7 +154,7 @@ export default function NotificationCenter() {
 
       {/* Notification Panel */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl z-50 border border-gray-200">
+        <div className="absolute right-0 mt-2 w-96 max-w-[calc(100vw-20px)] bg-white rounded-lg shadow-xl z-50 border border-gray-200">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-200">
             <h3 className="text-lg font-semibold text-gray-900">{t('notifications.title')}</h3>

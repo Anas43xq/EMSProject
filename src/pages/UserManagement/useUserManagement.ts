@@ -125,16 +125,27 @@ export function useUserManagement() {
       if (authError) throw authError;
 
       if (authData.user) {
-        const { error: updateError } = await (supabase
+        const { error: insertError } = await (supabase
           .from('users') as any)
-          .upsert({
+          .insert({
             id: authData.user.id,
             email: formData.email,
             role: formData.role,
             employee_id: formData.employee_id,
           });
 
-        if (updateError) throw updateError;
+        // If insert fails, try upsert as fallback
+        if (insertError) {
+          const { error: upsertError } = await (supabase
+            .from('users') as any)
+            .upsert({
+              id: authData.user.id,
+              email: formData.email,
+              role: formData.role,
+              employee_id: formData.employee_id,
+            });
+          if (upsertError) throw upsertError;
+        }
       }
 
       showNotification('success', t('userManagement.userCreated'));

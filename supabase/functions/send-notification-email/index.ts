@@ -1,4 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+// @ts-ignore - npm: protocol works at runtime in Supabase Edge Functions
 import nodemailer from "npm:nodemailer@6.9.9";
 
 // Declare Deno global

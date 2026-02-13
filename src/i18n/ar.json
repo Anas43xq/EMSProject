@@ -248,6 +248,7 @@
     "hours": "الساعات",
     "noRecords": "لا توجد سجلات حضور لهذا التاريخ",
     "selectEmployeeError": "يرجى اختيار موظف",
+    "recordAlreadyExists": "سجل الحضور موجود بالفعل لهذا الموظف في هذا التاريخ",
     "failedToAdd": "فشل في إضافة الحضور",
     "alreadyCheckedIn": "لقد سجلت حضورك اليوم بالفعل",
     "checkInSuccess": "تم تسجيل الحضور بنجاح",

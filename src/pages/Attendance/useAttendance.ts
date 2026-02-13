@@ -210,6 +210,20 @@ export function useAttendance() {
         return;
       }
 
+      // Check if attendance record already exists for this employee and date
+      const { data: existingRecord } = await supabase
+        .from('attendance')
+        .select('id')
+        .eq('employee_id', formData.employee_id)
+        .eq('date', formData.date)
+        .maybeSingle();
+
+      if (existingRecord) {
+        setError(t('attendance.recordAlreadyExists'));
+        setSubmitting(false);
+        return;
+      }
+
       const { error } = await (supabase.from('attendance') as any).insert({
         employee_id: formData.employee_id,
         date: formData.date,

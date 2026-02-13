@@ -248,6 +248,7 @@
     "hours": "Hours",
     "noRecords": "No attendance records for this date",
     "selectEmployeeError": "Please select an employee",
+    "recordAlreadyExists": "Attendance record already exists for this employee on this date",
     "failedToAdd": "Failed to add attendance",
     "alreadyCheckedIn": "You have already checked in today",
     "checkInSuccess": "Check-in recorded successfully",

@@ -46,8 +46,14 @@ BEGIN
   END LOOP;
 END $$;
 
--- Drop triggers
-DROP TRIGGER IF EXISTS update_announcements_updated_at_trigger ON public.announcements;
+-- Drop triggers (wrapped in exception handling since tables may not exist)
+DO $$
+BEGIN
+  DROP TRIGGER IF EXISTS update_announcements_updated_at_trigger ON public.announcements;
+EXCEPTION WHEN undefined_table THEN
+  -- Table doesn't exist, nothing to do
+END $$;
+
 DROP FUNCTION IF EXISTS update_announcements_updated_at();
 
 -- Drop tables in correct order (respecting foreign keys)
@@ -330,8 +336,12 @@ BEGIN
   WHERE email = NEW.email
   LIMIT 1;
   
-  -- Get role from app_metadata or default to 'employee'
-  user_role := COALESCE(NEW.raw_app_meta_data->>'role', 'employee');
+  -- Get role from app_metadata, user_metadata, or default to 'employee'
+  user_role := COALESCE(
+    NEW.raw_app_meta_data->>'role',
+    NEW.raw_user_meta_data->>'role',
+    'employee'
+  );
   
   -- Create the public.users record
   INSERT INTO public.users (id, email, role, employee_id, created_at, updated_at)

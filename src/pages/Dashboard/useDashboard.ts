@@ -61,7 +61,8 @@ export function useDashboard() {
         rejectedLeavesQuery,
         supabase.from('activity_logs').select('id, action, created_at, entity_type').order('created_at', { ascending: false }).limit(5),
         attendanceQuery,
-        supabase.from('employees').select('department_id, departments(name)')
+        supabase.from('employees').select('department_id').eq('status', 'active'),
+        supabase.from('departments').select('id, name'),
       ]);
 
       const activeEmployees = employeesRes.data?.filter((e: any) => e.status === 'active').length || 0;
@@ -78,9 +79,15 @@ export function useDashboard() {
 
       setRecentActivities(activitiesRes.data || []);
 
+      // Build department data
+      const deptMap: { [key: string]: string } = {};
+      departmentsRes.data?.forEach((dept: any) => {
+        deptMap[dept.id] = dept.name;
+      });
+
       const deptCounts: { [key: string]: number } = {};
       departmentEmployeesRes.data?.forEach((emp: any) => {
-        const deptName = emp.departments?.name || 'Unassigned';
+        const deptName = emp.department_id ? (deptMap[emp.department_id] || 'Unassigned') : 'Unassigned';
         deptCounts[deptName] = (deptCounts[deptName] || 0) + 1;
       });
 
