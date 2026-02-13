@@ -67,7 +67,11 @@ export default function Layout() {
               </div>
               <div>
                 <h1 className="text-white font-bold text-lg">{t('auth.ems')}</h1>
-                <p className="text-blue-300 text-xs">{t('auth.hrPortal')}</p>
+                <p className="text-blue-300 text-xs">
+                  {user?.role === 'admin' && t('auth.adminPortal')}
+                  {user?.role === 'hr' && t('auth.hrPortal')}
+                  {user?.role === 'employee' && t('auth.employeePortal')}
+                </p>
               </div>
             </div>
             <button

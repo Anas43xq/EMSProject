@@ -39,7 +39,9 @@
   },
   "auth": {
     "ems": "EMS",
+    "adminPortal": "Admin Portal",
     "hrPortal": "HR Portal",
+    "employeePortal": "Employee Portal",
     "employeeManagementSystem": "Employee Management System",
     "signInToContinue": "Sign in to continue",
     "emailAddress": "Email Address",

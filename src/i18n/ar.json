@@ -39,7 +39,9 @@
   },
   "auth": {
     "ems": "EMS",
+    "adminPortal": "بوابة الإدارة",
     "hrPortal": "بوابة الموارد البشرية",
+    "employeePortal": "بوابة الموظفين",
     "employeeManagementSystem": "نظام إدارة الموظفين",
     "signInToContinue": "سجّل دخولك للمتابعة",
     "emailAddress": "عنوان البريد الإلكتروني",
