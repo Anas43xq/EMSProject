@@ -48,6 +48,7 @@ function App() {
               <Route path="dashboard" element={<Suspense fallback={<PageLoader />}><Dashboard /></Suspense>} />
               <Route path="profile" element={<Suspense fallback={<PageLoader />}><Profile /></Suspense>} />
               <Route path="employees" element={<Suspense fallback={<PageLoader />}><Employees /></Suspense>} />
+              <Route path="employees/new" element={<Suspense fallback={<PageLoader />}><EmployeeEdit /></Suspense>} />
               <Route path="employees/:id" element={<Suspense fallback={<PageLoader />}><EmployeeView /></Suspense>} />
               <Route path="employees/:id/edit" element={<Suspense fallback={<PageLoader />}><EmployeeEdit /></Suspense>} />
               <Route path="departments" element={<Suspense fallback={<PageLoader />}><Departments /></Suspense>} />

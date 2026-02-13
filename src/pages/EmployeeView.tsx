@@ -49,13 +49,24 @@ export default function EmployeeView() {
   const { showNotification } = useNotification();
 
   useEffect(() => {
-    if (id) {
+    if (id && id !== 'new') {
       loadEmployee();
+    } else if (id === 'new') {
+      // If trying to access /employees/new, redirect to EmployeeEdit instead
+      navigate('/employees');
     }
   }, [id]);
 
   const loadEmployee = async () => {
     try {
+      // Validate that ID is a valid UUID format
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (!uuidRegex.test(id!)) {
+        showNotification('error', t('employees.invalidEmployee'));
+        navigate('/employees');
+        return;
+      }
+
       const { data, error } = await supabase
         .from('employees')
         .select(`
