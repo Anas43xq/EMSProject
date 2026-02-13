@@ -333,43 +333,32 @@ export function useLeaves() {
         });
       }
 
-      // Get the user_id for the employee to send in-app notification
+      // Get the user for the employee to send notifications (using login email)
       const { data: employeeUser } = await supabase
         .from('users')
-        .select('id')
+        .select('id, email')
         .eq('employee_id', leave.employee_id)
-        .single() as { data: { id: string } | null };
+        .single() as { data: { id: string; email: string } | null };
 
       if (employeeUser) {
+        // Send in-app notification
         await createNotification(
           employeeUser.id,
           'Leave Approved',
           `Your ${leave.leave_type} leave request (${new Date(leave.start_date).toLocaleDateString()} - ${new Date(leave.end_date).toLocaleDateString()}) has been approved.`,
           'leave'
         );
-      }
 
-      // Send email notification - fetch email directly if not available from join
-      let employeeEmail = leave.employees?.email;
-      if (!employeeEmail) {
-        const { data: emp } = await supabase
-          .from('employees')
-          .select('email')
-          .eq('id', leave.employee_id)
-          .single() as { data: { email: string } | null };
-        employeeEmail = emp?.email;
-      }
-
-      if (employeeEmail) {
-        console.log('Sending leave approval email to:', employeeEmail);
+        // Send email notification to user's login email
+        console.log('Sending leave approval email to:', employeeUser.email);
         await notifyLeaveApproval(
-          employeeEmail,
+          employeeUser.email,
           leave.leave_type,
           new Date(leave.start_date).toLocaleDateString(),
           new Date(leave.end_date).toLocaleDateString()
         );
       } else {
-        console.warn('No employee email found for leave approval notification, employee_id:', leave.employee_id);
+        console.warn('No user linked to employee for leave approval notification, employee_id:', leave.employee_id);
       }
 
       loadLeaves();
@@ -405,43 +394,32 @@ export function useLeaves() {
         });
       }
 
-      // Get the user_id for the employee to send in-app notification
+      // Get the user for the employee to send notifications (using login email)
       const { data: employeeUser } = await supabase
         .from('users')
-        .select('id')
+        .select('id, email')
         .eq('employee_id', leave.employee_id)
-        .single() as { data: { id: string } | null };
+        .single() as { data: { id: string; email: string } | null };
 
       if (employeeUser) {
+        // Send in-app notification
         await createNotification(
           employeeUser.id,
           'Leave Rejected',
           `Your ${leave.leave_type} leave request (${new Date(leave.start_date).toLocaleDateString()} - ${new Date(leave.end_date).toLocaleDateString()}) has been rejected.`,
           'leave'
         );
-      }
 
-      // Send email notification - fetch email directly if not available from join
-      let employeeEmail = leave.employees?.email;
-      if (!employeeEmail) {
-        const { data: emp } = await supabase
-          .from('employees')
-          .select('email')
-          .eq('id', leave.employee_id)
-          .single() as { data: { email: string } | null };
-        employeeEmail = emp?.email;
-      }
-
-      if (employeeEmail) {
-        console.log('Sending leave rejection email to:', employeeEmail);
+        // Send email notification to user's login email
+        console.log('Sending leave rejection email to:', employeeUser.email);
         await notifyLeaveRejection(
-          employeeEmail,
+          employeeUser.email,
           leave.leave_type,
           new Date(leave.start_date).toLocaleDateString(),
           new Date(leave.end_date).toLocaleDateString()
         );
       } else {
-        console.warn('No employee email found for leave rejection notification, employee_id:', leave.employee_id);
+        console.warn('No user linked to employee for leave rejection notification, employee_id:', leave.employee_id);
       }
 
       loadLeaves();
