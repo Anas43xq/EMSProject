@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNotification } from '../contexts/NotificationContext';
 import { Mail, Phone, Calendar, MapPin, Briefcase, User, Building2 } from 'lucide-react';
 import { format } from 'date-fns';
+import { PageSpinner, PageHeader, Card, EmptyState } from '../components/ui';
 
 interface Employee {
   id: string;
@@ -77,40 +78,29 @@ export default function Profile() {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-900"></div>
-      </div>
-    );
+    return <PageSpinner />;
   }
 
   if (!user?.employeeId) {
     return (
-      <div className="text-center py-12">
-        <User className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">{t('profile.noProfileLinked')}</h2>
-        <p className="text-gray-600">{t('profile.contactAdmin')}</p>
-      </div>
+      <EmptyState
+        icon={<User className="w-16 h-16 text-gray-400" />}
+        title={t('profile.noProfileLinked')}
+        message={t('profile.contactAdmin')}
+      />
     );
   }
 
   if (!employee) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-gray-500">{t('employees.notFound')}</p>
-      </div>
-    );
+    return <EmptyState message={t('employees.notFound')} />;
   }
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">{t('nav.myProfile')}</h1>
-        <p className="text-gray-600 mt-2">{t('profile.viewYourDetails')}</p>
-      </div>
+      <PageHeader title={t('nav.myProfile')} subtitle={t('profile.viewYourDetails')} />
 
       {/* Profile Header */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <Card>
         <div className="flex items-center space-x-6">
           <div className="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center">
             <span className="text-3xl font-bold text-blue-900">
@@ -132,7 +122,7 @@ export default function Profile() {
             </span>
           </div>
         </div>
-      </div>
+      </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Personal Information */}

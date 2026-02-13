@@ -21,9 +21,9 @@
   - user_preferences (notification settings)
   
   ## Demo Users
-  - admin@company.com / admin123 (Admin)
-  - hr@company.com / hr123 (HR)
-  - employee@company.com / employee123 (Employee)
+  - admin@university.edu / admin123 (Admin)
+  - hr@university.edu / hr123 (HR)
+  - employee@university.edu / emp123 (Employee)
   
   ## Notes
   - RLS policies use JWT metadata to avoid infinite recursion
@@ -490,39 +490,39 @@ INSERT INTO public.departments (id, name, type, description) VALUES
 -- Insert Employees (30 employees)
 INSERT INTO public.employees (id, employee_number, first_name, last_name, email, phone, date_of_birth, gender, address, city, state, postal_code, department_id, position, employment_type, status, hire_date, salary, qualifications, emergency_contact_name, emergency_contact_phone) VALUES
   -- Admin Employee
-  ('650e8400-e29b-41d4-a716-446655440001', 'EMP001', 'John', 'Smith', 'admin@company.com', '555-0101', '1975-03-15', 'male', '123 Admin St', 'Boston', 'MA', '02101', '550e8400-e29b-41d4-a716-446655440005', 'System Administrator', 'full-time', 'active', '2010-01-15', 95000, '[{"degree": "MBA", "institution": "Harvard University"}]', 'Jane Smith', '555-0102'),
+  ('650e8400-e29b-41d4-a716-446655440001', 'EMP001', 'John', 'Smith', 'admin@university.edu', '555-0101', '1975-03-15', 'male', '123 Admin St', 'Boston', 'MA', '02101', '550e8400-e29b-41d4-a716-446655440005', 'System Administrator', 'full-time', 'active', '2010-01-15', 95000, '[{"degree": "MBA", "institution": "Harvard University"}]', 'Jane Smith', '555-0102'),
   -- HR Employee
-  ('650e8400-e29b-41d4-a716-446655440002', 'EMP002', 'Sarah', 'Johnson', 'hr@company.com', '555-0103', '1982-07-22', 'female', '456 HR Ave', 'Boston', 'MA', '02102', '550e8400-e29b-41d4-a716-446655440005', 'HR Manager', 'full-time', 'active', '2015-03-20', 75000, '[{"degree": "MS Human Resources", "institution": "Boston College"}]', 'Mike Johnson', '555-0104'),
+  ('650e8400-e29b-41d4-a716-446655440002', 'EMP002', 'Sarah', 'Johnson', 'hr@university.edu', '555-0103', '1982-07-22', 'female', '456 HR Ave', 'Boston', 'MA', '02102', '550e8400-e29b-41d4-a716-446655440005', 'HR Manager', 'full-time', 'active', '2015-03-20', 75000, '[{"degree": "MS Human Resources", "institution": "Boston College"}]', 'Mike Johnson', '555-0104'),
   -- Regular Employee
-  ('650e8400-e29b-41d4-a716-446655440003', 'EMP003', 'Michael', 'Davis', 'employee@company.com', '555-0105', '1988-11-10', 'male', '789 Faculty Rd', 'Boston', 'MA', '02103', '550e8400-e29b-41d4-a716-446655440001', 'Senior Analyst', 'full-time', 'active', '2018-09-01', 68000, '[{"degree": "PhD Computer Science", "institution": "MIT"}]', 'Emily Davis', '555-0106'),
+  ('650e8400-e29b-41d4-a716-446655440003', 'EMP003', 'Michael', 'Davis', 'employee@university.edu', '555-0105', '1988-11-10', 'male', '789 Faculty Rd', 'Boston', 'MA', '02103', '550e8400-e29b-41d4-a716-446655440001', 'Senior Analyst', 'full-time', 'active', '2018-09-01', 68000, '[{"degree": "PhD Computer Science", "institution": "MIT"}]', 'Emily Davis', '555-0106'),
   -- Additional Employees
-  ('650e8400-e29b-41d4-a716-446655440004', 'EMP004', 'Emily', 'Wilson', 'e.wilson@company.com', '555-0107', '1985-05-18', 'female', '321 Academic Ln', 'Boston', 'MA', '02104', '550e8400-e29b-41d4-a716-446655440001', 'Director', 'full-time', 'active', '2012-08-15', 85000, '[{"degree": "PhD Computer Science", "institution": "Stanford University"}]', 'Robert Wilson', '555-0108'),
-  ('650e8400-e29b-41d4-a716-446655440005', 'EMP005', 'David', 'Brown', 'd.brown@company.com', '555-0109', '1990-02-28', 'male', '654 Tech Blvd', 'Boston', 'MA', '02105', '550e8400-e29b-41d4-a716-446655440001', 'Lecturer', 'full-time', 'active', '2019-01-10', 62000, '[{"degree": "MS Computer Science", "institution": "Boston University"}]', 'Lisa Brown', '555-0110'),
-  ('650e8400-e29b-41d4-a716-446655440006', 'EMP006', 'Jennifer', 'Martinez', 'j.martinez@company.com', '555-0111', '1987-09-05', 'female', '987 Business Dr', 'Boston', 'MA', '02106', '550e8400-e29b-41d4-a716-446655440002', 'Team Lead', 'full-time', 'active', '2014-07-01', 78000, '[{"degree": "PhD Business Administration", "institution": "Wharton"}]', 'Carlos Martinez', '555-0112'),
-  ('650e8400-e29b-41d4-a716-446655440007', 'EMP007', 'Robert', 'Garcia', 'r.garcia@company.com', '555-0113', '1983-12-20', 'male', '147 Commerce St', 'Boston', 'MA', '02107', '550e8400-e29b-41d4-a716-446655440002', 'Director', 'full-time', 'active', '2011-09-15', 88000, '[{"degree": "PhD Economics", "institution": "Yale University"}]', 'Maria Garcia', '555-0114'),
-  ('650e8400-e29b-41d4-a716-446655440008', 'EMP008', 'Linda', 'Rodriguez', 'l.rodriguez@company.com', '555-0115', '1992-04-12', 'female', '258 Finance Way', 'Boston', 'MA', '02108', '550e8400-e29b-41d4-a716-446655440002', 'Senior Analyst', 'full-time', 'active', '2020-01-15', 65000, '[{"degree": "PhD Finance", "institution": "NYU"}]', 'Jose Rodriguez', '555-0116'),
-  ('650e8400-e29b-41d4-a716-446655440009', 'EMP009', 'James', 'Lee', 'j.lee@company.com', '555-0117', '1986-08-30', 'male', '369 Engineering Ct', 'Boston', 'MA', '02109', '550e8400-e29b-41d4-a716-446655440003', 'Director', 'full-time', 'active', '2013-06-01', 90000, '[{"degree": "PhD Mechanical Engineering", "institution": "MIT"}]', 'Susan Lee', '555-0118'),
-  ('650e8400-e29b-41d4-a716-446655440010', 'EMP010', 'Mary', 'Anderson', 'm.anderson@company.com', '555-0119', '1989-01-25', 'female', '741 Tech Plaza', 'Boston', 'MA', '02110', '550e8400-e29b-41d4-a716-446655440003', 'Team Lead', 'full-time', 'active', '2016-03-10', 76000, '[{"degree": "PhD Electrical Engineering", "institution": "Caltech"}]', 'Tom Anderson', '555-0120'),
-  ('650e8400-e29b-41d4-a716-446655440011', 'EMP011', 'William', 'Taylor', 'w.taylor@company.com', '555-0121', '1991-06-14', 'male', '852 Innovation Dr', 'Boston', 'MA', '02111', '550e8400-e29b-41d4-a716-446655440003', 'Lecturer', 'part-time', 'active', '2021-09-01', 45000, '[{"degree": "MS Civil Engineering", "institution": "Georgia Tech"}]', 'Ann Taylor', '555-0122'),
-  ('650e8400-e29b-41d4-a716-446655440012', 'EMP012', 'Patricia', 'Thomas', 'p.thomas@company.com', '555-0123', '1984-10-08', 'female', '963 Liberal Arts Ave', 'Boston', 'MA', '02112', '550e8400-e29b-41d4-a716-446655440004', 'Director', 'full-time', 'active', '2012-08-20', 82000, '[{"degree": "PhD English Literature", "institution": "Columbia"}]', 'George Thomas', '555-0124'),
-  ('650e8400-e29b-41d4-a716-446655440013', 'EMP013', 'Richard', 'Jackson', 'r.jackson@company.com', '555-0125', '1987-03-17', 'male', '159 History Ln', 'Boston', 'MA', '02113', '550e8400-e29b-41d4-a716-446655440004', 'Team Lead', 'full-time', 'active', '2015-01-12', 74000, '[{"degree": "PhD History", "institution": "Princeton"}]', 'Barbara Jackson', '555-0126'),
-  ('650e8400-e29b-41d4-a716-446655440014', 'EMP014', 'Barbara', 'White', 'b.white@company.com', '555-0127', '1993-07-29', 'female', '357 Philosophy Rd', 'Boston', 'MA', '02114', '550e8400-e29b-41d4-a716-446655440004', 'Senior Analyst', 'full-time', 'active', '2019-09-01', 63000, '[{"degree": "PhD Philosophy", "institution": "UC Berkeley"}]', 'Steven White', '555-0128'),
-  ('650e8400-e29b-41d4-a716-446655440015', 'EMP015', 'Charles', 'Harris', 'c.harris@company.com', '555-0129', '1988-11-03', 'male', '468 Support St', 'Boston', 'MA', '02115', '550e8400-e29b-41d4-a716-446655440005', 'IT Manager', 'full-time', 'active', '2016-05-15', 72000, '[{"degree": "BS Information Systems", "institution": "Northeastern"}]', 'Nancy Harris', '555-0130'),
-  ('650e8400-e29b-41d4-a716-446655440016', 'EMP016', 'Susan', 'Clark', 's.clark@company.com', '555-0131', '1990-04-19', 'female', '579 Operations Ave', 'Boston', 'MA', '02116', '550e8400-e29b-41d4-a716-446655440005', 'Operations Coordinator', 'full-time', 'active', '2018-02-20', 55000, '[{"degree": "BA Business", "institution": "Suffolk University"}]', 'Paul Clark', '555-0132'),
-  ('650e8400-e29b-41d4-a716-446655440017', 'EMP017', 'Joseph', 'Lewis', 'j.lewis@company.com', '555-0133', '1986-12-07', 'male', '680 Data Science Blvd', 'Boston', 'MA', '02117', '550e8400-e29b-41d4-a716-446655440001', 'Senior Analyst', 'full-time', 'active', '2017-08-01', 70000, '[{"degree": "PhD Data Science", "institution": "Carnegie Mellon"}]', 'Karen Lewis', '555-0134'),
-  ('650e8400-e29b-41d4-a716-446655440018', 'EMP018', 'Karen', 'Walker', 'k.walker@company.com', '555-0135', '1991-05-23', 'female', '791 AI Research Ct', 'Boston', 'MA', '02118', '550e8400-e29b-41d4-a716-446655440001', 'Research Associate', 'contract', 'active', '2022-01-10', 58000, '[{"degree": "MS Artificial Intelligence", "institution": "Stanford"}]', 'Mark Walker', '555-0136'),
-  ('650e8400-e29b-41d4-a716-446655440019', 'EMP019', 'Nancy', 'Hall', 'n.hall@company.com', '555-0137', '1985-09-16', 'female', '892 Marketing Plaza', 'Boston', 'MA', '02119', '550e8400-e29b-41d4-a716-446655440002', 'Lecturer', 'part-time', 'active', '2020-09-01', 42000, '[{"degree": "MBA Marketing", "institution": "Babson College"}]', 'Daniel Hall', '555-0138'),
-  ('650e8400-e29b-41d4-a716-446655440020', 'EMP020', 'Daniel', 'Allen', 'd.allen@company.com', '555-0139', '1989-02-11', 'male', '903 Strategy St', 'Boston', 'MA', '02120', '550e8400-e29b-41d4-a716-446655440002', 'Senior Lecturer', 'full-time', 'active', '2017-01-15', 66000, '[{"degree": "PhD Management", "institution": "Northwestern"}]', 'Rachel Allen', '555-0140'),
-  ('650e8400-e29b-41d4-a716-446655440021', 'EMP021', 'Betty', 'Young', 'b.young@company.com', '555-0141', '1992-08-26', 'female', '124 Robotics Way', 'Boston', 'MA', '02121', '550e8400-e29b-41d4-a716-446655440003', 'Senior Analyst', 'full-time', 'active', '2020-08-15', 69000, '[{"degree": "PhD Robotics", "institution": "CMU"}]', 'Frank Young', '555-0142'),
-  ('650e8400-e29b-41d4-a716-446655440022', 'EMP022', 'Paul', 'King', 'p.king@company.com', '555-0143', '1987-12-01', 'male', '235 Materials Ln', 'Boston', 'MA', '02122', '550e8400-e29b-41d4-a716-446655440003', 'Director', 'full-time', 'active', '2013-09-01', 87000, '[{"degree": "PhD Materials Science", "institution": "MIT"}]', 'Laura King', '555-0144'),
-  ('650e8400-e29b-41d4-a716-446655440023', 'EMP023', 'Laura', 'Wright', 'l.wright@company.com', '555-0145', '1990-06-18', 'female', '346 Literature Rd', 'Boston', 'MA', '02123', '550e8400-e29b-41d4-a716-446655440004', 'Lecturer', 'part-time', 'active', '2021-01-15', 40000, '[{"degree": "MA English", "institution": "Tufts"}]', 'Kevin Wright', '555-0146'),
-  ('650e8400-e29b-41d4-a716-446655440024', 'EMP024', 'Kevin', 'Lopez', 'k.lopez@company.com', '555-0147', '1988-03-09', 'male', '457 Sociology Ave', 'Boston', 'MA', '02124', '550e8400-e29b-41d4-a716-446655440004', 'Team Lead', 'full-time', 'active', '2016-08-20', 75000, '[{"degree": "PhD Sociology", "institution": "Harvard"}]', 'Michelle Lopez', '555-0148'),
-  ('650e8400-e29b-41d4-a716-446655440025', 'EMP025', 'Michelle', 'Hill', 'm.hill@company.com', '555-0149', '1991-10-13', 'female', '568 Psychology Blvd', 'Boston', 'MA', '02125', '550e8400-e29b-41d4-a716-446655440004', 'Senior Analyst', 'full-time', 'active', '2019-01-10', 67000, '[{"degree": "PhD Psychology", "institution": "UCLA"}]', 'Brian Hill', '555-0150'),
-  ('650e8400-e29b-41d4-a716-446655440026', 'EMP026', 'Brian', 'Scott', 'b.scott@company.com', '555-0151', '1986-05-27', 'male', '679 Facilities Dr', 'Boston', 'MA', '02126', '550e8400-e29b-41d4-a716-446655440005', 'Facilities Manager', 'full-time', 'active', '2015-03-15', 60000, '[{"degree": "BS Facilities Management", "institution": "UMass"}]', 'Carol Scott', '555-0152'),
-  ('650e8400-e29b-41d4-a716-446655440027', 'EMP027', 'Carol', 'Green', 'c.green@company.com', '555-0153', '1993-01-08', 'female', '780 Finance Office St', 'Boston', 'MA', '02127', '550e8400-e29b-41d4-a716-446655440005', 'Financial Analyst', 'full-time', 'active', '2020-06-01', 58000, '[{"degree": "MS Finance", "institution": "Boston College"}]', 'Eric Green', '555-0154'),
-  ('650e8400-e29b-41d4-a716-446655440028', 'EMP028', 'Eric', 'Adams', 'e.adams@company.com', '555-0155', '1989-07-21', 'male', '891 Registrar Ave', 'Boston', 'MA', '02128', '550e8400-e29b-41d4-a716-446655440005', 'Registrar Coordinator', 'full-time', 'active', '2018-08-20', 52000, '[{"degree": "BA Administration", "institution": "Emerson"}]', 'Diana Adams', '555-0156'),
-  ('650e8400-e29b-41d4-a716-446655440029', 'EMP029', 'Diana', 'Baker', 'd.baker@company.com', '555-0157', '1990-11-30', 'female', '902 Library Plaza', 'Boston', 'MA', '02129', '550e8400-e29b-41d4-a716-446655440005', 'Librarian', 'full-time', 'active', '2019-05-15', 54000, '[{"degree": "MLS Library Science", "institution": "Simmons"}]', 'Ryan Baker', '555-0158'),
-  ('650e8400-e29b-41d4-a716-446655440030', 'EMP030', 'Ryan', 'Nelson', 'r.nelson@company.com', '555-0159', '1987-04-04', 'male', '113 Student Services Rd', 'Boston', 'MA', '02130', '550e8400-e29b-41d4-a716-446655440005', 'Student Services Advisor', 'full-time', 'active', '2017-09-01', 56000, '[{"degree": "MS Counseling", "institution": "Lesley"}]', 'Jessica Nelson', '555-0160');
+  ('650e8400-e29b-41d4-a716-446655440004', 'EMP004', 'Emily', 'Wilson', 'e.wilson@university.edu', '555-0107', '1985-05-18', 'female', '321 Academic Ln', 'Boston', 'MA', '02104', '550e8400-e29b-41d4-a716-446655440001', 'Director', 'full-time', 'active', '2012-08-15', 85000, '[{"degree": "PhD Computer Science", "institution": "Stanford University"}]', 'Robert Wilson', '555-0108'),
+  ('650e8400-e29b-41d4-a716-446655440005', 'EMP005', 'David', 'Brown', 'd.brown@university.edu', '555-0109', '1990-02-28', 'male', '654 Tech Blvd', 'Boston', 'MA', '02105', '550e8400-e29b-41d4-a716-446655440001', 'Lecturer', 'full-time', 'active', '2019-01-10', 62000, '[{"degree": "MS Computer Science", "institution": "Boston University"}]', 'Lisa Brown', '555-0110'),
+  ('650e8400-e29b-41d4-a716-446655440006', 'EMP006', 'Jennifer', 'Martinez', 'j.martinez@university.edu', '555-0111', '1987-09-05', 'female', '987 Business Dr', 'Boston', 'MA', '02106', '550e8400-e29b-41d4-a716-446655440002', 'Team Lead', 'full-time', 'active', '2014-07-01', 78000, '[{"degree": "PhD Business Administration", "institution": "Wharton"}]', 'Carlos Martinez', '555-0112'),
+  ('650e8400-e29b-41d4-a716-446655440007', 'EMP007', 'Robert', 'Garcia', 'r.garcia@university.edu', '555-0113', '1983-12-20', 'male', '147 Commerce St', 'Boston', 'MA', '02107', '550e8400-e29b-41d4-a716-446655440002', 'Director', 'full-time', 'active', '2011-09-15', 88000, '[{"degree": "PhD Economics", "institution": "Yale University"}]', 'Maria Garcia', '555-0114'),
+  ('650e8400-e29b-41d4-a716-446655440008', 'EMP008', 'Linda', 'Rodriguez', 'l.rodriguez@university.edu', '555-0115', '1992-04-12', 'female', '258 Finance Way', 'Boston', 'MA', '02108', '550e8400-e29b-41d4-a716-446655440002', 'Senior Analyst', 'full-time', 'active', '2020-01-15', 65000, '[{"degree": "PhD Finance", "institution": "NYU"}]', 'Jose Rodriguez', '555-0116'),
+  ('650e8400-e29b-41d4-a716-446655440009', 'EMP009', 'James', 'Lee', 'j.lee@university.edu', '555-0117', '1986-08-30', 'male', '369 Engineering Ct', 'Boston', 'MA', '02109', '550e8400-e29b-41d4-a716-446655440003', 'Director', 'full-time', 'active', '2013-06-01', 90000, '[{"degree": "PhD Mechanical Engineering", "institution": "MIT"}]', 'Susan Lee', '555-0118'),
+  ('650e8400-e29b-41d4-a716-446655440010', 'EMP010', 'Mary', 'Anderson', 'm.anderson@university.edu', '555-0119', '1989-01-25', 'female', '741 Tech Plaza', 'Boston', 'MA', '02110', '550e8400-e29b-41d4-a716-446655440003', 'Team Lead', 'full-time', 'active', '2016-03-10', 76000, '[{"degree": "PhD Electrical Engineering", "institution": "Caltech"}]', 'Tom Anderson', '555-0120'),
+  ('650e8400-e29b-41d4-a716-446655440011', 'EMP011', 'William', 'Taylor', 'w.taylor@university.edu', '555-0121', '1991-06-14', 'male', '852 Innovation Dr', 'Boston', 'MA', '02111', '550e8400-e29b-41d4-a716-446655440003', 'Lecturer', 'part-time', 'active', '2021-09-01', 45000, '[{"degree": "MS Civil Engineering", "institution": "Georgia Tech"}]', 'Ann Taylor', '555-0122'),
+  ('650e8400-e29b-41d4-a716-446655440012', 'EMP012', 'Patricia', 'Thomas', 'p.thomas@university.edu', '555-0123', '1984-10-08', 'female', '963 Liberal Arts Ave', 'Boston', 'MA', '02112', '550e8400-e29b-41d4-a716-446655440004', 'Director', 'full-time', 'active', '2012-08-20', 82000, '[{"degree": "PhD English Literature", "institution": "Columbia"}]', 'George Thomas', '555-0124'),
+  ('650e8400-e29b-41d4-a716-446655440013', 'EMP013', 'Richard', 'Jackson', 'r.jackson@university.edu', '555-0125', '1987-03-17', 'male', '159 History Ln', 'Boston', 'MA', '02113', '550e8400-e29b-41d4-a716-446655440004', 'Team Lead', 'full-time', 'active', '2015-01-12', 74000, '[{"degree": "PhD History", "institution": "Princeton"}]', 'Barbara Jackson', '555-0126'),
+  ('650e8400-e29b-41d4-a716-446655440014', 'EMP014', 'Barbara', 'White', 'b.white@university.edu', '555-0127', '1993-07-29', 'female', '357 Philosophy Rd', 'Boston', 'MA', '02114', '550e8400-e29b-41d4-a716-446655440004', 'Senior Analyst', 'full-time', 'active', '2019-09-01', 63000, '[{"degree": "PhD Philosophy", "institution": "UC Berkeley"}]', 'Steven White', '555-0128'),
+  ('650e8400-e29b-41d4-a716-446655440015', 'EMP015', 'Charles', 'Harris', 'c.harris@university.edu', '555-0129', '1988-11-03', 'male', '468 Support St', 'Boston', 'MA', '02115', '550e8400-e29b-41d4-a716-446655440005', 'IT Manager', 'full-time', 'active', '2016-05-15', 72000, '[{"degree": "BS Information Systems", "institution": "Northeastern"}]', 'Nancy Harris', '555-0130'),
+  ('650e8400-e29b-41d4-a716-446655440016', 'EMP016', 'Susan', 'Clark', 's.clark@university.edu', '555-0131', '1990-04-19', 'female', '579 Operations Ave', 'Boston', 'MA', '02116', '550e8400-e29b-41d4-a716-446655440005', 'Operations Coordinator', 'full-time', 'active', '2018-02-20', 55000, '[{"degree": "BA Business", "institution": "Suffolk University"}]', 'Paul Clark', '555-0132'),
+  ('650e8400-e29b-41d4-a716-446655440017', 'EMP017', 'Joseph', 'Lewis', 'j.lewis@university.edu', '555-0133', '1986-12-07', 'male', '680 Data Science Blvd', 'Boston', 'MA', '02117', '550e8400-e29b-41d4-a716-446655440001', 'Senior Analyst', 'full-time', 'active', '2017-08-01', 70000, '[{"degree": "PhD Data Science", "institution": "Carnegie Mellon"}]', 'Karen Lewis', '555-0134'),
+  ('650e8400-e29b-41d4-a716-446655440018', 'EMP018', 'Karen', 'Walker', 'k.walker@university.edu', '555-0135', '1991-05-23', 'female', '791 AI Research Ct', 'Boston', 'MA', '02118', '550e8400-e29b-41d4-a716-446655440001', 'Research Associate', 'contract', 'active', '2022-01-10', 58000, '[{"degree": "MS Artificial Intelligence", "institution": "Stanford"}]', 'Mark Walker', '555-0136'),
+  ('650e8400-e29b-41d4-a716-446655440019', 'EMP019', 'Nancy', 'Hall', 'n.hall@university.edu', '555-0137', '1985-09-16', 'female', '892 Marketing Plaza', 'Boston', 'MA', '02119', '550e8400-e29b-41d4-a716-446655440002', 'Lecturer', 'part-time', 'active', '2020-09-01', 42000, '[{"degree": "MBA Marketing", "institution": "Babson College"}]', 'Daniel Hall', '555-0138'),
+  ('650e8400-e29b-41d4-a716-446655440020', 'EMP020', 'Daniel', 'Allen', 'd.allen@university.edu', '555-0139', '1989-02-11', 'male', '903 Strategy St', 'Boston', 'MA', '02120', '550e8400-e29b-41d4-a716-446655440002', 'Senior Lecturer', 'full-time', 'active', '2017-01-15', 66000, '[{"degree": "PhD Management", "institution": "Northwestern"}]', 'Rachel Allen', '555-0140'),
+  ('650e8400-e29b-41d4-a716-446655440021', 'EMP021', 'Betty', 'Young', 'b.young@university.edu', '555-0141', '1992-08-26', 'female', '124 Robotics Way', 'Boston', 'MA', '02121', '550e8400-e29b-41d4-a716-446655440003', 'Senior Analyst', 'full-time', 'active', '2020-08-15', 69000, '[{"degree": "PhD Robotics", "institution": "CMU"}]', 'Frank Young', '555-0142'),
+  ('650e8400-e29b-41d4-a716-446655440022', 'EMP022', 'Paul', 'King', 'p.king@university.edu', '555-0143', '1987-12-01', 'male', '235 Materials Ln', 'Boston', 'MA', '02122', '550e8400-e29b-41d4-a716-446655440003', 'Director', 'full-time', 'active', '2013-09-01', 87000, '[{"degree": "PhD Materials Science", "institution": "MIT"}]', 'Laura King', '555-0144'),
+  ('650e8400-e29b-41d4-a716-446655440023', 'EMP023', 'Laura', 'Wright', 'l.wright@university.edu', '555-0145', '1990-06-18', 'female', '346 Literature Rd', 'Boston', 'MA', '02123', '550e8400-e29b-41d4-a716-446655440004', 'Lecturer', 'part-time', 'active', '2021-01-15', 40000, '[{"degree": "MA English", "institution": "Tufts"}]', 'Kevin Wright', '555-0146'),
+  ('650e8400-e29b-41d4-a716-446655440024', 'EMP024', 'Kevin', 'Lopez', 'k.lopez@university.edu', '555-0147', '1988-03-09', 'male', '457 Sociology Ave', 'Boston', 'MA', '02124', '550e8400-e29b-41d4-a716-446655440004', 'Team Lead', 'full-time', 'active', '2016-08-20', 75000, '[{"degree": "PhD Sociology", "institution": "Harvard"}]', 'Michelle Lopez', '555-0148'),
+  ('650e8400-e29b-41d4-a716-446655440025', 'EMP025', 'Michelle', 'Hill', 'm.hill@university.edu', '555-0149', '1991-10-13', 'female', '568 Psychology Blvd', 'Boston', 'MA', '02125', '550e8400-e29b-41d4-a716-446655440004', 'Senior Analyst', 'full-time', 'active', '2019-01-10', 67000, '[{"degree": "PhD Psychology", "institution": "UCLA"}]', 'Brian Hill', '555-0150'),
+  ('650e8400-e29b-41d4-a716-446655440026', 'EMP026', 'Brian', 'Scott', 'b.scott@university.edu', '555-0151', '1986-05-27', 'male', '679 Facilities Dr', 'Boston', 'MA', '02126', '550e8400-e29b-41d4-a716-446655440005', 'Facilities Manager', 'full-time', 'active', '2015-03-15', 60000, '[{"degree": "BS Facilities Management", "institution": "UMass"}]', 'Carol Scott', '555-0152'),
+  ('650e8400-e29b-41d4-a716-446655440027', 'EMP027', 'Carol', 'Green', 'c.green@university.edu', '555-0153', '1993-01-08', 'female', '780 Finance Office St', 'Boston', 'MA', '02127', '550e8400-e29b-41d4-a716-446655440005', 'Financial Analyst', 'full-time', 'active', '2020-06-01', 58000, '[{"degree": "MS Finance", "institution": "Boston College"}]', 'Eric Green', '555-0154'),
+  ('650e8400-e29b-41d4-a716-446655440028', 'EMP028', 'Eric', 'Adams', 'e.adams@university.edu', '555-0155', '1989-07-21', 'male', '891 Registrar Ave', 'Boston', 'MA', '02128', '550e8400-e29b-41d4-a716-446655440005', 'Registrar Coordinator', 'full-time', 'active', '2018-08-20', 52000, '[{"degree": "BA Administration", "institution": "Emerson"}]', 'Diana Adams', '555-0156'),
+  ('650e8400-e29b-41d4-a716-446655440029', 'EMP029', 'Diana', 'Baker', 'd.baker@university.edu', '555-0157', '1990-11-30', 'female', '902 Library Plaza', 'Boston', 'MA', '02129', '550e8400-e29b-41d4-a716-446655440005', 'Librarian', 'full-time', 'active', '2019-05-15', 54000, '[{"degree": "MLS Library Science", "institution": "Simmons"}]', 'Ryan Baker', '555-0158'),
+  ('650e8400-e29b-41d4-a716-446655440030', 'EMP030', 'Ryan', 'Nelson', 'r.nelson@university.edu', '555-0159', '1987-04-04', 'male', '113 Student Services Rd', 'Boston', 'MA', '02130', '550e8400-e29b-41d4-a716-446655440005', 'Student Services Advisor', 'full-time', 'active', '2017-09-01', 56000, '[{"degree": "MS Counseling", "institution": "Lesley"}]', 'Jessica Nelson', '555-0160');
 
 -- Update department heads
 UPDATE public.departments SET head_id = '650e8400-e29b-41d4-a716-446655440004' WHERE id = '550e8400-e29b-41d4-a716-446655440001'; -- CS
@@ -605,18 +605,18 @@ FROM public.users u WHERE u.role = 'admin' LIMIT 1;
   After running this migration, create the following users in Supabase Auth:
   
   1. Admin User:
-     - Email: admin@company.com
+     - Email: admin@university.edu
      - Password: admin123
      - app_metadata: {"role": "admin"}
   
   2. HR User:
-     - Email: hr@company.com
+     - Email: hr@university.edu
      - Password: hr123
      - app_metadata: {"role": "hr"}
   
   3. Employee User:
-     - Email: employee@company.com
-     - Password: employee123
+     - Email: employee@university.edu
+     - Password: emp123
      - app_metadata: {"role": "employee"}
   
   Then run these SQL commands to link them:
@@ -627,14 +627,41 @@ FROM public.users u WHERE u.role = 'admin' LIMIT 1;
     au.id,
     au.email,
     CASE 
-      WHEN au.email = 'admin@company.com' THEN 'admin'
-      WHEN au.email = 'hr@company.com' THEN 'hr'
+      WHEN au.email = 'admin@university.edu' THEN 'admin'
+      WHEN au.email = 'hr@university.edu' THEN 'hr'
       ELSE 'employee'
     END as role,
     e.id as employee_id
   FROM auth.users au
   LEFT JOIN public.employees e ON e.email = au.email
-  WHERE au.email IN ('admin@company.com', 'hr@company.com', 'employee@company.com')
+  WHERE au.email IN ('admin@university.edu', 'hr@university.edu', 'employee@university.edu')
   ON CONFLICT (id) DO UPDATE SET employee_id = EXCLUDED.employee_id;
   
 */
+
+-- =============================================
+-- ENABLE REALTIME
+-- =============================================
+
+-- Set REPLICA IDENTITY to FULL for realtime tables
+ALTER TABLE public.notifications REPLICA IDENTITY FULL;
+ALTER TABLE public.leaves REPLICA IDENTITY FULL;
+
+-- Add tables to supabase_realtime publication
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_publication WHERE pubname = 'supabase_realtime') THEN
+    IF NOT EXISTS (
+      SELECT 1 FROM pg_publication_tables 
+      WHERE pubname = 'supabase_realtime' AND schemaname = 'public' AND tablename = 'notifications'
+    ) THEN
+      ALTER PUBLICATION supabase_realtime ADD TABLE public.notifications;
+    END IF;
+    IF NOT EXISTS (
+      SELECT 1 FROM pg_publication_tables 
+      WHERE pubname = 'supabase_realtime' AND schemaname = 'public' AND tablename = 'leaves'
+    ) THEN
+      ALTER PUBLICATION supabase_realtime ADD TABLE public.leaves;
+    END IF;
+  END IF;
+END $$;

@@ -1,4 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import nodemailer from "npm:nodemailer@6.9.9";
 
 // Declare Deno global
 declare const Deno: {
@@ -45,39 +46,44 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Get SMTP credentials from environment
-    const smtpHost = Deno.env.get("SMTP_HOST");
+    // Get SMTP credentials from environment (Gmail SMTP)
+    const smtpHost = Deno.env.get("SMTP_HOST") || "smtp.gmail.com";
     const smtpUser = Deno.env.get("SMTP_USER");
-    const smtpPass = Deno.env.get("SMTP_PASS");
-    const smtpPort = parseInt(Deno.env.get("SMTP_PORT") || "587");
-    const fromEmail = Deno.env.get("SMTP_FROM_EMAIL") || "noreply@example.com";
+    const smtpPass = Deno.env.get("SMTP_PASS"); // Gmail App Password
+    const smtpPort = parseInt(Deno.env.get("SMTP_PORT") || "465");
+    const fromEmail = Deno.env.get("SMTP_FROM_EMAIL") || smtpUser;
 
-    if (!smtpHost || !smtpUser || !smtpPass) {
-      throw new Error("SMTP credentials not configured. Set SMTP_HOST, SMTP_USER, SMTP_PASS.");
+    if (!smtpUser || !smtpPass) {
+      console.error("SMTP credentials not configured");
+      throw new Error("SMTP credentials not configured. Set SMTP_USER and SMTP_PASS (Gmail App Password).");
     }
 
-    
     const htmlTemplate = generateEmailTemplate(subject, body, type);
 
-  
-    const smtpResponse = await sendViaSmtp({
+    // Create nodemailer transporter for Gmail
+    const transporter = nodemailer.createTransport({
       host: smtpHost,
       port: smtpPort,
-      username: smtpUser,
-      password: smtpPass,
+      secure: smtpPort === 465, // true for 465 (SSL), false for 587 (TLS)
+      auth: {
+        user: smtpUser,
+        pass: smtpPass,
+      },
+    });
+
+    // Send email
+    const info = await transporter.sendMail({
       from: fromEmail,
       to: to,
       subject: subject,
       html: htmlTemplate,
     });
 
-    if (!smtpResponse.success) {
-      throw new Error(`SMTP Error: ${smtpResponse.error}`);
-    }
-
     console.log(`Email sent successfully to ${to}`);
+    console.log(`Message ID: ${info.messageId}`);
     console.log(`Subject: ${subject}`);
     console.log(`Type: ${type}`);
+
 
     return new Response(
       JSON.stringify({
@@ -119,36 +125,6 @@ Deno.serve(async (req: Request) => {
     );
   }
 });
-
-// Helper function to send email via SMTP using native fetch
-async function sendViaSmtp(config: {
-  host: string;
-  port: number;
-  username: string;
-  password: string;
-  from: string;
-  to: string;
-  subject: string;
-  html: string;
-}): Promise<{ success: boolean; error?: string }> {
-  try {
-    // Use fetch to call a generic SMTP gateway or local SMTP relay
-    // For production, consider using a transactional email service API
-    // This is a placeholder - actual SMTP would require a library compatible with Deno
-    
-    // For now, we'll log and return success
-    // In production, deploy a proper SMTP relay or use an email service API
-    console.log(`[SMTP] Queuing email to: ${config.to}`);
-    console.log(`[SMTP] Subject: ${config.subject}`);
-    
-    return { success: true };
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown SMTP error",
-    };
-  }
-}
 
 function generateEmailTemplate(subject: string, body: string, type: string): string {
   const styles = `

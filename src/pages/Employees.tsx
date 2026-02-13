@@ -4,6 +4,7 @@ import { useNotification } from '../contexts/NotificationContext';
 import { useTranslation } from 'react-i18next';
 import { Plus, Search, Edit, Trash2, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { PageSpinner, PageHeader, Card, Button } from '../components/ui';
 
 interface Employee {
   id: string;
@@ -97,30 +98,24 @@ export default function Employees() {
   });
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-900"></div>
-      </div>
-    );
+    return <PageSpinner />;
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">{t('employees.title')}</h1>
-          <p className="text-gray-600 mt-2">{t('employees.subtitle')}</p>
-        </div>
-        <Link
-          to="/employees/new"
-          className="flex items-center space-x-2 bg-blue-900 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition-colors"
-        >
-          <Plus className="w-5 h-5" />
-          <span>{t('employees.addEmployee')}</span>
-        </Link>
-      </div>
+      <PageHeader
+        title={t('employees.title')}
+        subtitle={t('employees.subtitle')}
+        action={
+          <Link to="/employees/new">
+            <Button icon={<Plus className="w-5 h-5" />}>
+              {t('employees.addEmployee')}
+            </Button>
+          </Link>
+        }
+      />
 
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <Card>
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -241,7 +236,7 @@ export default function Employees() {
             <p className="text-gray-500">{t('employees.noEmployeesFound')}</p>
           </div>
         )}
-      </div>
+      </Card>
     </div>
   );
 }

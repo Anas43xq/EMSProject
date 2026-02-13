@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase';
 import { useNotification } from '../contexts/NotificationContext';
 import { ArrowLeft, Edit, Mail, Phone, Calendar, MapPin, Briefcase, User, FileText } from 'lucide-react';
 import { format } from 'date-fns';
+import { PageSpinner, Card, Button } from '../components/ui';
 
 interface Employee {
   id: string;
@@ -78,11 +79,7 @@ export default function EmployeeView() {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-900"></div>
-      </div>
-    );
+    return <PageSpinner />;
   }
 
   if (!employee) {
@@ -106,12 +103,10 @@ export default function EmployeeView() {
             <p className="text-gray-600 mt-1">{employee.position}</p>
           </div>
         </div>
-        <Link
-          to={`/employees/${id}/edit`}
-          className="flex items-center space-x-2 bg-blue-900 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition-colors"
-        >
-          <Edit className="w-5 h-5" />
-          <span>{t('employees.editEmployee')}</span>
+        <Link to={`/employees/${id}/edit`}>
+          <Button icon={<Edit className="w-5 h-5" />}>
+            {t('employees.editEmployee')}
+          </Button>
         </Link>
       </div>
 

@@ -92,12 +92,15 @@ A comprehensive, production-ready Employee Management System with role-based acc
 ## Technology Stack
 
 - **Frontend**: React 18 + TypeScript
-- **Styling**: Tailwind CSS
+- **Styling**: Tailwind CSS with custom `@apply` utility classes
+- **UI Components**: Custom reusable component library (`src/components/ui/`)
+- **State Management**: React Context + custom hooks (`useFormModal`, `useActivityLogger`)
 - **Icons**: Lucide React
 - **Routing**: React Router v6
 - **Internationalization**: react-i18next with RTL support
 - **Backend**: Supabase (PostgreSQL)
 - **Authentication**: Supabase Auth
+- **Real-time**: Supabase Realtime for notifications
 - **Build Tool**: Vite
 
 ## Database Schema
@@ -138,42 +141,165 @@ The system includes realistic sample data:
 - **Professional University Aesthetic**: Navy blue color scheme suitable for academic institutions
 - **Mobile Responsive**: Fully responsive design works on all device sizes
 - **Accessibility**: High contrast ratios and proper semantic HTML
-- **Clean Architecture**: Modular component structure with clear separation of concerns
-- **Type Safety**: Full TypeScript implementation for better code quality
+- **DRY Architecture**: Reusable UI components, shared hooks, and centralized types eliminate code duplication
+- **Modular Pages**: Complex pages split into index, hook, types, and sub-components for maintainability
+- **Type Safety**: Full TypeScript implementation with shared type definitions
 - **Security First**: Row Level Security, role-based access, and proper authentication
 
 ## Project Structure
 
 ```
 src/
-├── components/          # Reusable UI components
-│   ├── Login.tsx       # Authentication page
-│   ├── Layout.tsx      # Main layout with sidebar
-│   └── ProtectedRoute.tsx  # Route protection wrapper
-├── contexts/           # React contexts
-│   └── AuthContext.tsx # Authentication state management
-├── i18n/              # Internationalization
-│   ├── index.ts       # i18n configuration
-│   ├── en.json        # English translations
-│   └── ar.json        # Arabic translations
-├── lib/               # Utility libraries
-│   ├── supabase.ts    # Supabase client configuration
-│   └── database.types.ts  # TypeScript database types
-├── pages/             # Main application pages
-│   ├── Dashboard.tsx
+├── components/           # Reusable UI components
+│   ├── ui/              # Core UI component library
+│   │   ├── index.ts     # Barrel exports
+│   │   ├── PageSpinner.tsx   # Loading spinner
+│   │   ├── PageHeader.tsx    # Page title with subtitle & action
+│   │   ├── Card.tsx          # Card container with hover variant
+│   │   ├── Button.tsx        # Button (primary/secondary/danger/ghost)
+│   │   ├── Modal.tsx         # Compound modal (Header/Body/Footer)
+│   │   ├── StatusBadge.tsx   # Status badges with color mapping
+│   │   ├── EmptyState.tsx    # Empty state with icon/action
+│   │   ├── FormField.tsx     # Form label wrapper
+│   │   └── FormError.tsx     # Error alert display
+│   ├── Login.tsx            # Authentication page
+│   ├── Layout.tsx           # Main layout with sidebar
+│   ├── NotificationCenter.tsx
+│   ├── NotificationContainer.tsx
+│   ├── AnnouncementsWidget.tsx
+│   └── ProtectedRoute.tsx   # Route protection wrapper
+├── contexts/             # React contexts
+│   ├── AuthContext.tsx   # Authentication state management
+│   └── NotificationContext.tsx
+├── hooks/                # Reusable custom hooks
+│   ├── index.ts          # Barrel exports
+│   ├── useFormModal.ts   # Generic form modal state management
+│   └── useActivityLogger.ts  # Activity logging with user context
+├── i18n/                 # Internationalization
+│   ├── index.ts          # i18n configuration
+│   ├── en.json           # English translations
+│   └── ar.json           # Arabic translations
+├── lib/                  # Utility libraries
+│   ├── supabase.ts       # Supabase client configuration
+│   ├── database.types.ts # TypeScript database types
+│   ├── types.ts          # Shared Employee/Department types
+│   ├── queries.ts        # Shared Supabase queries
+│   ├── activityLog.ts    # Activity logging utility
+│   ├── notifications.ts  # Notification helpers
+│   ├── dbNotifications.ts
+│   └── dashboardConfig.ts
+├── pages/                # Main application pages (modular structure)
+│   ├── Dashboard/
+│   │   ├── index.tsx
+│   │   ├── useDashboard.ts
+│   │   ├── StatCards.tsx
+│   │   ├── DepartmentChart.tsx
+│   │   ├── LeaveChart.tsx
+│   │   ├── RecentActivities.tsx
+│   │   └── QuickActions.tsx
+│   ├── Leaves/
+│   │   ├── index.tsx
+│   │   ├── useLeaves.ts
+│   │   ├── types.ts
+│   │   ├── ApplyLeaveModal.tsx
+│   │   ├── LeaveCard.tsx
+│   │   └── LeaveStatusFilter.tsx
+│   ├── Attendance/
+│   │   ├── index.tsx
+│   │   ├── useAttendance.ts
+│   │   ├── types.ts
+│   │   ├── AddAttendanceModal.tsx
+│   │   └── AttendanceTable.tsx
+│   ├── Departments/
+│   │   ├── index.tsx
+│   │   ├── useDepartments.ts
+│   │   ├── types.ts
+│   │   ├── DepartmentCard.tsx
+│   │   └── DepartmentFormModal.tsx
+│   ├── Announcements/
+│   │   ├── index.tsx
+│   │   ├── useAnnouncements.ts
+│   │   ├── types.ts
+│   │   ├── AnnouncementCard.tsx
+│   │   └── AnnouncementFormModal.tsx
+│   ├── UserManagement/
+│   │   ├── index.tsx
+│   │   ├── useUserManagement.ts
+│   │   ├── types.ts
+│   │   ├── UserStatsCards.tsx
+│   │   ├── UserFilters.tsx
+│   │   ├── UsersTable.tsx
+│   │   ├── AddUserModal.tsx
+│   │   ├── EditUserModal.tsx
+│   │   ├── LinkEmployeeModal.tsx
+│   │   ├── DeleteUserModal.tsx
+│   │   └── ResetPasswordModal.tsx
+│   ├── Reports/
+│   │   ├── index.tsx
+│   │   ├── useReports.ts
+│   │   ├── ReportCardGrid.tsx
+│   │   └── CustomReportPanel.tsx
+│   ├── Settings/
+│   │   ├── index.tsx
+│   │   ├── ProfileInfoCard.tsx
+│   │   ├── ChangePasswordCard.tsx
+│   │   ├── NotificationPrefsCard.tsx
+│   │   ├── LanguageCard.tsx
+│   │   └── AccountInfoSidebar.tsx
+│   ├── EmployeeEdit/
+│   │   ├── index.tsx
+│   │   ├── useEmployeeEdit.ts
+│   │   ├── PersonalInfoSection.tsx
+│   │   ├── EmploymentDetailsSection.tsx
+│   │   └── EmergencyContactSection.tsx
 │   ├── Employees.tsx
 │   ├── EmployeeView.tsx
-│   ├── EmployeeEdit.tsx
-│   ├── Profile.tsx     # Employee self-service profile view
-│   ├── Departments.tsx
-│   ├── Leaves.tsx
-│   ├── Attendance.tsx
-│   ├── Announcements.tsx
-│   ├── Reports.tsx
-│   ├── UserManagement.tsx
-│   ├── Settings.tsx
+│   ├── Profile.tsx
 │   └── ResetPassword.tsx
-└── App.tsx            # Main app component with routing
+└── App.tsx               # Main app component with routing
+```
+
+## UI Component Library
+
+The project includes a reusable UI component library (`src/components/ui/`) to reduce code duplication:
+
+| Component | Description |
+|-----------|-------------|
+| `PageSpinner` | Centered loading spinner for page-level loading states |
+| `PageHeader` | Consistent page title, subtitle, and action button layout |
+| `Card` | Standard card container with optional hover effect |
+| `Button` | Variants: primary, secondary, danger, ghost with loading state |
+| `Modal` | Compound component with Modal.Header, Modal.Body, Modal.Footer |
+| `StatusBadge` | Color-coded status badges (16 status types supported) |
+| `EmptyState` | Empty state display with icon, title, message, and action |
+| `FormField` | Form label wrapper with required indicator |
+| `FormError` | Conditional error alert display |
+
+### Usage Example
+
+```tsx
+import { PageSpinner, PageHeader, Card, Button, EmptyState } from '../components/ui';
+
+// Loading state
+if (loading) return <PageSpinner />;
+
+// Page layout
+<PageHeader
+  title="Dashboard"
+  subtitle="Welcome back"
+  action={<Button icon={<Plus />}>Add New</Button>}
+/>
+
+// Cards
+<Card hover>Content here</Card>
+
+// Empty states
+<EmptyState
+  icon={<Inbox className="w-16 h-16" />}
+  title="No items"
+  message="Get started by creating one"
+  action={<Button>Create</Button>}
+/>
 ```
 
 ## Getting Started
