@@ -31,7 +31,7 @@ export function generatePayslipPDF(data: PayslipData) {
   yPosition += 10;
   pdf.setFontSize(9);
   pdf.setFont('helvetica', 'normal');
-  pdf.text('Employee Management System - University Administration Portal', pageWidth / 2, yPosition, { align: 'center' });
+  pdf.text('Employee Management System', pageWidth / 2, yPosition, { align: 'center' });
 
   // Divider line
   yPosition += 8;

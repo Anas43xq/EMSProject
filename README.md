@@ -1,6 +1,6 @@
 # Employee Management System (EMS)
 
-A comprehensive, production-ready Employee Management System built for university administration with role-based access control, complete HR functionality, and modern UI/UX.
+A comprehensive, production-ready Employee Management System with role-based access control, complete HR functionality, and modern UI/UX.
 
 ## Features
 

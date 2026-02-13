@@ -13,8 +13,9 @@ import {
   LogOut,
   Menu,
   X,
-  GraduationCap,
+  Briefcase,
   Megaphone,
+  UserCog,
 } from 'lucide-react';
 
 export default function Layout() {
@@ -31,6 +32,7 @@ export default function Layout() {
     { name: 'Attendance', href: '/attendance', icon: Clock, roles: ['admin', 'hr', 'employee'] },
     { name: 'Announcements', href: '/announcements', icon: Megaphone, roles: ['admin', 'hr'] },
     { name: 'Reports', href: '/reports', icon: FileText, roles: ['admin', 'hr'] },
+    { name: 'User Management', href: '/users', icon: UserCog, roles: ['admin'] },
     { name: 'Settings', href: '/settings', icon: Settings, roles: ['admin', 'hr', 'employee'] },
   ];
 
@@ -50,11 +52,11 @@ export default function Layout() {
           <div className="flex items-center justify-between p-4 border-b border-blue-800">
             <div className="flex items-center space-x-3">
               <div className="bg-white p-2 rounded-lg">
-                <GraduationCap className="w-6 h-6 text-blue-900" />
+                <Briefcase className="w-6 h-6 text-blue-900" />
               </div>
               <div>
                 <h1 className="text-white font-bold text-lg">EMS</h1>
-                <p className="text-blue-300 text-xs">University Portal</p>
+                <p className="text-blue-300 text-xs">HR Portal</p>
               </div>
             </div>
             <button

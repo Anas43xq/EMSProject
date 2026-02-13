@@ -22,36 +22,58 @@ export default function ResetPassword() {
   useEffect(() => {
     const validateToken = async () => {
       try {
-        // Extract tokens from URL hash
+        // Method 1: Check for token_hash in query params (custom email template)
+        const searchParams = new URLSearchParams(window.location.search);
+        const tokenHash = searchParams.get('token_hash');
+        const queryType = searchParams.get('type');
+
+        if (tokenHash && queryType === 'recovery') {
+          const { data, error } = await supabase.auth.verifyOtp({
+            token_hash: tokenHash,
+            type: 'recovery',
+          });
+
+          if (error || !data?.session) {
+            showNotification('error', 'Invalid or expired reset link. Please request a new password reset.');
+            setValidating(false);
+            setTimeout(() => navigate('/login'), 3000);
+            return;
+          }
+
+          setIsValidToken(true);
+          setValidating(false);
+          return;
+        }
+
+        // Method 2: Check for access_token in URL hash (default Supabase flow)
         const hash = window.location.hash.substring(1);
         const params = new URLSearchParams(hash);
         const accessToken = params.get('access_token');
         const refreshToken = params.get('refresh_token');
         const type = params.get('type');
 
-        // Validate recovery token
-        if (!accessToken || type !== 'recovery') {
-          showNotification('error', 'Invalid or expired reset link. Please request a new password reset.');
+        if (accessToken && type === 'recovery') {
+          const { data: sessionData, error: setError } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken || '',
+          });
+
+          if (setError || !sessionData?.session) {
+            showNotification('error', 'Failed to validate reset link. Please request a new password reset.');
+            setValidating(false);
+            setTimeout(() => navigate('/login'), 3000);
+            return;
+          }
+
+          setIsValidToken(true);
           setValidating(false);
-          setTimeout(() => navigate('/login'), 3000);
           return;
         }
 
-        // Set the session with the recovery tokens
-        const { data: sessionData, error: setError } = await supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken || '',
-        });
-
-        if (setError || !sessionData?.session) {
-          showNotification('error', 'Failed to validate reset link. Please request a new password reset.');
-          setValidating(false);
-          setTimeout(() => navigate('/login'), 3000);
-          return;
-        }
-
-        setIsValidToken(true);
+        // No valid token found
+        showNotification('error', 'Invalid or expired reset link. Please request a new password reset.');
         setValidating(false);
+        setTimeout(() => navigate('/login'), 3000);
       } catch (error) {
         console.error('Token validation error:', error);
         showNotification('error', 'Failed to validate reset link');

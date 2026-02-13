@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useNotification } from '../contexts/NotificationContext';
 import { supabase } from '../lib/supabase';
-import { GraduationCap, ArrowLeft } from 'lucide-react';
+import { Briefcase, ArrowLeft } from 'lucide-react';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -46,8 +46,6 @@ export default function Login() {
     setResetLoading(true);
 
     try {
-      // Use production URL from environment variable
-      // IMPORTANT: Make sure VITE_APP_URL is set in Vercel environment variables
       const appUrl = import.meta.env.VITE_APP_URL || window.location.origin;
       const redirectUrl = `${appUrl}/reset-password`;
 
@@ -82,7 +80,7 @@ export default function Login() {
 
           <div className="flex items-center justify-center mb-8">
             <div className="bg-blue-900 p-3 rounded-lg">
-              <GraduationCap className="w-10 h-10 text-white" />
+              <Briefcase className="w-10 h-10 text-white" />
             </div>
           </div>
 
@@ -132,7 +130,7 @@ export default function Login() {
       <div className="bg-white rounded-lg shadow-2xl w-full max-w-md p-8">
         <div className="flex items-center justify-center mb-8">
           <div className="bg-blue-900 p-3 rounded-lg">
-            <GraduationCap className="w-10 h-10 text-white" />
+            <Briefcase className="w-10 h-10 text-white" />
           </div>
         </div>
 
@@ -140,7 +138,7 @@ export default function Login() {
           Employee Management System
         </h1>
         <p className="text-center text-gray-600 mb-8">
-          University Administration Portal
+          Sign in to continue
         </p>
 
         {error && (

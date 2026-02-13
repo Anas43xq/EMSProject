@@ -18,7 +18,7 @@ interface EmailNotificationRequest {
   to: string;
   subject: string;
   body: string;
-  type: 'leave_approved' | 'leave_rejected' | 'leave_pending' | 'payroll_processed' | 'performance_review' | 'general';
+  type: 'leave_approved' | 'leave_rejected' | 'leave_pending' | 'general';
 }
 
 Deno.serve(async (req: Request) => {
@@ -56,10 +56,10 @@ Deno.serve(async (req: Request) => {
       throw new Error("SMTP credentials not configured. Set SMTP_HOST, SMTP_USER, SMTP_PASS.");
     }
 
-    // Generate HTML template
+    
     const htmlTemplate = generateEmailTemplate(subject, body, type);
 
-    // Simple SMTP implementation for Gmail
+  
     const smtpResponse = await sendViaSmtp({
       host: smtpHost,
       port: smtpPort,
@@ -178,7 +178,7 @@ function generateEmailTemplate(subject: string, body: string, type: string): str
       <div class="container">
         <div class="header">
           <h1 style="margin: 0; font-size: 24px;">Employee Management System</h1>
-          <p style="margin: 5px 0 0 0; opacity: 0.9;">University Administration Portal</p>
+          <p style="margin: 5px 0 0 0; opacity: 0.9;">HR Notifications</p>
         </div>
         <div class="content">
           <span class="badge ${badgeClass}">${type.toUpperCase().replace(/_/g, ' ')}</span>

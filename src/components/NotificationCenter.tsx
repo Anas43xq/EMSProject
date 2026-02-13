@@ -1,53 +1,144 @@
-import { useState } from 'react';
-import { Bell, X, AlertCircle, CheckCircle, Info } from 'lucide-react';
-
-interface NotificationItem {
-  id: string;
-  type: 'success' | 'error' | 'warning' | 'info';
-  message: string;
-  timestamp: Date;
-}
+import { useState, useEffect, useCallback } from 'react';
+import { Bell, X, AlertCircle, CheckCircle, Info, Calendar, Clock, Settings } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../lib/supabase';
+import {
+  DbNotification,
+  fetchNotifications,
+  markNotificationRead,
+  markAllNotificationsRead,
+  deleteNotification,
+} from '../lib/dbNotifications';
 
 export default function NotificationCenter() {
   const [isOpen, setIsOpen] = useState(false);
-  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [notifications, setNotifications] = useState<DbNotification[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
-  const removeNotification = (id: string) => {
-    setNotifications(prev => prev.filter(n => n.id !== id));
+  const loadNotifications = useCallback(async () => {
+    if (!user?.id) return;
+    setLoading(true);
+    const data = await fetchNotifications(user.id, 50);
+    setNotifications(data);
+    setLoading(false);
+  }, [user?.id]);
+
+  useEffect(() => {
+    loadNotifications();
+  }, [loadNotifications]);
+
+  // Subscribe to realtime updates
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const channel = supabase
+      .channel('notifications')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          setNotifications((prev) => [payload.new as DbNotification, ...prev]);
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          setNotifications((prev) =>
+            prev.map((n) => (n.id === payload.new.id ? (payload.new as DbNotification) : n))
+          );
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          setNotifications((prev) => prev.filter((n) => n.id !== payload.old.id));
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id]);
+
+  const handleMarkRead = async (id: string) => {
+    await markNotificationRead(id);
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
+    );
   };
 
-  const clearAll = () => {
-    setNotifications([]);
+  const handleMarkAllRead = async () => {
+    if (!user?.id) return;
+    await markAllNotificationsRead(user.id);
+    setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
   };
+
+  const handleRemove = async (id: string) => {
+    await deleteNotification(id);
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
+  };
+
+  const unreadCount = notifications.filter((n) => !n.is_read).length;
 
   const getIcon = (type: string) => {
     switch (type) {
-      case 'success':
-        return <CheckCircle className="w-5 h-5 text-green-600" />;
-      case 'error':
-        return <AlertCircle className="w-5 h-5 text-red-600" />;
-      case 'warning':
-        return <AlertCircle className="w-5 h-5 text-yellow-600" />;
-      case 'info':
-        return <Info className="w-5 h-5 text-blue-600" />;
+      case 'leave':
+        return <Calendar className="w-5 h-5 text-purple-600" />;
+      case 'attendance':
+        return <Clock className="w-5 h-5 text-blue-600" />;
+      case 'system':
+        return <Settings className="w-5 h-5 text-gray-600" />;
       default:
         return <Info className="w-5 h-5 text-gray-600" />;
     }
   };
 
-  const getBackgroundColor = (type: string) => {
+  const getBackgroundColor = (type: string, isRead: boolean) => {
+    if (isRead) return 'bg-gray-50';
     switch (type) {
-      case 'success':
-        return 'bg-green-50 border-l-4 border-green-600';
-      case 'error':
-        return 'bg-red-50 border-l-4 border-red-600';
-      case 'warning':
-        return 'bg-yellow-50 border-l-4 border-yellow-600';
-      case 'info':
+      case 'leave':
+        return 'bg-purple-50 border-l-4 border-purple-600';
+      case 'attendance':
         return 'bg-blue-50 border-l-4 border-blue-600';
+      case 'system':
+        return 'bg-gray-100 border-l-4 border-gray-600';
       default:
         return 'bg-gray-50 border-l-4 border-gray-600';
     }
+  };
+
+  const formatTime = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+
+    if (minutes < 1) return 'Just now';
+    if (minutes < 60) return `${minutes}m ago`;
+    if (hours < 24) return `${hours}h ago`;
+    if (days < 7) return `${days}d ago`;
+    return date.toLocaleDateString();
   };
 
   return (

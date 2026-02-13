@@ -7,7 +7,6 @@ import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 import NotificationContainer from './components/NotificationContainer';
 
-// Lazy load page components
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Employees = lazy(() => import('./pages/Employees'));
 const EmployeeView = lazy(() => import('./pages/EmployeeView'));
@@ -19,8 +18,8 @@ const Reports = lazy(() => import('./pages/Reports'));
 const Settings = lazy(() => import('./pages/Settings'));
 const ResetPassword = lazy(() => import('./pages/ResetPassword'));
 const Announcements = lazy(() => import('./pages/Announcements'));
+const UserManagement = lazy(() => import('./pages/UserManagement'));
 
-// Loading fallback component
 function PageLoader() {
   return (
     <div className="flex items-center justify-center min-h-screen">
@@ -52,6 +51,7 @@ function App() {
               <Route path="leaves" element={<Suspense fallback={<PageLoader />}><Leaves /></Suspense>} />
               <Route path="announcements" element={<Suspense fallback={<PageLoader />}><Announcements /></Suspense>} />
               <Route path="reports" element={<Suspense fallback={<PageLoader />}><Reports /></Suspense>} />
+              <Route path="users" element={<Suspense fallback={<PageLoader />}><UserManagement /></Suspense>} />
               <Route path="settings" element={<Suspense fallback={<PageLoader />}><Settings /></Suspense>} />
             </Route>
           </Routes>

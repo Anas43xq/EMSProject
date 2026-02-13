@@ -4,14 +4,14 @@
 -- Run this AFTER creating auth users in Supabase Dashboard or via API
 -- 
 -- Step 1: Create users in Supabase Auth (Dashboard > Authentication > Users > Add User):
---   - admin@university.edu / admin123
---   - hr@university.edu / hr123  
---   - employee@university.edu / employee123
+--   - admin@company.com / admin123
+--   - hr@company.com / hr123  
+--   - employee@company.com / employee123
 --
 -- Step 2: Set app_metadata for each user:
---   UPDATE auth.users SET raw_app_meta_data = raw_app_meta_data || '{"role": "admin"}' WHERE email = 'admin@university.edu';
---   UPDATE auth.users SET raw_app_meta_data = raw_app_meta_data || '{"role": "hr"}' WHERE email = 'hr@university.edu';
---   UPDATE auth.users SET raw_app_meta_data = raw_app_meta_data || '{"role": "employee"}' WHERE email = 'employee@university.edu';
+--   UPDATE auth.users SET raw_app_meta_data = raw_app_meta_data || '{"role": "admin"}' WHERE email = 'admin@company.com';
+--   UPDATE auth.users SET raw_app_meta_data = raw_app_meta_data || '{"role": "hr"}' WHERE email = 'hr@company.com';
+--   UPDATE auth.users SET raw_app_meta_data = raw_app_meta_data || '{"role": "employee"}' WHERE email = 'employee@company.com';
 --
 -- Step 3: Run this script to link auth users to employees
 -- =============================================
@@ -25,7 +25,7 @@ SELECT
   e.id as employee_id
 FROM auth.users au
 LEFT JOIN public.employees e ON e.email = au.email
-WHERE au.email IN ('admin@university.edu', 'hr@university.edu', 'employee@university.edu')
+WHERE au.email IN ('admin@company.com', 'hr@company.com', 'employee@company.com')
 ON CONFLICT (id) DO UPDATE SET 
   role = EXCLUDED.role,
   employee_id = EXCLUDED.employee_id,

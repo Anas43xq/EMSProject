@@ -30,6 +30,18 @@ interface LeaveFormData {
   reason: string;
 }
 
+interface LeaveBalance {
+  id: string;
+  employee_id: string;
+  year: number;
+  annual_total: number;
+  annual_used: number;
+  sick_total: number;
+  sick_used: number;
+  casual_total: number;
+  casual_used: number;
+}
+
 export default function Leaves() {
   const [leaves, setLeaves] = useState<Leave[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,6 +50,7 @@ export default function Leaves() {
   const [filter, setFilter] = useState('all');
   const [showApplyModal, setShowApplyModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [leaveBalance, setLeaveBalance] = useState<LeaveBalance | null>(null);
   const [formData, setFormData] = useState<LeaveFormData>({
     leave_type: 'Annual',
     start_date: '',
@@ -47,7 +60,68 @@ export default function Leaves() {
 
   useEffect(() => {
     loadLeaves();
+    loadLeaveBalance();
   }, [user]);
+
+  const loadLeaveBalance = async () => {
+    if (!user?.employeeId) return;
+    
+    const currentYear = new Date().getFullYear();
+    try {
+      const { data, error } = await supabase
+        .from('leave_balances')
+        .select('*')
+        .eq('employee_id', user.employeeId)
+        .eq('year', currentYear)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error loading leave balance:', error);
+        return;
+      }
+
+      if (data) {
+        setLeaveBalance(data);
+      } else {
+        // Create default balance if none exists
+        const { data: newBalance, error: insertError } = await (supabase
+          .from('leave_balances') as any)
+          .insert({
+            employee_id: user.employeeId,
+            year: currentYear,
+            annual_total: 20,
+            annual_used: 0,
+            sick_total: 10,
+            sick_used: 0,
+            casual_total: 10,
+            casual_used: 0,
+          })
+          .select()
+          .single();
+
+        if (!insertError && newBalance) {
+          setLeaveBalance(newBalance);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading leave balance:', error);
+    }
+  };
+
+  const getAvailableBalance = (leaveType: string): number => {
+    if (!leaveBalance) return 0;
+    switch (leaveType) {
+      case 'Annual':
+        return leaveBalance.annual_total - leaveBalance.annual_used;
+      case 'Sick':
+        return leaveBalance.sick_total - leaveBalance.sick_used;
+      case 'Personal':
+      case 'Casual':
+        return leaveBalance.casual_total - leaveBalance.casual_used;
+      default:
+        return 999; // Unlimited for special leave types
+    }
+  };
 
   const loadLeaves = async () => {
     try {
@@ -87,6 +161,49 @@ export default function Leaves() {
     return diff > 0 ? diff : 0;
   };
 
+  const updateLeaveBalance = async (employeeId: string, leaveType: string, days: number, action: 'add' | 'subtract') => {
+    const currentYear = new Date().getFullYear();
+    let fieldToUpdate = '';
+    
+    switch (leaveType) {
+      case 'Annual':
+        fieldToUpdate = 'annual_used';
+        break;
+      case 'Sick':
+        fieldToUpdate = 'sick_used';
+        break;
+      case 'Personal':
+      case 'Casual':
+        fieldToUpdate = 'casual_used';
+        break;
+      default:
+        return; // Don't track special leave types
+    }
+
+    try {
+      // Get current balance
+      const { data: currentBalance } = await supabase
+        .from('leave_balances')
+        .select(fieldToUpdate)
+        .eq('employee_id', employeeId)
+        .eq('year', currentYear)
+        .single();
+
+      if (currentBalance) {
+        const currentValue = (currentBalance as Record<string, number>)[fieldToUpdate] || 0;
+        const newValue = action === 'add' ? currentValue + days : Math.max(0, currentValue - days);
+
+        await (supabase
+          .from('leave_balances') as any)
+          .update({ [fieldToUpdate]: newValue })
+          .eq('employee_id', employeeId)
+          .eq('year', currentYear);
+      }
+    } catch (error) {
+      console.error('Error updating leave balance:', error);
+    }
+  };
+
   const handleApplyLeave = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -103,6 +220,13 @@ export default function Leaves() {
     const daysCount = calculateDays(formData.start_date, formData.end_date);
     if (daysCount <= 0) {
       showNotification('error', 'End date must be after start date');
+      return;
+    }
+
+    // Validate against leave balance
+    const availableBalance = getAvailableBalance(formData.leave_type);
+    if (daysCount > availableBalance && availableBalance !== 999) {
+      showNotification('error', `Insufficient ${formData.leave_type} leave balance. Available: ${availableBalance} days`);
       return;
     }
 
@@ -188,6 +312,9 @@ export default function Leaves() {
 
       if (error) throw error;
 
+      // Deduct from leave balance
+      await updateLeaveBalance(leave.employee_id, leave.leave_type, leave.days_count, 'add');
+
       showNotification('success', 'Leave request approved successfully');
 
       if (leave.employees?.email) {
@@ -268,6 +395,74 @@ export default function Leaves() {
           <span>Apply Leave</span>
         </button>
       </div>
+
+      {/* Leave Balance Cards */}
+      {user?.role === 'employee' && leaveBalance && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-500">Annual Leave</p>
+                <p className="text-2xl font-bold text-blue-900">
+                  {leaveBalance.annual_total - leaveBalance.annual_used}
+                  <span className="text-sm font-normal text-gray-500"> / {leaveBalance.annual_total}</span>
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                <Calendar className="w-6 h-6 text-blue-900" />
+              </div>
+            </div>
+            <div className="mt-2 bg-gray-200 rounded-full h-2">
+              <div 
+                className="bg-blue-600 h-2 rounded-full" 
+                style={{ width: `${((leaveBalance.annual_total - leaveBalance.annual_used) / leaveBalance.annual_total) * 100}%` }}
+              />
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-500">Sick Leave</p>
+                <p className="text-2xl font-bold text-red-600">
+                  {leaveBalance.sick_total - leaveBalance.sick_used}
+                  <span className="text-sm font-normal text-gray-500"> / {leaveBalance.sick_total}</span>
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                <XCircle className="w-6 h-6 text-red-600" />
+              </div>
+            </div>
+            <div className="mt-2 bg-gray-200 rounded-full h-2">
+              <div 
+                className="bg-red-500 h-2 rounded-full" 
+                style={{ width: `${((leaveBalance.sick_total - leaveBalance.sick_used) / leaveBalance.sick_total) * 100}%` }}
+              />
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-500">Casual/Personal Leave</p>
+                <p className="text-2xl font-bold text-green-600">
+                  {leaveBalance.casual_total - leaveBalance.casual_used}
+                  <span className="text-sm font-normal text-gray-500"> / {leaveBalance.casual_total}</span>
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                <CheckCircle className="w-6 h-6 text-green-600" />
+              </div>
+            </div>
+            <div className="mt-2 bg-gray-200 rounded-full h-2">
+              <div 
+                className="bg-green-500 h-2 rounded-full" 
+                style={{ width: `${((leaveBalance.casual_total - leaveBalance.casual_used) / leaveBalance.casual_total) * 100}%` }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <div className="flex items-center space-x-4 mb-6">
@@ -442,10 +637,26 @@ export default function Leaves() {
               </div>
 
               {formData.start_date && formData.end_date && (
-                <div className="bg-blue-50 px-3 py-2 rounded-lg">
-                  <p className="text-sm text-blue-800">
-                    Duration: <strong>{calculateDays(formData.start_date, formData.end_date)} days</strong>
-                  </p>
+                <div className="space-y-2">
+                  <div className="bg-blue-50 px-3 py-2 rounded-lg">
+                    <p className="text-sm text-blue-800">
+                      Duration: <strong>{calculateDays(formData.start_date, formData.end_date)} days</strong>
+                    </p>
+                  </div>
+                  {leaveBalance && getAvailableBalance(formData.leave_type) !== 999 && (
+                    <div className={`px-3 py-2 rounded-lg ${
+                      calculateDays(formData.start_date, formData.end_date) > getAvailableBalance(formData.leave_type)
+                        ? 'bg-red-50 text-red-800'
+                        : 'bg-green-50 text-green-800'
+                    }`}>
+                      <p className="text-sm">
+                        Available {formData.leave_type} balance: <strong>{getAvailableBalance(formData.leave_type)} days</strong>
+                        {calculateDays(formData.start_date, formData.end_date) > getAvailableBalance(formData.leave_type) && (
+                          <span className="block text-red-600 font-medium mt-1">Insufficient balance!</span>
+                        )}
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
 
