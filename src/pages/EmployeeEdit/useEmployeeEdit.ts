@@ -42,8 +42,11 @@ export function useEmployeeEdit() {
 
   useEffect(() => {
     loadDepartments();
-    if (id) {
+    if (id && id !== 'new') {
       loadEmployee();
+    } else if (id === 'new') {
+      // Creating new employee - no need to load
+      setLoading(false);
     }
   }, [id]);
 
@@ -117,14 +120,14 @@ export function useEmployeeEdit() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.first_name || !formData.last_name || !formData.email || !formData.position) {
+    if (!formData.first_name || !formData.last_name || !formData.email || !formData.position || !formData.employee_number) {
       showNotification('error', t('employees.fillRequiredFields'));
       return;
     }
 
     setSaving(true);
     try {
-      const updateData = {
+      const submitData = {
         ...formData,
         salary: formData.salary ? parseFloat(formData.salary) : null,
         termination_date: formData.termination_date || null,
@@ -132,26 +135,44 @@ export function useEmployeeEdit() {
         updated_at: new Date().toISOString(),
       };
 
-      const { error } = await (supabase
-        .from('employees') as any)
-        .update(updateData)
-        .eq('id', id!);
+      let error;
+      let newEmployeeId = id;
 
-      if (error) throw error;
+      if (id === 'new') {
+        // Create new employee
+        const { data, error: insertError } = await supabase
+          .from('employees')
+          .insert([submitData])
+          .select('id')
+          .single();
 
-      showNotification('success', t('employees.employeeUpdated'));
+        if (insertError) throw insertError;
+        newEmployeeId = data?.id;
+
+        showNotification('success', t('employees.employeeCreated'));
+      } else {
+        // Update existing employee
+        const { error: updateError } = await (supabase
+          .from('employees') as any)
+          .update(submitData)
+          .eq('id', id!);
+
+        error = updateError;
+        if (error) throw error;
+        showNotification('success', t('employees.employeeUpdated'));
+      }
       
       // Log activity
       if (user) {
-        logActivity(user.id, 'employee_updated', 'employee', id!, {
+        logActivity(user.id, id === 'new' ? 'employee_created' : 'employee_updated', 'employee', newEmployeeId || id!, {
           name: `${formData.first_name} ${formData.last_name}`,
           position: formData.position,
         });
       }
 
-      navigate(`/employees/${id}`);
+      navigate(`/employees/${newEmployeeId || id}`);
     } catch (error: any) {
-      console.error('Error updating employee:', error);
+      console.error('Error saving employee:', error);
       showNotification('error', error.message || t('employees.failedToSave'));
     } finally {
       setSaving(false);

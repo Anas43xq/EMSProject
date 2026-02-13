@@ -23,18 +23,23 @@ export default function EmployeeEdit() {
     return <PageSpinner />;
   }
 
+  const isNewEmployee = id === 'new';
+  const backLink = isNewEmployee ? '/employees' : `/employees/${id}`;
+  const title = isNewEmployee ? t('employees.addNewEmployee') : t('employees.editEmployee');
+  const subtitle = isNewEmployee ? t('employees.createNewEmployee') : t('employees.updateInfo');
+
   return (
     <div className="space-y-6">
       <div className="flex items-center space-x-4">
         <Link
-          to={`/employees/${id}`}
+          to={backLink}
           className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
         >
           <ArrowLeft className="w-6 h-6 text-gray-600" />
         </Link>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">{t('employees.editEmployee')}</h1>
-          <p className="text-gray-600 mt-1">{t('employees.updateInfo')}</p>
+          <h1 className="text-3xl font-bold text-gray-900">{title}</h1>
+          <p className="text-gray-600 mt-1">{subtitle}</p>
         </div>
       </div>
 
@@ -45,13 +50,13 @@ export default function EmployeeEdit() {
 
         <div className="flex items-center justify-end space-x-4">
           <Link
-            to={`/employees/${id}`}
+            to={backLink}
             className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
           >
             {t('common.cancel')}
           </Link>
           <Button type="submit" loading={saving} icon={<Save className="w-5 h-5" />}>
-            {saving ? t('common.saving') : t('employees.saveChanges')}
+            {saving ? t('common.saving') : (isNewEmployee ? t('employees.createEmployee') : t('employees.saveChanges'))}
           </Button>
         </div>
       </form>
