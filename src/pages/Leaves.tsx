@@ -55,7 +55,7 @@ export default function Leaves() {
   const [submitting, setSubmitting] = useState(false);
   const [leaveBalance, setLeaveBalance] = useState<LeaveBalance | null>(null);
   const [formData, setFormData] = useState<LeaveFormData>({
-    leave_type: 'Annual',
+    leave_type: 'annual',
     start_date: '',
     end_date: '',
     reason: '',
@@ -114,15 +114,14 @@ export default function Leaves() {
   const getAvailableBalance = (leaveType: string): number => {
     if (!leaveBalance) return 0;
     switch (leaveType) {
-      case 'Annual':
+      case 'annual':
         return leaveBalance.annual_total - leaveBalance.annual_used;
-      case 'Sick':
+      case 'sick':
         return leaveBalance.sick_total - leaveBalance.sick_used;
-      case 'Personal':
-      case 'Casual':
+      case 'casual':
         return leaveBalance.casual_total - leaveBalance.casual_used;
       default:
-        return 999; // Unlimited for special leave types
+        return 999; // Unlimited for special leave types (sabbatical)
     }
   };
 
@@ -169,18 +168,17 @@ export default function Leaves() {
     let fieldToUpdate = '';
     
     switch (leaveType) {
-      case 'Annual':
+      case 'annual':
         fieldToUpdate = 'annual_used';
         break;
-      case 'Sick':
+      case 'sick':
         fieldToUpdate = 'sick_used';
         break;
-      case 'Personal':
-      case 'Casual':
+      case 'casual':
         fieldToUpdate = 'casual_used';
         break;
       default:
-        return; // Don't track special leave types
+        return; // Don't track special leave types (sabbatical)
     }
 
     try {
@@ -294,7 +292,7 @@ export default function Leaves() {
 
       // Reset form and close modal
       setFormData({
-        leave_type: 'Annual',
+        leave_type: 'annual',
         start_date: '',
         end_date: '',
         reason: '',
@@ -548,7 +546,7 @@ export default function Leaves() {
                     )}
                     <div className="flex items-center space-x-4 mb-2">
                       <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
-                        {leave.leave_type}
+                        {t(`leaves.${leave.leave_type}`)}
                       </span>
                       <span className="text-sm text-gray-600">
                         {new Date(leave.start_date).toLocaleDateString()} - {new Date(leave.end_date).toLocaleDateString()}
@@ -628,12 +626,10 @@ export default function Leaves() {
                   onChange={(e) => setFormData({ ...formData, leave_type: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <option value="Annual">{t('leaves.annual')}</option>
-                  <option value="Sick">{t('leaves.sick')}</option>
-                  <option value="Personal">{t('leaves.personal')}</option>
-                  <option value="Maternity">{t('leaves.maternity')}</option>
-                  <option value="Paternity">{t('leaves.paternity')}</option>
-                  <option value="Emergency">{t('leaves.emergency')}</option>
+                  <option value="annual">{t('leaves.annual')}</option>
+                  <option value="sick">{t('leaves.sick')}</option>
+                  <option value="casual">{t('leaves.casual')}</option>
+                  <option value="sabbatical">{t('leaves.sabbatical')}</option>
                 </select>
               </div>
 
