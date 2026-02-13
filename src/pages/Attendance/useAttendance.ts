@@ -114,6 +114,19 @@ export function useAttendance() {
       const now = new Date();
       const time = now.toTimeString().split(' ')[0].substring(0, 5);
 
+      // Check if already checked in today
+      const { data: existing } = await supabase
+        .from('attendance')
+        .select('id, check_in')
+        .eq('employee_id', user.employeeId)
+        .eq('date', today)
+        .maybeSingle();
+
+      if (existing) {
+        showNotification('info', t('attendance.alreadyCheckedIn'));
+        return;
+      }
+
       const { error } = await supabase.from('attendance').insert({
         employee_id: user.employeeId,
         date: today,
@@ -123,7 +136,7 @@ export function useAttendance() {
 
       if (error) throw error;
 
-      showNotification('success', 'Check-in recorded successfully');
+      showNotification('success', t('attendance.checkInSuccess'));
 
       logActivity(user.id, 'attendance_checked_in', 'attendance', undefined, {
         date: today,
@@ -136,7 +149,7 @@ export function useAttendance() {
       }
     } catch (error) {
       console.error('Error marking attendance:', error);
-      showNotification('error', 'Failed to record check-in');
+      showNotification('error', t('attendance.checkInFailed'));
     }
   };
 
@@ -157,7 +170,7 @@ export function useAttendance() {
 
       if (error) throw error;
 
-      showNotification('success', 'Check-out recorded successfully');
+      showNotification('success', t('attendance.checkOutSuccess'));
 
       logActivity(user.id, 'attendance_checked_out', 'attendance', recordId, {
         date: today,
@@ -168,7 +181,7 @@ export function useAttendance() {
       loadAttendance();
     } catch (error) {
       console.error('Error checking out:', error);
-      showNotification('error', 'Failed to record check-out');
+      showNotification('error', t('attendance.checkOutFailed'));
     }
   };
 

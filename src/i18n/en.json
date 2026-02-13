@@ -246,7 +246,12 @@
     "hours": "Hours",
     "noRecords": "No attendance records for this date",
     "selectEmployeeError": "Please select an employee",
-    "failedToAdd": "Failed to add attendance"
+    "failedToAdd": "Failed to add attendance",
+    "alreadyCheckedIn": "You have already checked in today",
+    "checkInSuccess": "Check-in recorded successfully",
+    "checkInFailed": "Failed to record check-in",
+    "checkOutSuccess": "Check-out recorded successfully",
+    "checkOutFailed": "Failed to record check-out"
   },
   "announcements": {
     "title": "Announcements",

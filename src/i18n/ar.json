@@ -246,7 +246,12 @@
     "hours": "الساعات",
     "noRecords": "لا توجد سجلات حضور لهذا التاريخ",
     "selectEmployeeError": "يرجى اختيار موظف",
-    "failedToAdd": "فشل في إضافة سجل الحضور"
+    "failedToAdd": "فشل في إضافة الحضور",
+    "alreadyCheckedIn": "لقد سجلت حضورك اليوم بالفعل",
+    "checkInSuccess": "تم تسجيل الحضور بنجاح",
+    "checkInFailed": "فشل في تسجيل الحضور",
+    "checkOutSuccess": "تم تسجيل الانصراف بنجاح",
+    "checkOutFailed": "فشل في تسجيل الانصراف"
   },
   "announcements": {
     "title": "الإعلانات",
