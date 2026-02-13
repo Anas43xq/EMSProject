@@ -310,6 +310,85 @@ CREATE TRIGGER sync_employee_email_on_user_insert
   EXECUTE FUNCTION sync_employee_email_on_link();
 
 -- =============================================
+-- AUTO-SETUP NEW AUTH USERS (Fully Automatic)
+-- =============================================
+-- When a new user signs up via Supabase Auth, this trigger automatically:
+-- 1. Creates a record in public.users
+-- 2. Matches and links to an existing employee by email
+-- 3. Syncs the employee email to match their login email
+-- 4. Creates default user preferences
+
+CREATE OR REPLACE FUNCTION handle_new_auth_user()
+RETURNS TRIGGER AS $$
+DECLARE
+  matched_employee_id UUID;
+  user_role TEXT;
+BEGIN
+  -- Try to find a matching employee by email
+  SELECT id INTO matched_employee_id
+  FROM public.employees
+  WHERE email = NEW.email
+  LIMIT 1;
+  
+  -- Get role from app_metadata or default to 'employee'
+  user_role := COALESCE(NEW.raw_app_meta_data->>'role', 'employee');
+  
+  -- Create the public.users record
+  INSERT INTO public.users (id, email, role, employee_id, created_at, updated_at)
+  VALUES (NEW.id, NEW.email, user_role, matched_employee_id, now(), now())
+  ON CONFLICT (id) DO UPDATE SET
+    email = EXCLUDED.email,
+    role = EXCLUDED.role,
+    employee_id = COALESCE(EXCLUDED.employee_id, public.users.employee_id),
+    updated_at = now();
+  
+  -- If linked to employee, sync the employee's email to match login email
+  IF matched_employee_id IS NOT NULL THEN
+    UPDATE public.employees
+    SET email = NEW.email
+    WHERE id = matched_employee_id
+      AND email IS DISTINCT FROM NEW.email;
+  END IF;
+  
+  -- Create default user preferences
+  INSERT INTO public.user_preferences (user_id, email_leave_approvals, email_attendance_reminders)
+  VALUES (NEW.id, true, true)
+  ON CONFLICT (user_id) DO NOTHING;
+  
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Trigger on auth.users INSERT
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW
+  EXECUTE FUNCTION handle_new_auth_user();
+
+-- Also handle auth user email updates
+CREATE OR REPLACE FUNCTION handle_auth_user_email_change()
+RETURNS TRIGGER AS $$
+BEGIN
+  -- Update public.users email
+  UPDATE public.users
+  SET email = NEW.email, updated_at = now()
+  WHERE id = NEW.id;
+  
+  -- The sync_employee_email_from_user trigger on public.users will handle syncing to employee
+  
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS on_auth_user_email_changed ON auth.users;
+CREATE TRIGGER on_auth_user_email_changed
+  AFTER UPDATE OF email ON auth.users
+  FOR EACH ROW
+  WHEN (OLD.email IS DISTINCT FROM NEW.email)
+  EXECUTE FUNCTION handle_auth_user_email_change();
+
+-- =============================================
 -- ROW LEVEL SECURITY
 -- =============================================
 
