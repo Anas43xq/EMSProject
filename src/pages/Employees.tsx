@@ -37,7 +37,6 @@ export default function Employees() {
 
   const loadEmployees = async () => {
     try {
-      console.log('Loading employees...');
       const { data, error } = await supabase
         .from('employees')
         .select(`
@@ -48,11 +47,7 @@ export default function Employees() {
         `)
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Supabase error:', error);
-        throw error;
-      }
-      console.log('Employees loaded:', data?.length);
+      if (error) throw error;
       setEmployees(data || []);
     } catch (error) {
       console.error('Error loading employees:', error);

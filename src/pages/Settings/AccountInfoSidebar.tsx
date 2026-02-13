@@ -1,8 +1,9 @@
 import { useTranslation } from 'react-i18next';
 import { Shield } from 'lucide-react';
+import { AuthUser } from '../../contexts/AuthContext';
 
 interface AccountInfoSidebarProps {
-  user: any;
+  user: AuthUser | null;
 }
 
 export default function AccountInfoSidebar({ user }: AccountInfoSidebarProps) {

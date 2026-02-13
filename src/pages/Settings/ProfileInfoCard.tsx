@@ -1,8 +1,9 @@
 import { useTranslation } from 'react-i18next';
 import { User, Edit2, Save, X } from 'lucide-react';
+import { AuthUser } from '../../contexts/AuthContext';
 
 interface ProfileInfoCardProps {
-  user: any;
+  user: AuthUser | null;
   isEditingEmail: boolean;
   setIsEditingEmail: (value: boolean) => void;
   newEmail: string;

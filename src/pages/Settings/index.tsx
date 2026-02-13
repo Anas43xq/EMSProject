@@ -36,10 +36,7 @@ export default function Settings() {
         .eq('user_id', user.id)
         .maybeSingle();
 
-      if (error) {
-        console.log('No preferences found, using defaults');
-        return;
-      }
+      if (error) return;
 
       if (data) {
         const prefs = data as UserPreferences;
@@ -49,7 +46,7 @@ export default function Settings() {
         });
       }
     } catch (err) {
-      console.log('No preferences found, using defaults');
+      // Use default preferences
     }
   };
 

@@ -5,7 +5,7 @@ import { logActivity } from '../lib/activityLog';
 
 type UserRole = 'admin' | 'hr' | 'employee';
 
-interface AuthUser {
+export interface AuthUser {
   id: string;
   email: string;
   role: UserRole;

@@ -7,6 +7,11 @@ import { ArrowLeft, Edit, Mail, Phone, Calendar, MapPin, Briefcase, User, FileTe
 import { format } from 'date-fns';
 import { PageSpinner, Button } from '../components/ui';
 
+interface Qualification {
+  degree: string;
+  institution: string;
+}
+
 interface Employee {
   id: string;
   employee_number: string;
@@ -27,7 +32,7 @@ interface Employee {
   hire_date: string;
   termination_date: string | null;
   salary: number;
-  qualifications: any[];
+  qualifications: Qualification[];
   emergency_contact_name: string;
   emergency_contact_phone: string;
   departments?: {
@@ -220,7 +225,7 @@ export default function EmployeeView() {
                 {t('employees.qualifications')}
               </h2>
               <div className="space-y-3">
-                {employee.qualifications.map((qual: any, index: number) => (
+                {employee.qualifications.map((qual, index) => (
                   <div key={index} className="border-l-4 border-blue-500 pl-4 py-2">
                     <p className="font-medium text-gray-900">{qual.degree}</p>
                     <p className="text-sm text-gray-600">{qual.institution}</p>
