@@ -23,7 +23,7 @@ export default function EmployeeEdit() {
     return <PageSpinner />;
   }
 
-  const isNewEmployee = id === 'new';
+  const isNewEmployee = !id || id === 'new';
   const backLink = isNewEmployee ? '/employees' : `/employees/${id}`;
   const title = isNewEmployee ? t('employees.addNewEmployee') : t('employees.editEmployee');
   const subtitle = isNewEmployee ? t('employees.createNewEmployee') : t('employees.updateInfo');

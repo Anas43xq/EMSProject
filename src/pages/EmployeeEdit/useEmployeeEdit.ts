@@ -44,8 +44,8 @@ export function useEmployeeEdit() {
     loadDepartments();
     if (id && id !== 'new') {
       loadEmployee();
-    } else if (id === 'new') {
-      // Creating new employee - no need to load
+    } else {
+      // Creating new employee - no need to load (id is undefined or 'new')
       setLoading(false);
     }
   }, [id]);
@@ -138,7 +138,9 @@ export function useEmployeeEdit() {
       let error;
       let newEmployeeId = id;
 
-      if (id === 'new') {
+      const isNewEmployee = !id || id === 'new';
+
+      if (isNewEmployee) {
         // Create new employee
         const { data, error: insertError } = await (supabase
           .from('employees') as any)
@@ -164,7 +166,7 @@ export function useEmployeeEdit() {
       
       // Log activity
       if (user) {
-        logActivity(user.id, id === 'new' ? 'employee_created' : 'employee_updated', 'employee', newEmployeeId || id!, {
+        logActivity(user.id, isNewEmployee ? 'employee_created' : 'employee_updated', 'employee', newEmployeeId || id!, {
           name: `${formData.first_name} ${formData.last_name}`,
           position: formData.position,
         });
