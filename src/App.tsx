@@ -12,6 +12,7 @@ const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Employees = lazy(() => import('./pages/Employees'));
 const EmployeeView = lazy(() => import('./pages/EmployeeView'));
 const EmployeeEdit = lazy(() => import('./pages/EmployeeEdit'));
+const Profile = lazy(() => import('./pages/Profile'));
 const Departments = lazy(() => import('./pages/Departments'));
 const Attendance = lazy(() => import('./pages/Attendance'));
 const Leaves = lazy(() => import('./pages/Leaves'));
@@ -45,6 +46,7 @@ function App() {
             <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
               <Route index element={<Navigate to="/dashboard" replace />} />
               <Route path="dashboard" element={<Suspense fallback={<PageLoader />}><Dashboard /></Suspense>} />
+              <Route path="profile" element={<Suspense fallback={<PageLoader />}><Profile /></Suspense>} />
               <Route path="employees" element={<Suspense fallback={<PageLoader />}><Employees /></Suspense>} />
               <Route path="employees/:id" element={<Suspense fallback={<PageLoader />}><EmployeeView /></Suspense>} />
               <Route path="employees/:id/edit" element={<Suspense fallback={<PageLoader />}><EmployeeEdit /></Suspense>} />

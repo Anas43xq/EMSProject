@@ -63,6 +63,7 @@
   },
   "nav": {
     "dashboard": "Dashboard",
+    "myProfile": "My Profile",
     "employees": "Employees",
     "departments": "Departments",
     "leaveManagement": "Leave Management",
@@ -71,6 +72,11 @@
     "reports": "Reports",
     "userManagement": "User Management",
     "settings": "Settings"
+  },
+  "profile": {
+    "viewYourDetails": "View your employee profile and information",
+    "noProfileLinked": "No Employee Profile Linked",
+    "contactAdmin": "Please contact your administrator to link your account to an employee profile."
   },
   "dashboard": {
     "title": "Dashboard",

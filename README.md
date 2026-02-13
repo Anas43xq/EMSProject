@@ -34,11 +34,13 @@ A comprehensive, production-ready Employee Management System with role-based acc
    - Email notifications for approvals/rejections
 
 5. **Attendance Tracking**
+   - Employee self-service check-in and check-out
    - Daily attendance marking with check-in/check-out times
    - Multiple status types (present, absent, late, half-day)
-   - Hours worked calculation
+   - Automatic hours worked calculation
    - Historical attendance records
    - Date-based filtering
+   - HR/Admin can add attendance records for any employee
 
 8. **Reports & Analytics**
    - Pre-built report templates for all modules
@@ -81,9 +83,9 @@ A comprehensive, production-ready Employee Management System with role-based acc
 - Announcements
 
 #### Employee
-- View own profile
+- View own profile (My Profile page)
 - Apply for leave
-- Mark attendance
+- Check-in and check-out attendance
 - View notifications
 - Update personal settings
 
@@ -162,6 +164,7 @@ src/
 │   ├── Employees.tsx
 │   ├── EmployeeView.tsx
 │   ├── EmployeeEdit.tsx
+│   ├── Profile.tsx     # Employee self-service profile view
 │   ├── Departments.tsx
 │   ├── Leaves.tsx
 │   ├── Attendance.tsx
@@ -190,6 +193,18 @@ The application is already configured and ready to use. Simply:
 - Protected routes based on user roles
 - Secure password handling
 - Activity logging for audit trails
+
+## Deployment
+
+The project includes a `vercel.json` configuration for easy deployment to Vercel:
+
+1. Push your code to GitHub
+2. Connect your repository to Vercel
+3. Add environment variables (VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY)
+4. Deploy
+
+The SPA routing is pre-configured to work correctly on Vercel.
+
 ## License
 
 This is a demonstration project for university employee management systems.

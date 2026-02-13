@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import { useNotification } from '../contexts/NotificationContext';
 import { logActivity } from '../lib/activityLog';
-import { Clock, CheckCircle, XCircle, Calendar, Plus, X } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, Calendar, Plus, X, LogOut } from 'lucide-react';
 
 interface AttendanceRecord {
   id: string;
@@ -31,6 +32,7 @@ export default function Attendance() {
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const { t } = useTranslation();
+  const { showNotification } = useNotification();
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   
   // Modal state for HR/Admin
@@ -142,6 +144,7 @@ export default function Attendance() {
 
       if (error) throw error;
       
+      showNotification('success', 'Check-in recorded successfully');
 
       logActivity(user.id, 'attendance_checked_in', 'attendance', undefined, {
         date: today,
@@ -154,6 +157,39 @@ export default function Attendance() {
       }
     } catch (error) {
       console.error('Error marking attendance:', error);
+      showNotification('error', 'Failed to record check-in');
+    }
+  };
+
+  const handleCheckOut = async (recordId: string) => {
+    if (!user?.employeeId) return;
+
+    const today = new Date().toISOString().split('T')[0];
+    
+    try {
+      const now = new Date();
+      const time = now.toTimeString().split(' ')[0].substring(0, 5);
+
+      const { error } = await (supabase
+        .from('attendance') as any)
+        .update({ check_out: time })
+        .eq('id', recordId)
+        .eq('employee_id', user.employeeId);
+
+      if (error) throw error;
+
+      showNotification('success', 'Check-out recorded successfully');
+
+      logActivity(user.id, 'attendance_checked_out', 'attendance', recordId, {
+        date: today,
+        check_out: time,
+      });
+
+      // Reload to show updated record
+      loadAttendance();
+    } catch (error) {
+      console.error('Error checking out:', error);
+      showNotification('error', 'Failed to record check-out');
     }
   };
 
@@ -299,14 +335,25 @@ export default function Attendance() {
                     )}
                   </div>
                 </div>
-                <span className={`px-3 py-1 text-sm font-medium rounded-full ${
-                  record.status === 'present' ? 'bg-green-100 text-green-800' :
-                  record.status === 'late' ? 'bg-yellow-100 text-yellow-800' :
-                  record.status === 'absent' ? 'bg-red-100 text-red-800' :
-                  'bg-gray-100 text-gray-800'
-                }`}>
-                  {record.status === 'present' ? t('attendance.present') : record.status === 'absent' ? t('attendance.absent') : record.status === 'late' ? t('attendance.late') : record.status === 'half-day' ? t('attendance.halfDay') : record.status}
-                </span>
+                <div className="flex items-center space-x-3">
+                  {user?.role === 'employee' && record.check_in && !record.check_out && selectedDate === new Date().toISOString().split('T')[0] && (
+                    <button
+                      onClick={() => handleCheckOut(record.id)}
+                      className="flex items-center space-x-1 px-3 py-1 text-sm font-medium rounded-lg bg-green-100 text-green-800 hover:bg-green-200 transition-colors"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span>Check Out</span>
+                    </button>
+                  )}
+                  <span className={`px-3 py-1 text-sm font-medium rounded-full ${
+                    record.status === 'present' ? 'bg-green-100 text-green-800' :
+                    record.status === 'late' ? 'bg-yellow-100 text-yellow-800' :
+                    record.status === 'absent' ? 'bg-red-100 text-red-800' :
+                    'bg-gray-100 text-gray-800'
+                  }`}>
+                    {record.status === 'present' ? t('attendance.present') : record.status === 'absent' ? t('attendance.absent') : record.status === 'late' ? t('attendance.late') : record.status === 'half-day' ? t('attendance.halfDay') : record.status}
+                  </span>
+                </div>
               </div>
             </div>
           ))}

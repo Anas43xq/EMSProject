@@ -63,6 +63,7 @@
   },
   "nav": {
     "dashboard": "لوحة التحكم",
+    "myProfile": "ملفي الشخصي",
     "employees": "الموظفون",
     "departments": "الأقسام",
     "leaveManagement": "إدارة الإجازات",
@@ -71,6 +72,11 @@
     "reports": "التقارير",
     "userManagement": "إدارة المستخدمين",
     "settings": "الإعدادات"
+  },
+  "profile": {
+    "viewYourDetails": "عرض ملفك الشخصي ومعلوماتك الوظيفية",
+    "noProfileLinked": "لا يوجد ملف موظف مرتبط",
+    "contactAdmin": "يرجى التواصل مع المسؤول لربط حسابك بملف موظف."
   },
   "dashboard": {
     "title": "لوحة التحكم",

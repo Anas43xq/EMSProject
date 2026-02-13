@@ -18,6 +18,7 @@ import {
   Megaphone,
   UserCog,
   Globe,
+  User,
 } from 'lucide-react';
 
 export default function Layout() {
@@ -30,6 +31,7 @@ export default function Layout() {
 
   const navigation = [
     { name: t('nav.dashboard'), href: '/dashboard', icon: LayoutDashboard, roles: ['admin', 'hr', 'employee'] },
+    { name: t('nav.myProfile'), href: '/profile', icon: User, roles: ['employee'] },
     { name: t('nav.employees'), href: '/employees', icon: Users, roles: ['admin', 'hr'] },
     { name: t('nav.departments'), href: '/departments', icon: Building2, roles: ['admin', 'hr'] },
     { name: t('nav.leaveManagement'), href: '/leaves', icon: Calendar, roles: ['admin', 'hr', 'employee'] },
