@@ -18,7 +18,6 @@ export default defineConfig({
           ],
           'lucide': ['lucide-react'],
           'supabase': ['@supabase/supabase-js'],
-          'pdf': ['jspdf'],
         },
       },
     },

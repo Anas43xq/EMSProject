@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { logActivity } from '../lib/activityLog';
@@ -16,15 +17,9 @@ interface Announcement {
   updated_at: string;
 }
 
-const PRIORITY_CONFIG = {
-  low: { label: 'Low', color: 'bg-gray-100 text-gray-700', icon: Info },
-  normal: { label: 'Normal', color: 'bg-blue-100 text-blue-700', icon: Bell },
-  high: { label: 'High', color: 'bg-orange-100 text-orange-700', icon: AlertTriangle },
-  urgent: { label: 'Urgent', color: 'bg-red-100 text-red-700', icon: AlertCircle },
-};
-
 export default function Announcements() {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -38,6 +33,13 @@ export default function Announcements() {
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+
+  const PRIORITY_CONFIG = {
+    low: { label: t('announcements.low'), color: 'bg-gray-100 text-gray-700', icon: Info },
+    normal: { label: t('announcements.normal'), color: 'bg-blue-100 text-blue-700', icon: Bell },
+    high: { label: t('announcements.high'), color: 'bg-orange-100 text-orange-700', icon: AlertTriangle },
+    urgent: { label: t('announcements.urgent'), color: 'bg-red-100 text-red-700', icon: AlertCircle },
+  };
 
   useEffect(() => {
     loadAnnouncements();
@@ -93,13 +95,13 @@ export default function Announcements() {
 
     try {
       if (!formData.title.trim()) {
-        setError('Title is required');
+        setError(t('announcements.titleRequired'));
         setSubmitting(false);
         return;
       }
 
       if (!formData.content.trim()) {
-        setError('Content is required');
+        setError(t('announcements.contentRequired'));
         setSubmitting(false);
         return;
       }
@@ -148,14 +150,14 @@ export default function Announcements() {
       loadAnnouncements();
     } catch (err: any) {
       console.error('Error saving announcement:', err);
-      setError(err.message || 'Failed to save announcement');
+      setError(err.message || t('announcements.saveFailed'));
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this announcement?')) return;
+    if (!confirm(t('announcements.confirmDelete'))) return;
 
     try {
       const { error } = await (supabase
@@ -173,7 +175,7 @@ export default function Announcements() {
       loadAnnouncements();
     } catch (err: any) {
       console.error('Error deleting announcement:', err);
-      alert(err.message || 'Failed to delete announcement');
+      alert(err.message || t('announcements.deleteFailed'));
     }
   };
 
@@ -211,29 +213,29 @@ export default function Announcements() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Announcements</h1>
-          <p className="text-gray-600 mt-2">Manage company-wide announcements</p>
+          <h1 className="text-3xl font-bold text-gray-900">{t('announcements.title')}</h1>
+          <p className="text-gray-600 mt-2">{t('announcements.subtitle')}</p>
         </div>
         <button
           onClick={openCreateModal}
           className="flex items-center space-x-2 px-4 py-2 bg-blue-900 text-white rounded-lg hover:bg-blue-800 transition-colors"
         >
           <Plus className="w-5 h-5" />
-          <span>New Announcement</span>
+          <span>{t('announcements.newAnnouncement')}</span>
         </button>
       </div>
 
       {announcements.length === 0 ? (
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
           <Megaphone className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No Announcements</h3>
-          <p className="text-gray-500 mb-4">Create your first announcement to share news with employees.</p>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">{t('announcements.noAnnouncements')}</h3>
+          <p className="text-gray-500 mb-4">{t('announcements.createFirst')}</p>
           <button
             onClick={openCreateModal}
             className="inline-flex items-center space-x-2 px-4 py-2 bg-blue-900 text-white rounded-lg hover:bg-blue-800 transition-colors"
           >
             <Plus className="w-5 h-5" />
-            <span>Create Announcement</span>
+            <span>{t('announcements.createAnnouncement')}</span>
           </button>
         </div>
       ) : (
@@ -260,20 +262,20 @@ export default function Announcements() {
                       </span>
                       {!announcement.is_active && (
                         <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                          Inactive
+                          {t('announcements.inactive')}
                         </span>
                       )}
                       {isExpired && (
                         <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-600">
-                          Expired
+                          {t('announcements.expired')}
                         </span>
                       )}
                     </div>
                     <p className="text-gray-600 whitespace-pre-wrap">{announcement.content}</p>
                     <div className="mt-3 flex items-center space-x-4 text-sm text-gray-500">
-                      <span>Created: {new Date(announcement.created_at).toLocaleDateString()}</span>
+                      <span>{t('announcements.created')}: {new Date(announcement.created_at).toLocaleDateString()}</span>
                       {announcement.expires_at && (
-                        <span>Expires: {new Date(announcement.expires_at).toLocaleDateString()}</span>
+                        <span>{t('announcements.expires')}: {new Date(announcement.expires_at).toLocaleDateString()}</span>
                       )}
                     </div>
                   </div>
@@ -286,7 +288,7 @@ export default function Announcements() {
                           : 'bg-green-100 text-green-700 hover:bg-green-200'
                       }`}
                     >
-                      {announcement.is_active ? 'Deactivate' : 'Activate'}
+                      {announcement.is_active ? t('announcements.deactivate') : t('announcements.activate')}
                     </button>
                     <button
                       onClick={() => openEditModal(announcement)}
@@ -314,7 +316,7 @@ export default function Announcements() {
           <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4">
             <div className="flex items-center justify-between p-6 border-b border-gray-200">
               <h2 className="text-xl font-bold text-gray-900">
-                {editingAnnouncement ? 'Edit Announcement' : 'New Announcement'}
+                {editingAnnouncement ? t('announcements.editAnnouncement') : t('announcements.newAnnouncement')}
               </h2>
               <button
                 onClick={() => setShowModal(false)}
@@ -333,47 +335,47 @@ export default function Announcements() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Title <span className="text-red-500">*</span>
+                  {t('announcements.announcementTitle')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Announcement title"
+                  placeholder={t('announcements.titlePlaceholder')}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Content <span className="text-red-500">*</span>
+                  {t('announcements.content')} <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   value={formData.content}
                   onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                   rows={5}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Announcement content..."
+                  placeholder={t('announcements.contentPlaceholder')}
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('announcements.priority')}</label>
                   <select
                     value={formData.priority}
                     onChange={(e) => setFormData({ ...formData, priority: e.target.value as any })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    <option value="low">Low</option>
-                    <option value="normal">Normal</option>
-                    <option value="high">High</option>
-                    <option value="urgent">Urgent</option>
+                    <option value="low">{t('announcements.low')}</option>
+                    <option value="normal">{t('announcements.normal')}</option>
+                    <option value="high">{t('announcements.high')}</option>
+                    <option value="urgent">{t('announcements.urgent')}</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Expires On (Optional)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('announcements.expiresOn')}</label>
                   <input
                     type="date"
                     value={formData.expires_at}
@@ -393,7 +395,7 @@ export default function Announcements() {
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
                 <label htmlFor="is_active" className="ml-2 block text-sm text-gray-900">
-                  Active (visible to all employees)
+                  {t('announcements.activeLabel')}
                 </label>
               </div>
 
@@ -403,14 +405,14 @@ export default function Announcements() {
                   onClick={() => setShowModal(false)}
                   className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
                   className="px-4 py-2 bg-blue-900 text-white rounded-lg hover:bg-blue-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {submitting ? 'Saving...' : editingAnnouncement ? 'Update' : 'Create'}
+                  {submitting ? t('common.saving') : editingAnnouncement ? t('announcements.update') : t('announcements.create')}
                 </button>
               </div>
             </form>

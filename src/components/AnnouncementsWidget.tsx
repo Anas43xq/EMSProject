@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { Megaphone, AlertCircle, AlertTriangle, Info, Bell } from 'lucide-react';
 
@@ -11,13 +12,14 @@ interface Announcement {
 }
 
 const PRIORITY_CONFIG = {
-  low: { label: 'Low', color: 'bg-gray-100 text-gray-700 border-gray-200', icon: Info },
-  normal: { label: 'Normal', color: 'bg-blue-50 text-blue-700 border-blue-200', icon: Bell },
-  high: { label: 'High', color: 'bg-orange-50 text-orange-700 border-orange-200', icon: AlertTriangle },
-  urgent: { label: 'Urgent', color: 'bg-red-50 text-red-700 border-red-200', icon: AlertCircle },
+  low: { labelKey: 'announcements.low', color: 'bg-gray-100 text-gray-700 border-gray-200', icon: Info },
+  normal: { labelKey: 'announcements.medium', color: 'bg-blue-50 text-blue-700 border-blue-200', icon: Bell },
+  high: { labelKey: 'announcements.high', color: 'bg-orange-50 text-orange-700 border-orange-200', icon: AlertTriangle },
+  urgent: { labelKey: 'announcements.urgent', color: 'bg-red-50 text-red-700 border-red-200', icon: AlertCircle },
 };
 
 export default function AnnouncementsWidget() {
+  const { t } = useTranslation();
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -58,7 +60,7 @@ export default function AnnouncementsWidget() {
           <div className="bg-blue-900 p-2 rounded-lg">
             <Megaphone className="w-6 h-6 text-white" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900">Announcements</h2>
+          <h2 className="text-2xl font-bold text-gray-900">{t('announcements.latestNews')}</h2>
         </div>
         <div className="flex items-center justify-center h-32">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-900"></div>
@@ -74,16 +76,16 @@ export default function AnnouncementsWidget() {
           <Megaphone className="w-6 h-6 text-white" />
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Announcements</h2>
-          <p className="text-sm text-gray-500">Latest company news and updates</p>
+          <h2 className="text-2xl font-bold text-gray-900">{t('announcements.latestNews')}</h2>
+          <p className="text-sm text-gray-500">{t('announcements.latestNews')}</p>
         </div>
       </div>
 
       {sortedAnnouncements.length === 0 ? (
         <div className="text-center py-12">
           <Megaphone className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <p className="text-gray-500 text-lg">No announcements at this time</p>
-          <p className="text-gray-400 text-sm mt-1">Check back later for updates</p>
+          <p className="text-gray-500 text-lg">{t('announcements.noAnnouncementsNow')}</p>
+          <p className="text-gray-400 text-sm mt-1">{t('announcements.checkBackLater')}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -103,7 +105,7 @@ export default function AnnouncementsWidget() {
                     <p className="text-sm text-gray-600 mt-2 line-clamp-3">{announcement.content}</p>
                     <div className="flex items-center justify-between mt-3">
                       <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${priorityConfig.color}`}>
-                        {priorityConfig.label} Priority
+                        {t(priorityConfig.labelKey)}
                       </span>
                       <p className="text-xs text-gray-500">
                         {new Date(announcement.created_at).toLocaleDateString()}

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useNotification } from '../contexts/NotificationContext';
+import { useTranslation } from 'react-i18next';
 import { Plus, Search, Edit, Trash2, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -27,6 +28,7 @@ export default function Employees() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [employmentTypeFilter, setEmploymentTypeFilter] = useState('all');
   const { showNotification } = useNotification();
+  const { t } = useTranslation();
 
   useEffect(() => {
     loadEmployees();
@@ -106,15 +108,15 @@ export default function Employees() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Employees</h1>
-          <p className="text-gray-600 mt-2">Manage employee records and information</p>
+          <h1 className="text-3xl font-bold text-gray-900">{t('employees.title')}</h1>
+          <p className="text-gray-600 mt-2">{t('employees.subtitle')}</p>
         </div>
         <Link
           to="/employees/new"
           className="flex items-center space-x-2 bg-blue-900 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition-colors"
         >
           <Plus className="w-5 h-5" />
-          <span>Add Employee</span>
+          <span>{t('employees.addEmployee')}</span>
         </Link>
       </div>
 
@@ -124,7 +126,7 @@ export default function Employees() {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
               type="text"
-              placeholder="Search employees..."
+              placeholder={t('employees.searchPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -136,20 +138,20 @@ export default function Employees() {
               onChange={(e) => setStatusFilter(e.target.value)}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option value="all">All Status</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-              <option value="on-leave">On Leave</option>
+              <option value="all">{t('employees.allStatus')}</option>
+              <option value="active">{t('employees.active')}</option>
+              <option value="inactive">{t('employees.inactive')}</option>
+              <option value="on-leave">{t('employees.onLeave')}</option>
             </select>
             <select
               value={employmentTypeFilter}
               onChange={(e) => setEmploymentTypeFilter(e.target.value)}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option value="all">All Types</option>
-              <option value="full-time">Full-time</option>
-              <option value="part-time">Part-time</option>
-              <option value="contract">Contract</option>
+              <option value="all">{t('employees.allTypes')}</option>
+              <option value="full-time">{t('employees.fullTime')}</option>
+              <option value="part-time">{t('employees.partTime')}</option>
+              <option value="contract">{t('employees.contract')}</option>
             </select>
           </div>
         </div>
@@ -159,22 +161,22 @@ export default function Employees() {
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Employee
+                  {t('employees.employee')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Department
+                  {t('employees.department')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Position
+                  {t('employees.position')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Type
+                  {t('employees.type')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
+                  {t('employees.status')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
+                  {t('employees.actions')}
                 </th>
               </tr>
             </thead>
@@ -236,7 +238,7 @@ export default function Employees() {
 
         {filteredEmployees.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-gray-500">No employees found</p>
+            <p className="text-gray-500">{t('employees.noEmployeesFound')}</p>
           </div>
         )}
       </div>

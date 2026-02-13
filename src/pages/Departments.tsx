@@ -4,6 +4,7 @@ import { useNotification } from '../contexts/NotificationContext';
 import { Plus, Building2, X, Edit2, Trash2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { logActivity } from '../lib/activityLog';
+import { useTranslation } from 'react-i18next';
 
 interface Department {
   id: string;
@@ -42,6 +43,7 @@ export default function Departments() {
   });
   const { showNotification } = useNotification();
   const { user } = useAuth();
+  const { t } = useTranslation();
   const isAdminOrHR = user?.role === 'admin' || user?.role === 'hr';
 
   useEffect(() => {
@@ -124,7 +126,7 @@ export default function Departments() {
           .eq('id', editingDept.id);
 
         if (error) throw error;
-        showNotification('success', 'Department updated successfully');
+        showNotification('success', t('departments.updatedSuccess'));
         
         // Log activity
         if (user) {
@@ -141,7 +143,7 @@ export default function Departments() {
           .single();
 
         if (error) throw error;
-        showNotification('success', 'Department added successfully');
+        showNotification('success', t('departments.addedSuccess'));
         
         // Log activity
         if (user && data) {
@@ -178,7 +180,7 @@ export default function Departments() {
         .eq('id', dept.id);
 
       if (error) throw error;
-      showNotification('success', 'Department deleted successfully');
+      showNotification('success', t('departments.deletedSuccess'));
       
       // Log activity
       if (user) {
@@ -195,7 +197,7 @@ export default function Departments() {
   };
 
   const getHeadName = (headId: string | null) => {
-    if (!headId) return 'Not assigned';
+    if (!headId) return t('departments.notAssigned');
     const emp = employees.find((e) => e.id === headId);
     return emp ? `${emp.first_name} ${emp.last_name}` : 'Unknown';
   };
@@ -212,8 +214,8 @@ export default function Departments() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Departments</h1>
-          <p className="text-gray-600 mt-2">Manage academic and administrative departments</p>
+          <h1 className="text-3xl font-bold text-gray-900">{t('departments.title')}</h1>
+          <p className="text-gray-600 mt-2">{t('departments.subtitle')}</p>
         </div>
         {isAdminOrHR && (
           <button
@@ -221,7 +223,7 @@ export default function Departments() {
             className="flex items-center space-x-2 bg-blue-900 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition-colors"
           >
             <Plus className="w-5 h-5" />
-            <span>Add Department</span>
+            <span>{t('departments.addDepartment')}</span>
           </button>
         )}
       </div>
@@ -263,10 +265,10 @@ export default function Departments() {
                 <p className="text-sm text-gray-600 mt-2">{dept.description}</p>
                 <div className="mt-4 pt-4 border-t border-gray-100 space-y-1">
                   <p className="text-sm text-gray-500">
-                    Head: <span className="font-medium text-gray-900">{getHeadName(dept.head_id)}</span>
+                    {t('departments.head')}: <span className="font-medium text-gray-900">{getHeadName(dept.head_id)}</span>
                   </p>
                   <p className="text-sm text-gray-500">
-                    Employees: <span className="font-medium text-gray-900">{dept.employees?.[0]?.count || 0}</span>
+                    {t('departments.employees')}: <span className="font-medium text-gray-900">{dept.employees?.[0]?.count || 0}</span>
                   </p>
                 </div>
               </div>
@@ -281,7 +283,7 @@ export default function Departments() {
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
             <div className="flex items-center justify-between p-6 border-b">
               <h2 className="text-xl font-bold text-gray-900">
-                {editingDept ? 'Edit Department' : 'Add Department'}
+                {editingDept ? t('departments.editDepartment') : t('departments.addDepartment')}
               </h2>
               <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600">
                 <X className="w-6 h-6" />
@@ -289,45 +291,45 @@ export default function Departments() {
             </div>
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Department Name *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('departments.departmentName')} *</label>
                 <input
                   type="text"
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="e.g. Computer Science"
+                  placeholder={t('departments.eComputerScience')}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Type *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('departments.type')} *</label>
                 <select
                   value={formData.type}
                   onChange={(e) => setFormData({ ...formData, type: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <option value="academic">Academic</option>
-                  <option value="administrative">Administrative</option>
+                  <option value="academic">{t('departments.academic')}</option>
+                  <option value="administrative">{t('departments.administrative')}</option>
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('departments.description')}</label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   rows={3}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Brief description of the department"
+                  placeholder={t('departments.briefDescription')}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Department Head</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('departments.departmentHead')}</label>
                 <select
                   value={formData.head_id}
                   onChange={(e) => setFormData({ ...formData, head_id: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <option value="">— Not assigned —</option>
+                  <option value="">{t('departments.notAssigned')}</option>
                   {employees.map((emp) => (
                     <option key={emp.id} value={emp.id}>
                       {emp.first_name} {emp.last_name}
@@ -341,14 +343,14 @@ export default function Departments() {
                   onClick={() => setShowModal(false)}
                   className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
                   className="px-4 py-2 bg-blue-900 text-white rounded-lg hover:bg-blue-800 transition-colors disabled:opacity-50"
                 >
-                  {submitting ? 'Saving...' : editingDept ? 'Update' : 'Add Department'}
+                  {submitting ? t('common.saving') : editingDept ? t('announcements.update') : t('departments.addDepartment')}
                 </button>
               </div>
             </form>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { logActivity } from '../lib/activityLog';
@@ -29,6 +30,7 @@ export default function Attendance() {
   const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   
   // Modal state for HR/Admin
@@ -140,7 +142,7 @@ export default function Attendance() {
 
       if (error) throw error;
       
-      // Log activity
+
       logActivity(user.id, 'attendance_checked_in', 'attendance', undefined, {
         date: today,
         check_in: time,
@@ -175,7 +177,7 @@ export default function Attendance() {
 
     try {
       if (!formData.employee_id) {
-        setError('Please select an employee');
+        setError(t('attendance.selectEmployeeError'));
         setSubmitting(false);
         return;
       }
@@ -207,7 +209,7 @@ export default function Attendance() {
       }
     } catch (err: any) {
       console.error('Error adding attendance:', err);
-      setError(err.message || 'Failed to add attendance');
+      setError(err.message || t('attendance.failedToAdd'));
     } finally {
       setSubmitting(false);
     }
@@ -225,8 +227,8 @@ export default function Attendance() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Attendance</h1>
-          <p className="text-gray-600 mt-2">Track daily attendance and working hours</p>
+          <h1 className="text-3xl font-bold text-gray-900">{t('attendance.title')}</h1>
+          <p className="text-gray-600 mt-2">{t('attendance.subtitle')}</p>
         </div>
         <div className="flex items-center space-x-3">
           {user?.role === 'employee' && selectedDate === new Date().toISOString().split('T')[0] && (
@@ -235,7 +237,7 @@ export default function Attendance() {
               className="flex items-center space-x-2 bg-blue-900 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition-colors"
             >
               <Clock className="w-5 h-5" />
-              <span>Mark Attendance</span>
+              <span>{t('attendance.markAttendance')}</span>
             </button>
           )}
           {(user?.role === 'admin' || user?.role === 'hr') && (
@@ -244,7 +246,7 @@ export default function Attendance() {
               className="flex items-center space-x-2 bg-blue-900 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition-colors"
             >
               <Plus className="w-5 h-5" />
-              <span>Add Attendance</span>
+              <span>{t('attendance.addAttendance')}</span>
             </button>
           )}
         </div>
@@ -286,10 +288,10 @@ export default function Attendance() {
                       </p>
                     )}
                     <div className="flex items-center space-x-4 text-sm text-gray-600">
-                      <span>Check In: {record.check_in || 'N/A'}</span>
-                      <span>Check Out: {record.check_out || 'N/A'}</span>
+                      <span>{t('attendance.checkIn')}: {record.check_in || t('common.na')}</span>
+                      <span>{t('attendance.checkOut')}: {record.check_out || t('common.na')}</span>
                       {calculateHoursWorked(record.check_in, record.check_out) && (
-                        <span className="font-medium text-gray-900">Hours: {calculateHoursWorked(record.check_in, record.check_out)}</span>
+                        <span className="font-medium text-gray-900">{t('attendance.hours')}: {calculateHoursWorked(record.check_in, record.check_out)}</span>
                       )}
                     </div>
                     {record.notes && (
@@ -303,7 +305,7 @@ export default function Attendance() {
                   record.status === 'absent' ? 'bg-red-100 text-red-800' :
                   'bg-gray-100 text-gray-800'
                 }`}>
-                  {record.status}
+                  {record.status === 'present' ? t('attendance.present') : record.status === 'absent' ? t('attendance.absent') : record.status === 'late' ? t('attendance.late') : record.status === 'half-day' ? t('attendance.halfDay') : record.status}
                 </span>
               </div>
             </div>
@@ -312,7 +314,7 @@ export default function Attendance() {
 
         {attendanceRecords.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-gray-500">No attendance records for this date</p>
+            <p className="text-gray-500">{t('attendance.noRecords')}</p>
           </div>
         )}
       </div>
@@ -322,7 +324,7 @@ export default function Attendance() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-lg mx-4">
             <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <h2 className="text-xl font-bold text-gray-900">Add Attendance Record</h2>
+              <h2 className="text-xl font-bold text-gray-900">{t('attendance.addAttendanceRecord')}</h2>
               <button
                 onClick={() => setShowAddModal(false)}
                 className="text-gray-500 hover:text-gray-700"
@@ -340,14 +342,14 @@ export default function Attendance() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Employee <span className="text-red-500">*</span>
+                  {t('attendance.employee')} <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={formData.employee_id}
                   onChange={(e) => setFormData({ ...formData, employee_id: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="">Select Employee</option>
+                  <option value="">{t('attendance.selectEmployee')}</option>
                   {employees.map((emp) => (
                     <option key={emp.id} value={emp.id}>
                       {emp.first_name} {emp.last_name} ({emp.employee_number})
@@ -358,7 +360,7 @@ export default function Attendance() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Date <span className="text-red-500">*</span>
+                  {t('attendance.date')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="date"
@@ -370,7 +372,7 @@ export default function Attendance() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Check In</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('attendance.checkIn')}</label>
                   <input
                     type="time"
                     value={formData.check_in}
@@ -379,7 +381,7 @@ export default function Attendance() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Check Out</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('attendance.checkOut')}</label>
                   <input
                     type="time"
                     value={formData.check_out}
@@ -390,26 +392,26 @@ export default function Attendance() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('attendance.status')}</label>
                 <select
                   value={formData.status}
                   onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="present">Present</option>
-                  <option value="absent">Absent</option>
-                  <option value="late">Late</option>
-                  <option value="half-day">Half Day</option>
+                  <option value="present">{t('attendance.present')}</option>
+                  <option value="absent">{t('attendance.absent')}</option>
+                  <option value="late">{t('attendance.late')}</option>
+                  <option value="half-day">{t('attendance.halfDay')}</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('attendance.notes')}</label>
                 <textarea
                   value={formData.notes}
                   onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                   rows={2}
-                  placeholder="Optional notes..."
+                  placeholder={t('attendance.optionalNotes')}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -420,14 +422,14 @@ export default function Attendance() {
                   onClick={() => setShowAddModal(false)}
                   className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
                   className="px-4 py-2 bg-blue-900 text-white rounded-lg hover:bg-blue-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {submitting ? 'Adding...' : 'Add Attendance'}
+                  {submitting ? t('common.adding') : t('attendance.addAttendance')}
                 </button>
               </div>
             </form>

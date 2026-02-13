@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useNotification } from '../contexts/NotificationContext';
@@ -48,6 +49,7 @@ export default function Leaves() {
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const { showNotification } = useNotification();
+  const { t } = useTranslation();
   const [filter, setFilter] = useState('all');
   const [showApplyModal, setShowApplyModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -255,7 +257,7 @@ export default function Leaves() {
 
       if (error) throw error;
 
-      showNotification('success', 'Leave request submitted successfully');
+      showNotification('success', t('leaves.leaveSubmitted'));
 
       // Log activity
       if (user) {
@@ -326,7 +328,7 @@ export default function Leaves() {
       // Deduct from leave balance
       await updateLeaveBalance(leave.employee_id, leave.leave_type, leave.days_count, 'add');
 
-      showNotification('success', 'Leave request approved successfully');
+      showNotification('success', t('leaves.leaveApproved'));
 
       // Log activity
       if (user) {
@@ -368,7 +370,7 @@ export default function Leaves() {
 
       if (error) throw error;
 
-      showNotification('success', 'Leave request rejected');
+      showNotification('success', t('leaves.leaveRejected'));
 
       // Log activity
       if (user) {
@@ -411,15 +413,15 @@ export default function Leaves() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Leave Management</h1>
-          <p className="text-gray-600 mt-2">Manage leave applications and balances</p>
+          <h1 className="text-3xl font-bold text-gray-900">{t('leaves.title')}</h1>
+          <p className="text-gray-600 mt-2">{t('leaves.subtitle')}</p>
         </div>
         <button 
           onClick={() => setShowApplyModal(true)}
           className="flex items-center space-x-2 bg-blue-900 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition-colors"
         >
           <Plus className="w-5 h-5" />
-          <span>Apply Leave</span>
+          <span>{t('leaves.applyLeave')}</span>
         </button>
       </div>
 
@@ -429,7 +431,7 @@ export default function Leaves() {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500">Annual Leave</p>
+                <p className="text-sm text-gray-500">{t('leaves.annualLeave')}</p>
                 <p className="text-2xl font-bold text-blue-900">
                   {leaveBalance.annual_total - leaveBalance.annual_used}
                   <span className="text-sm font-normal text-gray-500"> / {leaveBalance.annual_total}</span>
@@ -450,7 +452,7 @@ export default function Leaves() {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500">Sick Leave</p>
+                <p className="text-sm text-gray-500">{t('leaves.sickLeave')}</p>
                 <p className="text-2xl font-bold text-red-600">
                   {leaveBalance.sick_total - leaveBalance.sick_used}
                   <span className="text-sm font-normal text-gray-500"> / {leaveBalance.sick_total}</span>
@@ -471,7 +473,7 @@ export default function Leaves() {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500">Casual/Personal Leave</p>
+                <p className="text-sm text-gray-500">{t('leaves.casualLeave')}</p>
                 <p className="text-2xl font-bold text-green-600">
                   {leaveBalance.casual_total - leaveBalance.casual_used}
                   <span className="text-sm font-normal text-gray-500"> / {leaveBalance.casual_total}</span>
@@ -499,7 +501,7 @@ export default function Leaves() {
               filter === 'all' ? 'bg-blue-900 text-white' : 'bg-gray-100 text-gray-700'
             }`}
           >
-            All
+            {t('leaves.all')}
           </button>
           <button
             onClick={() => setFilter('pending')}
@@ -507,7 +509,7 @@ export default function Leaves() {
               filter === 'pending' ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-700'
             }`}
           >
-            Pending
+            {t('leaves.pending')}
           </button>
           <button
             onClick={() => setFilter('approved')}
@@ -515,7 +517,7 @@ export default function Leaves() {
               filter === 'approved' ? 'bg-green-500 text-white' : 'bg-gray-100 text-gray-700'
             }`}
           >
-            Approved
+            {t('leaves.approved')}
           </button>
           <button
             onClick={() => setFilter('rejected')}
@@ -523,7 +525,7 @@ export default function Leaves() {
               filter === 'rejected' ? 'bg-red-500 text-white' : 'bg-gray-100 text-gray-700'
             }`}
           >
-            Rejected
+            {t('leaves.rejected')}
           </button>
         </div>
 
@@ -551,7 +553,7 @@ export default function Leaves() {
                       <span className="text-sm text-gray-600">
                         {new Date(leave.start_date).toLocaleDateString()} - {new Date(leave.end_date).toLocaleDateString()}
                       </span>
-                      <span className="text-sm text-gray-600">{leave.days_count} days</span>
+                      <span className="text-sm text-gray-600">{leave.days_count} {t('common.days')}</span>
                     </div>
                     <p className="text-sm text-gray-700">{leave.reason}</p>
                   </div>
@@ -597,7 +599,7 @@ export default function Leaves() {
 
         {filteredLeaves.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-gray-500">No leave applications found</p>
+            <p className="text-gray-500">{t('leaves.noLeaves')}</p>
           </div>
         )}
       </div>
@@ -607,7 +609,7 @@ export default function Leaves() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
             <div className="flex items-center justify-between p-4 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900">Apply for Leave</h2>
+              <h2 className="text-xl font-semibold text-gray-900">{t('leaves.applyForLeave')}</h2>
               <button
                 onClick={() => setShowApplyModal(false)}
                 className="text-gray-500 hover:text-gray-700"
@@ -619,26 +621,26 @@ export default function Leaves() {
             <form onSubmit={handleApplyLeave} className="p-4 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Leave Type
+                  {t('leaves.leaveType')}
                 </label>
                 <select
                   value={formData.leave_type}
                   onChange={(e) => setFormData({ ...formData, leave_type: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <option value="Annual">Annual Leave</option>
-                  <option value="Sick">Sick Leave</option>
-                  <option value="Personal">Personal Leave</option>
-                  <option value="Maternity">Maternity Leave</option>
-                  <option value="Paternity">Paternity Leave</option>
-                  <option value="Emergency">Emergency Leave</option>
+                  <option value="Annual">{t('leaves.annual')}</option>
+                  <option value="Sick">{t('leaves.sick')}</option>
+                  <option value="Personal">{t('leaves.personal')}</option>
+                  <option value="Maternity">{t('leaves.maternity')}</option>
+                  <option value="Paternity">{t('leaves.paternity')}</option>
+                  <option value="Emergency">{t('leaves.emergency')}</option>
                 </select>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Start Date
+                    {t('leaves.startDate')}
                   </label>
                   <input
                     type="date"
@@ -650,7 +652,7 @@ export default function Leaves() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    End Date
+                    {t('leaves.endDate')}
                   </label>
                   <input
                     type="date"
@@ -667,7 +669,7 @@ export default function Leaves() {
                 <div className="space-y-2">
                   <div className="bg-blue-50 px-3 py-2 rounded-lg">
                     <p className="text-sm text-blue-800">
-                      Duration: <strong>{calculateDays(formData.start_date, formData.end_date)} days</strong>
+                      {t('leaves.duration')}: <strong>{calculateDays(formData.start_date, formData.end_date)} {t('common.days')}</strong>
                     </p>
                   </div>
                   {leaveBalance && getAvailableBalance(formData.leave_type) !== 999 && (
@@ -677,9 +679,9 @@ export default function Leaves() {
                         : 'bg-green-50 text-green-800'
                     }`}>
                       <p className="text-sm">
-                        Available {formData.leave_type} balance: <strong>{getAvailableBalance(formData.leave_type)} days</strong>
+                        Available {formData.leave_type} balance: <strong>{getAvailableBalance(formData.leave_type)} {t('common.days')}</strong>
                         {calculateDays(formData.start_date, formData.end_date) > getAvailableBalance(formData.leave_type) && (
-                          <span className="block text-red-600 font-medium mt-1">Insufficient balance!</span>
+                          <span className="block text-red-600 font-medium mt-1">{t('leaves.insufficientBalance')}</span>
                         )}
                       </p>
                     </div>
@@ -689,13 +691,13 @@ export default function Leaves() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Reason
+                  {t('leaves.reason')}
                 </label>
                 <textarea
                   value={formData.reason}
                   onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
                   rows={3}
-                  placeholder="Please provide a reason for your leave request..."
+                  placeholder={t('leaves.reasonPlaceholder')}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                   required
                 />
@@ -707,7 +709,7 @@ export default function Leaves() {
                   onClick={() => setShowApplyModal(false)}
                   className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
                 <button
                   type="submit"
@@ -717,10 +719,10 @@ export default function Leaves() {
                   {submitting ? (
                     <>
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                      <span>Submitting...</span>
+                      <span>{t('leaves.submitting')}</span>
                     </>
                   ) : (
-                    <span>Submit Request</span>
+                    <span>{t('leaves.submitRequest')}</span>
                   )}
                 </button>
               </div>

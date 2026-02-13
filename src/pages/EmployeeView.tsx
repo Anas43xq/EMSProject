@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { useNotification } from '../contexts/NotificationContext';
 import { ArrowLeft, Edit, Mail, Phone, Calendar, MapPin, Briefcase, User, FileText } from 'lucide-react';
@@ -36,6 +37,7 @@ interface Employee {
 export default function EmployeeView() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [employee, setEmployee] = useState<Employee | null>(null);
   const [loading, setLoading] = useState(true);
   const { showNotification } = useNotification();
@@ -60,7 +62,7 @@ export default function EmployeeView() {
       if (error) throw error;
 
       if (!data) {
-        showNotification('error', 'Employee not found');
+        showNotification('error', t('employees.notFound'));
         navigate('/employees');
         return;
       }
@@ -68,7 +70,7 @@ export default function EmployeeView() {
       setEmployee(data);
     } catch (error) {
       console.error('Error loading employee:', error);
-      showNotification('error', 'Failed to load employee details');
+      showNotification('error', t('employees.failedToLoadDetails'));
       navigate('/employees');
     } finally {
       setLoading(false);
@@ -109,7 +111,7 @@ export default function EmployeeView() {
           className="flex items-center space-x-2 bg-blue-900 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition-colors"
         >
           <Edit className="w-5 h-5" />
-          <span>Edit Employee</span>
+          <span>{t('employees.editEmployee')}</span>
         </Link>
       </div>
 
@@ -118,15 +120,15 @@ export default function EmployeeView() {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
               <User className="w-5 h-5 mr-2" />
-              Personal Information
+              {t('employees.personalInfo')}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">Employee Number</label>
+                <label className="block text-sm font-medium text-gray-600 mb-1">{t('employees.employeeNumber')}</label>
                 <p className="text-gray-900">{employee.employee_number}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">Email</label>
+                <label className="block text-sm font-medium text-gray-600 mb-1">{t('employees.email')}</label>
                 <div className="flex items-center text-gray-900">
                   <Mail className="w-4 h-4 mr-2 text-gray-400" />
                   <a href={`mailto:${employee.email}`} className="hover:text-blue-600">
@@ -135,31 +137,31 @@ export default function EmployeeView() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">Phone</label>
+                <label className="block text-sm font-medium text-gray-600 mb-1">{t('employees.phone')}</label>
                 <div className="flex items-center text-gray-900">
                   <Phone className="w-4 h-4 mr-2 text-gray-400" />
                   <a href={`tel:${employee.phone}`} className="hover:text-blue-600">
-                    {employee.phone || 'N/A'}
+                    {employee.phone || t('common.na')}
                   </a>
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">Date of Birth</label>
+                <label className="block text-sm font-medium text-gray-600 mb-1">{t('employees.dateOfBirth')}</label>
                 <div className="flex items-center text-gray-900">
                   <Calendar className="w-4 h-4 mr-2 text-gray-400" />
-                  {employee.date_of_birth ? format(new Date(employee.date_of_birth), 'PPP') : 'N/A'}
+                  {employee.date_of_birth ? format(new Date(employee.date_of_birth), 'PPP') : t('common.na')}
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">Gender</label>
-                <p className="text-gray-900 capitalize">{employee.gender || 'N/A'}</p>
+                <label className="block text-sm font-medium text-gray-600 mb-1">{t('employees.gender')}</label>
+                <p className="text-gray-900 capitalize">{employee.gender || t('common.na')}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">Address</label>
+                <label className="block text-sm font-medium text-gray-600 mb-1">{t('employees.address')}</label>
                 <div className="flex items-start text-gray-900">
                   <MapPin className="w-4 h-4 mr-2 text-gray-400 mt-0.5" />
                   <div>
-                    <p>{employee.address || 'N/A'}</p>
+                    <p>{employee.address || t('common.na')}</p>
                     {(employee.city || employee.state || employee.postal_code) && (
                       <p className="text-sm text-gray-600">
                         {[employee.city, employee.state, employee.postal_code].filter(Boolean).join(', ')}
@@ -174,25 +176,25 @@ export default function EmployeeView() {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
               <Briefcase className="w-5 h-5 mr-2" />
-              Employment Details
+              {t('employees.employmentDetails')}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">Department</label>
-                <p className="text-gray-900">{employee.departments?.name || 'N/A'}</p>
+                <label className="block text-sm font-medium text-gray-600 mb-1">{t('employees.department')}</label>
+                <p className="text-gray-900">{employee.departments?.name || t('common.na')}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">Position</label>
+                <label className="block text-sm font-medium text-gray-600 mb-1">{t('employees.position')}</label>
                 <p className="text-gray-900">{employee.position}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">Employment Type</label>
+                <label className="block text-sm font-medium text-gray-600 mb-1">{t('employees.employmentType')}</label>
                 <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 capitalize">
                   {employee.employment_type}
                 </span>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">Status</label>
+                <label className="block text-sm font-medium text-gray-600 mb-1">{t('employees.status')}</label>
                 <span className={`px-2 py-1 text-xs font-medium rounded-full capitalize ${
                   employee.status === 'active'
                     ? 'bg-green-100 text-green-800'
@@ -204,12 +206,12 @@ export default function EmployeeView() {
                 </span>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">Hire Date</label>
+                <label className="block text-sm font-medium text-gray-600 mb-1">{t('employees.hireDate')}</label>
                 <p className="text-gray-900">{format(new Date(employee.hire_date), 'PPP')}</p>
               </div>
               {employee.termination_date && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-1">Termination Date</label>
+                  <label className="block text-sm font-medium text-gray-600 mb-1">{t('employees.terminationDate')}</label>
                   <p className="text-gray-900">{format(new Date(employee.termination_date), 'PPP')}</p>
                 </div>
               )}
@@ -220,7 +222,7 @@ export default function EmployeeView() {
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
                 <FileText className="w-5 h-5 mr-2" />
-                Qualifications
+                {t('employees.qualifications')}
               </h2>
               <div className="space-y-3">
                 {employee.qualifications.map((qual: any, index: number) => (
@@ -236,14 +238,14 @@ export default function EmployeeView() {
 
         <div className="space-y-6">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Emergency Contact</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-4">{t('employees.emergencyContact')}</h2>
             <div className="space-y-3">
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">Name</label>
-                <p className="text-gray-900">{employee.emergency_contact_name || 'N/A'}</p>
+                <label className="block text-sm font-medium text-gray-600 mb-1">{t('common.name')}</label>
+                <p className="text-gray-900">{employee.emergency_contact_name || t('common.na')}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">Phone</label>
+                <label className="block text-sm font-medium text-gray-600 mb-1">{t('employees.phone')}</label>
                 <div className="flex items-center text-gray-900">
                   <Phone className="w-4 h-4 mr-2 text-gray-400" />
                   {employee.emergency_contact_phone ? (
@@ -251,7 +253,7 @@ export default function EmployeeView() {
                       {employee.emergency_contact_phone}
                     </a>
                   ) : (
-                    'N/A'
+                    t('common.na')
                   )}
                 </div>
               </div>
@@ -259,16 +261,16 @@ export default function EmployeeView() {
           </div>
 
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Stats</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-4">{t('employees.quickStats')}</h2>
             <div className="space-y-3">
               <div className="flex justify-between items-center py-2 border-b border-gray-200">
-                <span className="text-gray-600">Years of Service</span>
+                <span className="text-gray-600">{t('employees.yearsOfService')}</span>
                 <span className="font-semibold text-gray-900">
-                  {Math.floor((new Date().getTime() - new Date(employee.hire_date).getTime()) / (1000 * 60 * 60 * 24 * 365))} years
+                  {Math.floor((new Date().getTime() - new Date(employee.hire_date).getTime()) / (1000 * 60 * 60 * 24 * 365))} {t('employees.years')}
                 </span>
               </div>
               <div className="flex justify-between items-center py-2">
-                <span className="text-gray-600">Employment Status</span>
+                <span className="text-gray-600">{t('employees.employmentStatus')}</span>
                 <span className={`px-2 py-1 text-xs font-medium rounded-full capitalize ${
                   employee.status === 'active'
                     ? 'bg-green-100 text-green-800'

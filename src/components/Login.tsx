@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { useNotification } from '../contexts/NotificationContext';
 import { supabase } from '../lib/supabase';
-import { Briefcase, ArrowLeft } from 'lucide-react';
+import { Briefcase, ArrowLeft, Globe } from 'lucide-react';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -16,6 +17,13 @@ export default function Login() {
   const { user, signIn } = useAuth();
   const { showNotification } = useNotification();
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === 'ar';
+
+  const toggleLanguage = () => {
+    const newLang = i18n.language === 'ar' ? 'en' : 'ar';
+    i18n.changeLanguage(newLang);
+  };
 
   useEffect(() => {
     if (user) {
@@ -30,11 +38,11 @@ export default function Login() {
 
     try {
       await signIn(email, password);
-      showNotification('success', 'Successfully signed in!');
+      showNotification('success', t('auth.signedInSuccess'));
       navigate('/dashboard', { replace: true });
     } catch (err) {
-      setError('Invalid email or password');
-      showNotification('error', 'Invalid email or password');
+      setError(t('auth.invalidCredentials'));
+      showNotification('error', t('auth.invalidCredentials'));
     } finally {
       setLoading(false);
     }
@@ -55,12 +63,12 @@ export default function Login() {
 
       if (error) throw error;
 
-      showNotification('success', 'Password reset email sent! Please check your inbox.');
+      showNotification('success', t('auth.resetEmailSent'));
       setShowForgotPassword(false);
       setResetEmail('');
     } catch (err: any) {
-      setError(err.message || 'Failed to send password reset email');
-      showNotification('error', 'Failed to send password reset email');
+      setError(err.message || t('auth.resetEmailFailed'));
+      showNotification('error', t('auth.resetEmailFailed'));
     } finally {
       setResetLoading(false);
     }
@@ -68,14 +76,14 @@ export default function Login() {
 
   if (showForgotPassword) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-slate-900 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-slate-900 flex items-center justify-center p-4" dir={isRTL ? 'rtl' : 'ltr'}>
         <div className="bg-white rounded-lg shadow-2xl w-full max-w-md p-8">
           <button
             onClick={() => setShowForgotPassword(false)}
-            className="flex items-center text-gray-600 hover:text-gray-900 mb-6 transition-colors"
+            className={`flex items-center text-gray-600 hover:text-gray-900 mb-6 transition-colors ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}
           >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Sign In
+            <ArrowLeft className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
+            <span>{t('auth.backToSignIn')}</span>
           </button>
 
           <div className="flex items-center justify-center mb-8">
@@ -85,10 +93,10 @@ export default function Login() {
           </div>
 
           <h1 className="text-3xl font-bold text-center text-gray-900 mb-2">
-            Reset Password
+            {t('auth.resetPassword')}
           </h1>
           <p className="text-center text-gray-600 mb-8">
-            Enter your email address and we'll send you a link to reset your password
+            {t('auth.resetPasswordDesc')}
           </p>
 
           {error && (
@@ -100,7 +108,7 @@ export default function Login() {
           <form onSubmit={handleForgotPassword} className="space-y-6">
             <div>
               <label htmlFor="reset-email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email Address
+                {t('auth.emailAddress')}
               </label>
               <input
                 id="reset-email"
@@ -117,7 +125,7 @@ export default function Login() {
               disabled={resetLoading}
               className="w-full bg-blue-900 text-white py-3 rounded-lg font-medium hover:bg-blue-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {resetLoading ? 'Sending...' : 'Send Reset Link'}
+              {resetLoading ? t('common.sending') : t('auth.sendResetLink')}
             </button>
           </form>
         </div>
@@ -126,19 +134,28 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-slate-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-slate-900 flex items-center justify-center p-4" dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="bg-white rounded-lg shadow-2xl w-full max-w-md p-8">
-        <div className="flex items-center justify-center mb-8">
+        <div className="flex items-center justify-between mb-8">
+          <div />
           <div className="bg-blue-900 p-3 rounded-lg">
             <Briefcase className="w-10 h-10 text-white" />
           </div>
+          <button
+            onClick={toggleLanguage}
+            className="flex items-center space-x-1 text-gray-500 hover:text-gray-900 transition-colors"
+            title={isRTL ? 'Switch to English' : 'التبديل للعربية'}
+          >
+            <Globe className="w-5 h-5" />
+            <span className="text-sm">{isRTL ? 'EN' : 'ع'}</span>
+          </button>
         </div>
 
         <h1 className="text-3xl font-bold text-center text-gray-900 mb-2">
-          Employee Management System
+          {t('auth.employeeManagementSystem')}
         </h1>
         <p className="text-center text-gray-600 mb-8">
-          Sign in to continue
+          {t('auth.signInToContinue')}
         </p>
 
         {error && (
@@ -150,7 +167,7 @@ export default function Login() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-              Email Address
+              {t('auth.emailAddress')}
             </label>
             <input
               id="email"
@@ -165,14 +182,14 @@ export default function Login() {
           <div>
             <div className="flex items-center justify-between mb-2">
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password
+                {t('auth.password')}
               </label>
               <button
                 type="button"
                 onClick={() => setShowForgotPassword(true)}
                 className="text-sm text-blue-900 hover:text-blue-700 transition-colors"
               >
-                Forgot password?
+                {t('auth.forgotPassword')}
               </button>
             </div>
             <input
@@ -190,16 +207,16 @@ export default function Login() {
             disabled={loading}
             className="w-full bg-blue-900 text-white py-3 rounded-lg font-medium hover:bg-blue-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Signing in...' : 'Sign In'}
+            {loading ? t('auth.signingIn') : t('auth.signIn')}
           </button>
         </form>
 
         <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-          <p className="text-sm text-gray-700 font-medium mb-2">Demo Accounts:</p>
+          <p className="text-sm text-gray-700 font-medium mb-2">{t('auth.demoAccounts')}</p>
           <div className="text-xs text-gray-600 space-y-1">
-            <p>Admin: admin@university.edu / admin123</p>
-            <p>HR: hr@university.edu / hr123</p>
-            <p>Employee: employee@university.edu / emp123</p>
+            <p>{t('auth.demoAdmin')}</p>
+            <p>{t('auth.demoHR')}</p>
+            <p>{t('auth.demoEmployee')}</p>
           </div>
         </div>
       </div>

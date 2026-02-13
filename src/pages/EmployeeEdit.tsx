@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { useNotification } from '../contexts/NotificationContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -37,6 +38,7 @@ interface EmployeeFormData {
 export default function EmployeeEdit() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { showNotification } = useNotification();
   const { user } = useAuth();
 
@@ -84,7 +86,7 @@ export default function EmployeeEdit() {
       setDepartments(data || []);
     } catch (error) {
       console.error('Error loading departments:', error);
-      showNotification('error', 'Failed to load departments');
+      showNotification('error', t('employees.failedToLoadDepartments'));
     }
   };
 
@@ -99,7 +101,7 @@ export default function EmployeeEdit() {
       if (error) throw error;
 
       if (!data) {
-        showNotification('error', 'Employee not found');
+        showNotification('error', t('employees.notFound'));
         navigate('/employees');
         return;
       }
@@ -128,7 +130,7 @@ export default function EmployeeEdit() {
       });
     } catch (error) {
       console.error('Error loading employee:', error);
-      showNotification('error', 'Failed to load employee details');
+      showNotification('error', t('employees.failedToLoadDetails'));
       navigate('/employees');
     } finally {
       setLoading(false);
@@ -144,7 +146,7 @@ export default function EmployeeEdit() {
     e.preventDefault();
 
     if (!formData.first_name || !formData.last_name || !formData.email || !formData.position) {
-      showNotification('error', 'Please fill in all required fields');
+      showNotification('error', t('employees.fillRequiredFields'));
       return;
     }
 
@@ -165,7 +167,7 @@ export default function EmployeeEdit() {
 
       if (error) throw error;
 
-      showNotification('success', 'Employee updated successfully');
+      showNotification('success', t('employees.employeeUpdated'));
       
       // Log activity
       if (user) {
@@ -178,7 +180,7 @@ export default function EmployeeEdit() {
       navigate(`/employees/${id}`);
     } catch (error: any) {
       console.error('Error updating employee:', error);
-      showNotification('error', error.message || 'Failed to update employee');
+      showNotification('error', error.message || t('employees.failedToSave'));
     } finally {
       setSaving(false);
     }
@@ -202,18 +204,18 @@ export default function EmployeeEdit() {
           <ArrowLeft className="w-6 h-6 text-gray-600" />
         </Link>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Edit Employee</h1>
-          <p className="text-gray-600 mt-1">Update employee information</p>
+          <h1 className="text-3xl font-bold text-gray-900">{t('employees.editEmployee')}</h1>
+          <p className="text-gray-600 mt-1">{t('employees.updateInfo')}</p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Personal Information</h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-4">{t('employees.personalInfo')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Employee Number <span className="text-red-500">*</span>
+                {t('employees.employeeNumber')} <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -227,7 +229,7 @@ export default function EmployeeEdit() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email <span className="text-red-500">*</span>
+                {t('employees.email')} <span className="text-red-500">*</span>
               </label>
               <input
                 type="email"
@@ -240,7 +242,7 @@ export default function EmployeeEdit() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                First Name <span className="text-red-500">*</span>
+                {t('employees.firstName')} <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -253,7 +255,7 @@ export default function EmployeeEdit() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Last Name <span className="text-red-500">*</span>
+                {t('employees.lastName')} <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -265,7 +267,7 @@ export default function EmployeeEdit() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('employees.phone')}</label>
               <input
                 type="tel"
                 name="phone"
@@ -275,7 +277,7 @@ export default function EmployeeEdit() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Date of Birth</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('employees.dateOfBirth')}</label>
               <input
                 type="date"
                 name="date_of_birth"
@@ -285,21 +287,21 @@ export default function EmployeeEdit() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Gender</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('employees.gender')}</label>
               <select
                 name="gender"
                 value={formData.gender}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="">Select Gender</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="other">Other</option>
+                <option value="">{t('employees.selectGender')}</option>
+                <option value="male">{t('employees.male')}</option>
+                <option value="female">{t('employees.female')}</option>
+                <option value="other">{t('employees.other')}</option>
               </select>
             </div>
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('employees.address')}</label>
               <input
                 type="text"
                 name="address"
@@ -309,7 +311,7 @@ export default function EmployeeEdit() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('employees.city')}</label>
               <input
                 type="text"
                 name="city"
@@ -319,7 +321,7 @@ export default function EmployeeEdit() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">State</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('employees.state')}</label>
               <input
                 type="text"
                 name="state"
@@ -329,7 +331,7 @@ export default function EmployeeEdit() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Postal Code</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('employees.postalCode')}</label>
               <input
                 type="text"
                 name="postal_code"
@@ -342,11 +344,11 @@ export default function EmployeeEdit() {
         </div>
 
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Employment Details</h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-4">{t('employees.employmentDetails')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Department <span className="text-red-500">*</span>
+                {t('employees.department')} <span className="text-red-500">*</span>
               </label>
               <select
                 name="department_id"
@@ -355,7 +357,7 @@ export default function EmployeeEdit() {
                 required
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="">Select Department</option>
+                <option value="">{t('employees.selectDepartment')}</option>
                 {departments.map(dept => (
                   <option key={dept.id} value={dept.id}>{dept.name}</option>
                 ))}
@@ -363,7 +365,7 @@ export default function EmployeeEdit() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Position <span className="text-red-500">*</span>
+                {t('employees.position')} <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -376,7 +378,7 @@ export default function EmployeeEdit() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Employment Type <span className="text-red-500">*</span>
+                {t('employees.employmentType')} <span className="text-red-500">*</span>
               </label>
               <select
                 name="employment_type"
@@ -385,14 +387,15 @@ export default function EmployeeEdit() {
                 required
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="full-time">Full-time</option>
-                <option value="part-time">Part-time</option>
-                <option value="contract">Contract</option>
+                <option value="full-time">{t('employees.fullTime')}</option>
+                <option value="part-time">{t('employees.partTime')}</option>
+                <option value="contract">{t('employees.contract')}</option>
+                <option value="intern">{t('employees.intern')}</option>
               </select>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Status <span className="text-red-500">*</span>
+                {t('employees.status')} <span className="text-red-500">*</span>
               </label>
               <select
                 name="status"
@@ -401,14 +404,14 @@ export default function EmployeeEdit() {
                 required
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-                <option value="on-leave">On Leave</option>
+                <option value="active">{t('common.active')}</option>
+                <option value="inactive">{t('common.inactive')}</option>
+                <option value="on-leave">{t('employees.onLeave')}</option>
               </select>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Hire Date <span className="text-red-500">*</span>
+                {t('employees.hireDate')} <span className="text-red-500">*</span>
               </label>
               <input
                 type="date"
@@ -420,7 +423,7 @@ export default function EmployeeEdit() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Termination Date</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('employees.terminationDate')}</label>
               <input
                 type="date"
                 name="termination_date"
@@ -430,7 +433,7 @@ export default function EmployeeEdit() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Salary</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('employees.salary')}</label>
               <input
                 type="number"
                 name="salary"
@@ -445,10 +448,10 @@ export default function EmployeeEdit() {
         </div>
 
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Emergency Contact</h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-4">{t('employees.contactInfo')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Contact Name</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('employees.emergencyContact')}</label>
               <input
                 type="text"
                 name="emergency_contact_name"
@@ -458,7 +461,7 @@ export default function EmployeeEdit() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Contact Phone</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('employees.emergencyPhone')}</label>
               <input
                 type="tel"
                 name="emergency_contact_phone"
@@ -475,7 +478,7 @@ export default function EmployeeEdit() {
             to={`/employees/${id}`}
             className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
           >
-            Cancel
+            {t('common.cancel')}
           </Link>
           <button
             type="submit"
@@ -485,12 +488,12 @@ export default function EmployeeEdit() {
             {saving ? (
               <>
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                <span>Saving...</span>
+                <span>{t('common.saving')}</span>
               </>
             ) : (
               <>
                 <Save className="w-5 h-5" />
-                <span>Save Changes</span>
+                <span>{t('employees.saveChanges')}</span>
               </>
             )}
           </button>

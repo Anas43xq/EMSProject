@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { useNotification } from '../contexts/NotificationContext';
 import { Download, Users, Calendar, Clock } from 'lucide-react';
 import { format } from 'date-fns';
-import jsPDF from 'jspdf';
 
 interface Department {
   id: string;
@@ -63,12 +63,13 @@ interface DepartmentReport {
 type ReportType = 'employee' | 'leave' | 'attendance' | 'department';
 
 export default function Reports() {
+  const { t } = useTranslation();
   const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedReport, setSelectedReport] = useState<ReportType>('employee');
   const [dateRange, setDateRange] = useState('30');
   const [selectedDepartment, setSelectedDepartment] = useState('');
-  const [exportFormat, setExportFormat] = useState<'csv' | 'pdf' | 'excel'>('csv');
+
   const { showNotification } = useNotification();
 
   useEffect(() => {
@@ -281,20 +282,14 @@ export default function Reports() {
       }
 
       if (reportData && reportData.length > 0) {
-        if (exportFormat === 'pdf') {
-          downloadPDF(reportData, filename);
-        } else if (exportFormat === 'excel') {
-          downloadExcel(reportData, filename);
-        } else {
-          downloadCSV(reportData, filename);
-        }
-        showNotification('success', `Report generated successfully! ${reportData.length} records exported.`);
+        downloadCSV(reportData, filename);
+        showNotification('success', t('reports.reportSuccess', { count: reportData.length }));
       } else {
-        showNotification('warning', 'No data found for the selected criteria.');
+        showNotification('warning', t('reports.noData'));
       }
     } catch (error) {
       console.error('Error generating report:', error);
-      showNotification('error', 'Failed to generate report');
+      showNotification('error', t('reports.reportFailed'));
     } finally {
       setLoading(false);
     }
@@ -325,88 +320,7 @@ export default function Reports() {
     document.body.removeChild(link);
   };
 
-  const downloadPDF = (data: any[], filename: string) => {
-    if (data.length === 0) return;
 
-    const doc = new jsPDF();
-    const headers = Object.keys(data[0]);
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
-    let yPosition = 10;
-
-    // Add title
-    doc.setFontSize(14);
-    doc.text(filename.replace(/-/g, ' ').toUpperCase(), pageWidth / 2, yPosition, { align: 'center' });
-    yPosition += 10;
-
-    // Add date
-    doc.setFontSize(10);
-    doc.text(`Generated on: ${format(new Date(), 'yyyy-MM-dd HH:mm:ss')}`, pageWidth / 2, yPosition, { align: 'center' });
-    yPosition += 10;
-
-    // Add table headers
-    doc.setFontSize(9);
-    doc.setTextColor(30, 58, 138);
-    const columnWidth = (pageWidth - 20) / headers.length;
-    headers.forEach((header, index) => {
-      doc.text(header, 10 + index * columnWidth, yPosition, { maxWidth: columnWidth });
-    });
-
-    // Add horizontal line under headers
-    yPosition += 7;
-    doc.line(10, yPosition, pageWidth - 10, yPosition);
-    yPosition += 3;
-
-    // Add data rows
-    doc.setTextColor(0, 0, 0);
-    doc.setFontSize(8);
-
-    data.forEach((row) => {
-      if (yPosition > pageHeight - 15) {
-        doc.addPage();
-        yPosition = 10;
-      }
-
-      headers.forEach((header, colIndex) => {
-        const value = row[header]?.toString() || '';
-        const wrappedText = doc.splitTextToSize(value, columnWidth - 2);
-        doc.text(wrappedText, 10 + colIndex * columnWidth + 1, yPosition, { maxWidth: columnWidth - 2 });
-      });
-
-      yPosition += 5 + (Math.max(...headers.map(h => doc.splitTextToSize(row[h]?.toString() || '', columnWidth - 2).length)) - 1) * 2;
-    });
-
-    // And download the PDF
-    doc.save(`${filename}-${format(new Date(), 'yyyy-MM-dd')}.pdf`);
-  };
-
-  const downloadExcel = (data: any[], filename: string) => {
-    if (data.length === 0) return;
-
-    const headers = Object.keys(data[0]);
-    
-    // Create CSV content with tab separators for better Excel compatibility
-    const csvContent = [
-      headers.join('\t'),
-      ...data.map(row =>
-        headers.map(header => {
-          const value = row[header]?.toString() || '';
-          return value.replace(/\t/g, ' ').replace(/\n/g, ' ');
-        }).join('\t')
-      )
-    ].join('\n');
-
-    // Create blob and download as Excel file
-    const blob = new Blob([csvContent], { type: 'application/vnd.ms-excel;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', `${filename}-${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
 
   const generateCustomReport = () => {
     generateReport(selectedReport);
@@ -415,29 +329,29 @@ export default function Reports() {
   const reports = [
     {
       id: 'employee' as ReportType,
-      name: 'Employee Directory Report',
-      description: 'Complete list of all employees with their details',
+      name: t('reports.employeeReport'),
+      description: t('reports.employeeReportDesc'),
       icon: Users,
       color: 'bg-blue-500',
     },
     {
       id: 'leave' as ReportType,
-      name: 'Leave Report',
-      description: 'Summary of leave applications and balances',
+      name: t('reports.leaveReport'),
+      description: t('reports.leaveReportDesc'),
       icon: Calendar,
       color: 'bg-green-500',
     },
     {
       id: 'attendance' as ReportType,
-      name: 'Attendance Report',
-      description: 'Monthly attendance records and statistics',
+      name: t('reports.attendanceReport'),
+      description: t('reports.attendanceReportDesc'),
       icon: Clock,
       color: 'bg-cyan-500',
     },
     {
       id: 'department' as ReportType,
-      name: 'Department Report',
-      description: 'Department-wise employee distribution',
+      name: t('reports.departmentReport'),
+      description: t('reports.departmentReportDesc'),
       icon: Users,
       color: 'bg-teal-500',
     },
@@ -446,8 +360,8 @@ export default function Reports() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Reports & Analytics</h1>
-        <p className="text-gray-600 mt-2">Generate and download various reports in CSV format</p>
+        <h1 className="text-3xl font-bold text-gray-900">{t('reports.title')}</h1>
+        <p className="text-gray-600 mt-2">{t('reports.subtitle')}</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -468,12 +382,12 @@ export default function Reports() {
                   {loading ? (
                     <>
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                      <span className="text-sm">Generating...</span>
+                      <span className="text-sm">{t('reports.generatingReport')}</span>
                     </>
                   ) : (
                     <>
                       <Download className="w-4 h-4" />
-                      <span className="text-sm">Generate Report</span>
+                      <span className="text-sm">{t('reports.generateReport')}</span>
                     </>
                   )}
                 </button>
@@ -484,62 +398,49 @@ export default function Reports() {
       </div>
 
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Custom Report</h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-4">{t('reports.customReport')}</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Report Type</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">{t('reports.reportType')}</label>
             <select
               value={selectedReport}
               onChange={(e) => setSelectedReport(e.target.value as ReportType)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option value="employee">Employee Report</option>
-              <option value="leave">Leave Report</option>
-              <option value="attendance">Attendance Report</option>
-              <option value="department">Department Report</option>
+              <option value="employee">{t('reports.employeeReportOption')}</option>
+              <option value="leave">{t('reports.leaveReportOption')}</option>
+              <option value="attendance">{t('reports.attendanceReportOption')}</option>
+              <option value="department">{t('reports.departmentReportOption')}</option>
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Date Range</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">{t('reports.dateRange')}</label>
             <select
               value={dateRange}
               onChange={(e) => setDateRange(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option value="7">Last 7 Days</option>
-              <option value="30">Last 30 Days</option>
-              <option value="90">Last 3 Months</option>
-              <option value="365">Last Year</option>
-              <option value="all">All Time</option>
+              <option value="7">{t('reports.last7Days')}</option>
+              <option value="30">{t('reports.last30Days')}</option>
+              <option value="90">{t('reports.last3Months')}</option>
+              <option value="365">{t('reports.lastYear')}</option>
+              <option value="all">{t('reports.allTime')}</option>
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Department</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">{t('reports.department')}</label>
             <select
               value={selectedDepartment}
               onChange={(e) => setSelectedDepartment(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option value="">All Departments</option>
+              <option value="">{t('reports.allDepartments')}</option>
               {departments.map((dept) => (
                 <option key={dept.id} value={dept.id}>
                   {dept.name}
                 </option>
               ))}
             </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Format</label>
-            <select
-              value={exportFormat}
-              onChange={(e) => setExportFormat(e.target.value as 'csv' | 'pdf' | 'excel')}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="csv">CSV</option>
-              <option value="pdf">PDF</option>
-              <option value="excel">Excel</option>
-            </select>
-            <p className="text-xs text-gray-500 mt-1">Select export format (CSV, PDF, or Excel)</p>
           </div>
         </div>
         <button
@@ -550,12 +451,12 @@ export default function Reports() {
           {loading ? (
             <>
               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-              <span>Generating Report...</span>
+              <span>{t('reports.generatingReport')}</span>
             </>
           ) : (
             <>
               <Download className="w-5 h-5" />
-              <span>Generate Custom Report</span>
+              <span>{t('reports.generateCustomReport')}</span>
             </>
           )}
         </button>

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Bell, X, Info, Calendar, Clock, Settings } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
@@ -11,6 +12,7 @@ import {
 } from '../lib/dbNotifications';
 
 export default function NotificationCenter() {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<DbNotification[]>([]);
   const { user } = useAuth();
@@ -123,10 +125,10 @@ export default function NotificationCenter() {
     const hours = Math.floor(diff / 3600000);
     const days = Math.floor(diff / 86400000);
 
-    if (minutes < 1) return 'Just now';
-    if (minutes < 60) return `${minutes}m ago`;
-    if (hours < 24) return `${hours}h ago`;
-    if (days < 7) return `${days}d ago`;
+    if (minutes < 1) return t('notifications.justNow');
+    if (minutes < 60) return t('notifications.mAgo', { count: minutes });
+    if (hours < 24) return t('notifications.hAgo', { count: hours });
+    if (days < 7) return t('notifications.dAgo', { count: days });
     return date.toLocaleDateString();
   };
 
@@ -140,7 +142,7 @@ export default function NotificationCenter() {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-        aria-label="Notifications"
+        aria-label={t('notifications.title')}
       >
         <Bell className="w-5 h-5" />
         {notifications.length > 0 && (
@@ -155,7 +157,7 @@ export default function NotificationCenter() {
         <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl z-50 border border-gray-200">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
+            <h3 className="text-lg font-semibold text-gray-900">{t('notifications.title')}</h3>
             <button
               onClick={() => setIsOpen(false)}
               className="text-gray-400 hover:text-gray-600"
@@ -169,7 +171,7 @@ export default function NotificationCenter() {
             {notifications.length === 0 ? (
               <div className="p-8 text-center text-gray-500">
                 <Bell className="w-12 h-12 mx-auto mb-2 text-gray-300" />
-                <p>No notifications yet</p>
+                <p>{t('notifications.noNotifications')}</p>
               </div>
             ) : (
               <div className="divide-y divide-gray-200">
@@ -208,7 +210,7 @@ export default function NotificationCenter() {
                 onClick={handleClearAll}
                 className="text-sm text-blue-600 hover:text-blue-900 font-medium"
               >
-                Clear All
+                {t('notifications.clearAll')}
               </button>
             </div>
           )}

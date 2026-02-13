@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Lock, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useNotification } from '../contexts/NotificationContext';
@@ -7,6 +8,7 @@ import { useNotification } from '../contexts/NotificationContext';
 export default function ResetPassword() {
   const navigate = useNavigate();
   const { showNotification } = useNotification();
+  const { t } = useTranslation();
   
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -34,7 +36,7 @@ export default function ResetPassword() {
           });
 
           if (error || !data?.session) {
-            showNotification('error', 'Invalid or expired reset link. Please request a new password reset.');
+            showNotification('error', t('resetPassword.invalidLink'));
             setValidating(false);
             setTimeout(() => navigate('/login'), 3000);
             return;
@@ -59,7 +61,7 @@ export default function ResetPassword() {
           });
 
           if (setError || !sessionData?.session) {
-            showNotification('error', 'Failed to validate reset link. Please request a new password reset.');
+            showNotification('error', t('resetPassword.invalidLink'));
             setValidating(false);
             setTimeout(() => navigate('/login'), 3000);
             return;
@@ -71,12 +73,12 @@ export default function ResetPassword() {
         }
 
         // No valid token found
-        showNotification('error', 'Invalid or expired reset link. Please request a new password reset.');
+        showNotification('error', t('resetPassword.invalidLink'));
         setValidating(false);
         setTimeout(() => navigate('/login'), 3000);
       } catch (error) {
         console.error('Token validation error:', error);
-        showNotification('error', 'Failed to validate reset link');
+        showNotification('error', t('resetPassword.invalidLink'));
         setValidating(false);
         setTimeout(() => navigate('/login'), 3000);
       }
@@ -107,18 +109,18 @@ export default function ResetPassword() {
 
     // Password validation
     if (!password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = t('resetPassword.passwordRequired');
     } else if (password.length < 8) {
-      newErrors.password = 'Password must be at least 8 characters';
+      newErrors.password = t('resetPassword.passwordMinLength');
     } else if (!(/[A-Z]/.test(password)) || !(/[a-z]/.test(password)) || !(/\d/.test(password))) {
-      newErrors.password = 'Password must contain uppercase, lowercase, and numbers';
+      newErrors.password = t('resetPassword.passwordComplexity');
     }
 
     // Confirm password validation
     if (!confirmPassword) {
-      newErrors.confirmPassword = 'Please confirm your password';
+      newErrors.confirmPassword = t('resetPassword.confirmRequired');
     } else if (password !== confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+      newErrors.confirmPassword = t('resetPassword.passwordsMismatch');
     }
 
     setErrors(newErrors);
@@ -163,7 +165,7 @@ export default function ResetPassword() {
         throw error;
       }
 
-      showNotification('success', 'Password changed successfully! Redirecting to login...');
+      showNotification('success', t('resetPassword.passwordChanged'));
       
       // Sign out the user
       await supabase.auth.signOut();
@@ -176,10 +178,10 @@ export default function ResetPassword() {
       console.error('Error changing password:', error);
       
       if (error.message?.includes('Invalid Refresh Token')) {
-        showNotification('error', 'Session expired. Please request a new password reset link.');
+        showNotification('error', t('resetPassword.sessionExpired'));
         setTimeout(() => navigate('/login'), 2000);
       } else {
-        showNotification('error', error.message || 'Failed to change password. Please try again.');
+        showNotification('error', error.message || t('resetPassword.failedToChange'));
       }
     } finally {
       setLoading(false);
@@ -193,7 +195,7 @@ export default function ResetPassword() {
           <div className="flex justify-center mb-4">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-900"></div>
           </div>
-          <p className="text-center text-gray-600">Validating reset link...</p>
+          <p className="text-center text-gray-600">{t('resetPassword.validating')}</p>
         </div>
       </div>
     );
@@ -215,11 +217,11 @@ export default function ResetPassword() {
 
   const getStrengthText = () => {
     switch (passwordStrength) {
-      case 'weak': return 'Weak';
-      case 'fair': return 'Fair';
-      case 'good': return 'Good';
-      case 'strong': return 'Strong';
-      default: return 'None';
+      case 'weak': return t('resetPassword.weak');
+      case 'fair': return t('resetPassword.fair');
+      case 'good': return t('resetPassword.good');
+      case 'strong': return t('resetPassword.strong');
+      default: return '';
     }
   };
 
@@ -233,8 +235,8 @@ export default function ResetPassword() {
               <Lock className="w-8 h-8 text-blue-900" />
             </div>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Reset Password</h1>
-          <p className="text-gray-600 text-sm">Create a new password for your account</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">{t('resetPassword.title')}</h1>
+          <p className="text-gray-600 text-sm">{t('resetPassword.subtitle')}</p>
         </div>
 
         {/* Form */}
@@ -242,7 +244,7 @@ export default function ResetPassword() {
           {/* New Password Field */}
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-              New Password
+              {t('resetPassword.newPassword')}
             </label>
             <div className="relative">
               <input
@@ -250,7 +252,7 @@ export default function ResetPassword() {
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={handlePasswordChange}
-                placeholder="Enter your new password"
+                placeholder={t('resetPassword.enterNewPassword')}
                 className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
                   errors.password ? 'border-red-500' : 'border-gray-300'
                 }`}
@@ -274,7 +276,7 @@ export default function ResetPassword() {
             {password && (
               <div className="mt-3 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-600 font-medium">Password Strength</span>
+                  <span className="text-xs text-gray-600 font-medium">{t('resetPassword.passwordStrength')}</span>
                   <span className="text-xs font-medium text-gray-700">{getStrengthText()}</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
@@ -288,7 +290,7 @@ export default function ResetPassword() {
                   />
                 </div>
                 <p className="text-xs text-gray-600">
-                  Requirements: 8+ characters, uppercase, lowercase, and numbers
+                  {t('resetPassword.requirements')}
                 </p>
               </div>
             )}
@@ -297,7 +299,7 @@ export default function ResetPassword() {
           {/* Confirm Password Field */}
           <div>
             <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-              Confirm Password
+              {t('resetPassword.confirmPassword')}
             </label>
             <div className="relative">
               <input
@@ -305,7 +307,7 @@ export default function ResetPassword() {
                 type={showConfirmPassword ? 'text' : 'password'}
                 value={confirmPassword}
                 onChange={handleConfirmPasswordChange}
-                placeholder="Confirm your password"
+                placeholder={t('resetPassword.confirmYourPassword')}
                 className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
                   errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
                 }`}
@@ -330,7 +332,7 @@ export default function ResetPassword() {
           {confirmPassword && password === confirmPassword && (
             <div className="flex items-center text-green-600 text-sm bg-green-50 p-3 rounded-lg">
               <CheckCircle className="w-4 h-4 mr-2" />
-              Passwords match
+              {t('resetPassword.passwordsMatch')}
             </div>
           )}
 
@@ -347,10 +349,10 @@ export default function ResetPassword() {
             {loading ? (
               <div className="flex items-center justify-center">
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                Updating Password...
+                {t('resetPassword.updatingPassword')}
               </div>
             ) : (
-              'Change Password'
+              t('resetPassword.changePassword')
             )}
           </button>
         </form>
@@ -358,7 +360,7 @@ export default function ResetPassword() {
         {/* Security Info */}
         <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
           <p className="text-xs text-gray-700">
-            <strong>Security Tip:</strong> Use a strong password with a mix of uppercase, lowercase, numbers, and special characters for better security.
+            {t('resetPassword.securityTip')}
           </p>
         </div>
       </div>

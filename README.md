@@ -43,7 +43,7 @@ A comprehensive, production-ready Employee Management System with role-based acc
 8. **Reports & Analytics**
    - Pre-built report templates for all modules
    - Custom report generation
-   - Multiple export formats (PDF, Excel, CSV)
+   - CSV export format
    - Department-wise filtering
    - Date range selection
 
@@ -51,7 +51,15 @@ A comprehensive, production-ready Employee Management System with role-based acc
    - Profile management
    - Password change functionality
    - Notification preferences
+   - Language preference (English/Arabic)
    - Role-based UI customization
+
+10. **Multi-Language Support**
+    - Full English and Arabic translations
+    - Right-to-Left (RTL) layout support for Arabic
+    - Language switcher in header and settings
+    - Automatic language detection from browser
+    - Persistent language preference (localStorage)
 
 ### User Roles & Permissions
 
@@ -85,6 +93,7 @@ A comprehensive, production-ready Employee Management System with role-based acc
 - **Styling**: Tailwind CSS
 - **Icons**: Lucide React
 - **Routing**: React Router v6
+- **Internationalization**: react-i18next with RTL support
 - **Backend**: Supabase (PostgreSQL)
 - **Authentication**: Supabase Auth
 - **Build Tool**: Vite
@@ -141,6 +150,10 @@ src/
 │   └── ProtectedRoute.tsx  # Route protection wrapper
 ├── contexts/           # React contexts
 │   └── AuthContext.tsx # Authentication state management
+├── i18n/              # Internationalization
+│   ├── index.ts       # i18n configuration
+│   ├── en.json        # English translations
+│   └── ar.json        # Arabic translations
 ├── lib/               # Utility libraries
 │   ├── supabase.ts    # Supabase client configuration
 │   └── database.types.ts  # TypeScript database types
@@ -177,17 +190,6 @@ The application is already configured and ready to use. Simply:
 - Protected routes based on user roles
 - Secure password handling
 - Activity logging for audit trails
-
-## Future Enhancements
-
-Potential areas for expansion:
-- Biometric integration for attendance
-- Advanced analytics and charts
-- Multi-language support
-- Mobile app version
-- Calendar integration
-- Employee self-service portal enhancements
-
 ## License
 
 This is a demonstration project for university employee management systems.

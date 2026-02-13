@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { Users, Building2, Calendar, TrendingUp, Clock, CheckCircle, UserCheck, XCircle, ArrowRight } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
@@ -37,6 +38,7 @@ interface LeaveStatusData {
 export default function Dashboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [stats, setStats] = useState<Stats>({
     totalEmployees: 0,
     totalDepartments: 0,
@@ -143,13 +145,13 @@ export default function Dashboard() {
   };
 
   const allStatCards = [
-    { id: 'totalEmployees', name: 'Total Employees', value: stats.totalEmployees, icon: Users, color: 'bg-blue-500' },
-    { id: 'activeEmployees', name: 'Active Employees', value: stats.activeEmployees, icon: CheckCircle, color: 'bg-green-500' },
-    { id: 'departments', name: 'Departments', value: stats.totalDepartments, icon: Building2, color: 'bg-teal-500' },
-    { id: 'pendingLeaves', name: 'Pending Leaves', value: stats.pendingLeaves, icon: Calendar, color: 'bg-orange-500' },
-    { id: 'todayAttendance', name: "Today's Attendance", value: stats.todayAttendance, icon: UserCheck, color: 'bg-cyan-500' },
-    { id: 'approvedLeaves', name: 'Approved Leaves', value: stats.approvedLeaves, icon: CheckCircle, color: 'bg-emerald-500' },
-    { id: 'rejectedLeaves', name: 'Rejected Leaves', value: stats.rejectedLeaves, icon: XCircle, color: 'bg-red-500' },
+    { id: 'totalEmployees', name: t('dashboard.totalEmployees'), value: stats.totalEmployees, icon: Users, color: 'bg-blue-500' },
+    { id: 'activeEmployees', name: t('dashboard.activeEmployees'), value: stats.activeEmployees, icon: CheckCircle, color: 'bg-green-500' },
+    { id: 'departments', name: t('dashboard.departments'), value: stats.totalDepartments, icon: Building2, color: 'bg-teal-500' },
+    { id: 'pendingLeaves', name: t('dashboard.pendingLeaves'), value: stats.pendingLeaves, icon: Calendar, color: 'bg-orange-500' },
+    { id: 'todayAttendance', name: t('dashboard.todayAttendance'), value: stats.todayAttendance, icon: UserCheck, color: 'bg-cyan-500' },
+    { id: 'approvedLeaves', name: t('dashboard.approvedLeaves'), value: stats.approvedLeaves, icon: CheckCircle, color: 'bg-emerald-500' },
+    { id: 'rejectedLeaves', name: t('dashboard.rejectedLeaves'), value: stats.rejectedLeaves, icon: XCircle, color: 'bg-red-500' },
   ];
 
   const statCards = allStatCards.filter(card => isWidgetVisible(card.id, user?.role || 'employee'));
@@ -171,8 +173,8 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-600 mt-2">Welcome to the Employee Management System</p>
+        <h1 className="text-3xl font-bold text-gray-900">{t('dashboard.title')}</h1>
+        <p className="text-gray-600 mt-2">{t('dashboard.welcome')}</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -200,7 +202,7 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {isWidgetVisible('departmentChart', user?.role || 'employee') && (
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Employees by Department</h2>
+              <h2 className="text-xl font-bold text-gray-900 mb-4">{t('dashboard.employeesByDept')}</h2>
               {departmentData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={departmentData}>
@@ -213,7 +215,7 @@ export default function Dashboard() {
                 </ResponsiveContainer>
               ) : (
                 <div className="flex items-center justify-center h-64">
-                  <p className="text-gray-500">No department data available</p>
+                  <p className="text-gray-500">{t('dashboard.noDeptData')}</p>
                 </div>
               )}
             </div>
@@ -221,7 +223,7 @@ export default function Dashboard() {
 
           {isWidgetVisible('leaveChart', user?.role || 'employee') && (
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Leave Status Distribution</h2>
+              <h2 className="text-xl font-bold text-gray-900 mb-4">{t('dashboard.leaveStatusDist')}</h2>
               {leaveStatusData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={300}>
                   <PieChart>
@@ -245,7 +247,7 @@ export default function Dashboard() {
                 </ResponsiveContainer>
               ) : (
                 <div className="flex items-center justify-center h-64">
-                  <p className="text-gray-500">No leave data available</p>
+                  <p className="text-gray-500">{t('dashboard.noLeaveData')}</p>
                 </div>
               )}
             </div>
@@ -256,7 +258,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {isWidgetVisible('recentActivities', user?.role || 'employee') && (
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Recent Activities</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-4">{t('dashboard.recentActivities')}</h2>
             <div className="space-y-4">
               {recentActivities.length > 0 ? (
                 recentActivities.map((activity) => (
@@ -273,14 +275,14 @@ export default function Dashboard() {
                   </div>
                 ))
               ) : (
-                <p className="text-gray-500 text-sm">No recent activities</p>
+                <p className="text-gray-500 text-sm">{t('dashboard.noRecentActivities')}</p>
               )}
             </div>
           </div>
         )}
 
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-4">{t('dashboard.quickActions')}</h2>
           <div className={`grid gap-4 ${getVisibleQuickActions(user?.role || 'employee').length <= 2 ? 'grid-cols-1' : 'grid-cols-2'}`}>
             {getVisibleQuickActions(user?.role || 'employee').map((action) => {
               const iconMap: { [key: string]: any } = {

@@ -1,13 +1,16 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import i18n from '../i18n';
 import { useAuth } from '../contexts/AuthContext';
 import { useNotification } from '../contexts/NotificationContext';
 import { supabase } from '../lib/supabase';
-import { User, Lock, Bell, Shield, Edit2, Save, X } from 'lucide-react';
+import { User, Lock, Bell, Shield, Edit2, Save, X, Globe } from 'lucide-react';
 import type { Database } from '../lib/database.types';
 
 type UserPreferences = Database['public']['Tables']['user_preferences']['Row'];
 
 export default function Settings() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { showNotification } = useNotification();
   const [isEditingEmail, setIsEditingEmail] = useState(false);
@@ -71,7 +74,7 @@ export default function Settings() {
         .eq('user_id', user.id);
 
       if (error) throw error;
-      showNotification('success', 'Notification preferences saved successfully');
+      showNotification('success', t('settings.prefsSaved'));
     } catch (err) {
       console.error('Error saving preferences:', err);
       showNotification('error', 'Failed to save preferences');
@@ -112,7 +115,7 @@ export default function Settings() {
       
       if (error) throw error;
 
-      showNotification('success', 'Email change request sent! Confirm the change by clicking the link in your email.');
+      showNotification('success', t('settings.emailChangeRequest'));
       setIsEditingEmail(false);
     } catch (error: any) {
       console.error('Error updating email:', error);
@@ -135,8 +138,8 @@ export default function Settings() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
-        <p className="text-gray-600 mt-2">Manage your account and preferences</p>
+        <h1 className="text-3xl font-bold text-gray-900">{t('settings.title')}</h1>
+        <p className="text-gray-600 mt-2">{t('settings.subtitle')}</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -144,11 +147,11 @@ export default function Settings() {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center space-x-3 mb-6">
               <User className="w-5 h-5 text-gray-600" />
-              <h2 className="text-xl font-bold text-gray-900">Profile Information</h2>
+              <h2 className="text-xl font-bold text-gray-900">{t('settings.profileInfo')}</h2>
             </div>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('settings.email')}</label>
                 <div className="flex items-center space-x-2">
                   {isEditingEmail ? (
                     <>
@@ -157,7 +160,7 @@ export default function Settings() {
                         value={newEmail}
                         onChange={(e) => setNewEmail(e.target.value)}
                         className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Enter new email"
+                        placeholder={t('settings.enterNewEmail')}
                       />
                       <button
                         onClick={handleEmailUpdate}
@@ -165,7 +168,7 @@ export default function Settings() {
                         className="flex items-center space-x-1 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
                       >
                         <Save className="w-4 h-4" />
-                        <span className="text-sm">{updatingEmail ? 'Saving...' : 'Save'}</span>
+                        <span className="text-sm">{updatingEmail ? t('common.saving') : t('common.save')}</span>
                       </button>
                       <button
                         onClick={handleCancelEdit}
@@ -188,7 +191,7 @@ export default function Settings() {
                         className="flex items-center space-x-1 px-3 py-2 bg-blue-900 text-white rounded-lg hover:bg-blue-800 transition-colors"
                       >
                         <Edit2 className="w-4 h-4" />
-                        <span className="text-sm">Edit</span>
+                        <span className="text-sm">{t('common.edit')}</span>
                       </button>
                     </>
                   )}
@@ -196,16 +199,16 @@ export default function Settings() {
                 {isEditingEmail && (
                   <div className="text-xs mt-2 space-y-1">
                     <p className="text-blue-600 font-medium">
-                      A confirmation link will be sent to your new email. Once confirmed, your email will be updated.
+                      {t('settings.confirmationNote')}
                     </p>
                     <p className="text-gray-500">
-                      Confirmation link will redirect to: <span className="font-mono bg-gray-100 px-1 rounded">{import.meta.env.VITE_APP_URL || window.location.origin}/settings</span>
+                      {t('settings.redirectNote')} <span className="font-mono bg-gray-100 px-1 rounded">{import.meta.env.VITE_APP_URL || window.location.origin}/settings</span>
                     </p>
                   </div>
                 )}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Role</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('settings.role')}</label>
                 <input
                   type="text"
                   value={user?.role}
@@ -219,32 +222,32 @@ export default function Settings() {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center space-x-3 mb-6">
               <Lock className="w-5 h-5 text-gray-600" />
-              <h2 className="text-xl font-bold text-gray-900">Change Password</h2>
+              <h2 className="text-xl font-bold text-gray-900">{t('settings.changePassword')}</h2>
             </div>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Current Password</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('settings.currentPassword')}</label>
                 <input
                   type="password"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">New Password</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('settings.newPassword')}</label>
                 <input
                   type="password"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Confirm New Password</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('settings.confirmNewPassword')}</label>
                 <input
                   type="password"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
               <button className="bg-blue-900 text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition-colors">
-                Update Password
+                {t('settings.updatePassword')}
               </button>
             </div>
           </div>
@@ -252,7 +255,7 @@ export default function Settings() {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center space-x-3 mb-6">
               <Bell className="w-5 h-5 text-gray-600" />
-              <h2 className="text-xl font-bold text-gray-900">Notifications</h2>
+              <h2 className="text-xl font-bold text-gray-900">{t('settings.notifications')}</h2>
             </div>
             <div className="space-y-4">
               <label className="flex items-center space-x-3">
@@ -262,7 +265,7 @@ export default function Settings() {
                   onChange={(e) => setNotificationPrefs(prev => ({ ...prev, leave_approvals: e.target.checked }))}
                   className="rounded text-blue-900 focus:ring-blue-500"
                 />
-                <span className="text-sm text-gray-700">Email notifications for leave approvals</span>
+                <span className="text-sm text-gray-700">{t('settings.leaveApprovals')}</span>
               </label>
               <label className="flex items-center space-x-3">
                 <input
@@ -271,15 +274,33 @@ export default function Settings() {
                   onChange={(e) => setNotificationPrefs(prev => ({ ...prev, attendance_reminders: e.target.checked }))}
                   className="rounded text-blue-900 focus:ring-blue-500"
                 />
-                <span className="text-sm text-gray-700">Email notifications for attendance reminders</span>
+                <span className="text-sm text-gray-700">{t('settings.attendanceReminders')}</span>
               </label>
               <button
                 onClick={handleSavePreferences}
                 disabled={savingPrefs}
                 className="mt-6 bg-blue-900 text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition-colors disabled:opacity-50"
               >
-                {savingPrefs ? 'Saving...' : 'Save Preferences'}
+                {savingPrefs ? t('common.saving') : t('settings.savePreferences')}
               </button>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center space-x-3 mb-6">
+              <Globe className="w-5 h-5 text-gray-600" />
+              <h2 className="text-xl font-bold text-gray-900">{t('settings.language')}</h2>
+            </div>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600">{t('settings.languageDesc')}</p>
+              <select
+                value={i18n.language}
+                onChange={(e) => i18n.changeLanguage(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="en">English</option>
+                <option value="ar">العربية</option>
+              </select>
             </div>
           </div>
         </div>
@@ -288,17 +309,17 @@ export default function Settings() {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center space-x-3 mb-4">
               <Shield className="w-5 h-5 text-gray-600" />
-              <h2 className="text-lg font-bold text-gray-900">Account Info</h2>
+              <h2 className="text-lg font-bold text-gray-900">{t('settings.accountInfo')}</h2>
             </div>
             <div className="space-y-3 text-sm">
               <div>
-                <p className="text-gray-600">Account Type</p>
+                <p className="text-gray-600">{t('settings.accountType')}</p>
                 <p className="font-medium text-gray-900 capitalize">{user?.role}</p>
               </div>
               <div>
-                <p className="text-gray-600">Status</p>
+                <p className="text-gray-600">{t('common.status')}</p>
                 <span className="inline-block mt-1 px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
-                  Active
+                  {t('settings.active')}
                 </span>
               </div>
             </div>
@@ -306,9 +327,9 @@ export default function Settings() {
 
           {(user?.role === 'admin' || user?.role === 'hr') && (
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-              <h3 className="font-bold text-blue-900 mb-2">Administrator Access</h3>
+              <h3 className="font-bold text-blue-900 mb-2">{t('settings.adminAccess')}</h3>
               <p className="text-sm text-blue-800">
-                You have administrative privileges to manage employees, departments, and system settings.
+                {t('settings.adminAccessDesc')}
               </p>
             </div>
           )}

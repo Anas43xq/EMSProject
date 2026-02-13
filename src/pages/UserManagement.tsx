@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useNotification } from '../contexts/NotificationContext';
@@ -85,6 +86,7 @@ export default function UserManagement() {
   const [showPassword, setShowPassword] = useState(false);
   const { user: currentUser } = useAuth();
   const { showNotification } = useNotification();
+  const { t } = useTranslation();
 
   const [formData, setFormData] = useState<UserFormData>({
     email: '',
@@ -122,7 +124,7 @@ export default function UserManagement() {
       setUsers(data || []);
     } catch (error) {
       console.error('Error loading users:', error);
-      showNotification('error', 'Failed to load users');
+      showNotification('error', t('userManagement.failedToLoad'));
     } finally {
       setLoading(false);
     }
@@ -163,12 +165,12 @@ export default function UserManagement() {
     e.preventDefault();
     
     if (!formData.email || !formData.password) {
-      showNotification('error', 'Email and password are required');
+      showNotification('error', t('userManagement.emailAndPasswordRequired'));
       return;
     }
 
     if (formData.password.length < 6) {
-      showNotification('error', 'Password must be at least 6 characters');
+      showNotification('error', t('userManagement.passwordMinLength'));
       return;
     }
 
@@ -202,7 +204,7 @@ export default function UserManagement() {
         if (updateError) throw updateError;
       }
 
-      showNotification('success', 'User created successfully. They will receive a confirmation email.');
+      showNotification('success', t('userManagement.userCreated'));
       
       // Log activity
       if (authData.user && currentUser) {
@@ -218,7 +220,7 @@ export default function UserManagement() {
       loadEmployees();
     } catch (error: any) {
       console.error('Error creating user:', error);
-      showNotification('error', error.message || 'Failed to create user');
+      showNotification('error', error.message || t('userManagement.failedToCreate'));
     } finally {
       setSubmitting(false);
     }
@@ -241,7 +243,7 @@ export default function UserManagement() {
 
       if (error) throw error;
 
-      showNotification('success', 'User updated successfully');
+      showNotification('success', t('userManagement.userUpdated'));
       
       // Log activity
       if (currentUser) {
@@ -257,7 +259,7 @@ export default function UserManagement() {
       loadEmployees();
     } catch (error: any) {
       console.error('Error updating user:', error);
-      showNotification('error', error.message || 'Failed to update user');
+      showNotification('error', error.message || t('userManagement.failedToUpdate'));
     } finally {
       setSubmitting(false);
     }
@@ -268,7 +270,7 @@ export default function UserManagement() {
 
     // Prevent deleting yourself
     if (selectedUser.id === currentUser?.id) {
-      showNotification('error', 'You cannot delete your own account');
+      showNotification('error', t('userManagement.cannotDeleteSelf'));
       return;
     }
 
@@ -282,7 +284,7 @@ export default function UserManagement() {
 
       if (error) throw error;
 
-      showNotification('success', 'User deleted successfully');
+      showNotification('success', t('userManagement.userDeleted'));
       
       // Log activity
       if (currentUser) {
@@ -297,7 +299,7 @@ export default function UserManagement() {
       loadEmployees();
     } catch (error: any) {
       console.error('Error deleting user:', error);
-      showNotification('error', error.message || 'Failed to delete user');
+      showNotification('error', error.message || t('userManagement.failedToDelete'));
     } finally {
       setSubmitting(false);
     }
@@ -318,7 +320,7 @@ export default function UserManagement() {
 
       if (error) throw error;
 
-      showNotification('success', 'Employee linked successfully');
+      showNotification('success', t('userManagement.employeeLinked'));
       
       // Log activity
       if (currentUser) {
@@ -333,7 +335,7 @@ export default function UserManagement() {
       loadEmployees();
     } catch (error: any) {
       console.error('Error linking employee:', error);
-      showNotification('error', error.message || 'Failed to link employee');
+      showNotification('error', error.message || t('userManagement.failedToLink'));
     } finally {
       setSubmitting(false);
     }
@@ -352,7 +354,7 @@ export default function UserManagement() {
 
       if (error) throw error;
 
-      showNotification('success', 'Employee unlinked successfully');
+      showNotification('success', t('userManagement.employeeUnlinked'));
       
       // Log activity
       if (currentUser) {
@@ -363,7 +365,7 @@ export default function UserManagement() {
       loadEmployees();
     } catch (error: any) {
       console.error('Error unlinking employee:', error);
-      showNotification('error', error.message || 'Failed to unlink employee');
+      showNotification('error', error.message || t('userManagement.failedToUnlink'));
     } finally {
       setSubmitting(false);
     }
@@ -381,7 +383,7 @@ export default function UserManagement() {
 
       if (error) throw error;
 
-      showNotification('success', 'Password reset email sent successfully');
+      showNotification('success', t('userManagement.resetEmailSent'));
       
       // Log activity
       if (currentUser) {
@@ -394,7 +396,7 @@ export default function UserManagement() {
       setSelectedUser(null);
     } catch (error: any) {
       console.error('Error sending password reset:', error);
-      showNotification('error', error.message || 'Failed to send password reset email');
+      showNotification('error', error.message || t('userManagement.failedToResetPassword'));
     } finally {
       setSubmitting(false);
     }
@@ -472,8 +474,8 @@ export default function UserManagement() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
-          <p className="text-gray-600 mt-2">Manage system users, roles, and employee links</p>
+          <h1 className="text-3xl font-bold text-gray-900">{t('userManagement.title')}</h1>
+          <p className="text-gray-600 mt-2">{t('userManagement.subtitle')}</p>
         </div>
         <button
           onClick={() => {
@@ -483,7 +485,7 @@ export default function UserManagement() {
           className="flex items-center space-x-2 bg-blue-900 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition-colors"
         >
           <Plus className="w-5 h-5" />
-          <span>Add User</span>
+          <span>{t('userManagement.addUser')}</span>
         </button>
       </div>
 
@@ -492,7 +494,7 @@ export default function UserManagement() {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500">Total Users</p>
+              <p className="text-sm text-gray-500">{t('userManagement.totalUsers')}</p>
               <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
             </div>
             <UserCog className="w-8 h-8 text-gray-400" />
@@ -501,7 +503,7 @@ export default function UserManagement() {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500">Admins</p>
+              <p className="text-sm text-gray-500">{t('userManagement.admins')}</p>
               <p className="text-2xl font-bold text-red-600">{stats.admins}</p>
             </div>
             <ShieldAlert className="w-8 h-8 text-red-400" />
@@ -510,7 +512,7 @@ export default function UserManagement() {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500">HR Staff</p>
+              <p className="text-sm text-gray-500">{t('userManagement.hrStaff')}</p>
               <p className="text-2xl font-bold text-purple-600">{stats.hr}</p>
             </div>
             <ShieldCheck className="w-8 h-8 text-purple-400" />
@@ -519,7 +521,7 @@ export default function UserManagement() {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500">Employees</p>
+              <p className="text-sm text-gray-500">{t('userManagement.employees')}</p>
               <p className="text-2xl font-bold text-blue-600">{stats.employees}</p>
             </div>
             <Shield className="w-8 h-8 text-blue-400" />
@@ -528,7 +530,7 @@ export default function UserManagement() {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500">Linked</p>
+              <p className="text-sm text-gray-500">{t('userManagement.linked')}</p>
               <p className="text-2xl font-bold text-green-600">{stats.linked}</p>
             </div>
             <UserCheck className="w-8 h-8 text-green-400" />
@@ -537,7 +539,7 @@ export default function UserManagement() {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500">Unlinked</p>
+              <p className="text-sm text-gray-500">{t('userManagement.unlinked')}</p>
               <p className="text-2xl font-bold text-orange-600">{stats.unlinked}</p>
             </div>
             <UserX className="w-8 h-8 text-orange-400" />
@@ -552,7 +554,7 @@ export default function UserManagement() {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="text"
-              placeholder="Search by email, name, or employee number..."
+              placeholder={t('userManagement.searchPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -565,10 +567,10 @@ export default function UserManagement() {
               onChange={(e) => setRoleFilter(e.target.value)}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option value="all">All Roles</option>
-              <option value="admin">Admin</option>
-              <option value="hr">HR</option>
-              <option value="employee">Employee</option>
+              <option value="all">{t('userManagement.allRoles')}</option>
+              <option value="admin">{t('userManagement.admin')}</option>
+              <option value="hr">{t('userManagement.hr')}</option>
+              <option value="employee">{t('userManagement.employee')}</option>
             </select>
           </div>
           <button
@@ -579,7 +581,7 @@ export default function UserManagement() {
             className="flex items-center space-x-2 px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
           >
             <RefreshCw className="w-4 h-4" />
-            <span>Refresh</span>
+            <span>{t('userManagement.refresh')}</span>
           </button>
         </div>
       </div>
@@ -590,11 +592,11 @@ export default function UserManagement() {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Linked Employee</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('userManagement.user')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('userManagement.role')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('userManagement.linkedEmployee')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('userManagement.created')}</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{t('common.actions')}</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -611,7 +613,7 @@ export default function UserManagement() {
                         <div className="text-sm font-medium text-gray-900">{user.email}</div>
                         <div className="text-xs text-gray-500 flex items-center space-x-1">
                           <Mail className="w-3 h-3" />
-                          <span>{user.id === currentUser?.id ? '(You)' : ''}</span>
+                          <span>{user.id === currentUser?.id ? t('userManagement.you') : ''}</span>
                         </div>
                       </div>
                     </div>
@@ -619,7 +621,7 @@ export default function UserManagement() {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${getRoleBadge(user.role)}`}>
                       {getRoleIcon(user.role)}
-                      <span className="capitalize">{user.role}</span>
+                      <span>{t(`userManagement.${user.role}`)}</span>
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -636,7 +638,7 @@ export default function UserManagement() {
                         <button
                           onClick={() => handleUnlinkEmployee(user.id)}
                           className="ml-2 p-1 text-gray-400 hover:text-red-500 transition-colors"
-                          title="Unlink employee"
+                          title={t('userManagement.unlinkEmployee')}
                         >
                           <Unlink className="w-4 h-4" />
                         </button>
@@ -647,7 +649,7 @@ export default function UserManagement() {
                         className="flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-800"
                       >
                         <Link2 className="w-4 h-4" />
-                        <span>Link Employee</span>
+                        <span>{t('userManagement.linkEmployee')}</span>
                       </button>
                     )}
                   </td>
@@ -665,14 +667,14 @@ export default function UserManagement() {
                           setShowResetPasswordModal(true);
                         }}
                         className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                        title="Reset Password"
+                        title={t('userManagement.resetPassword')}
                       >
                         <Key className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => openEditModal(user)}
                         className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                        title="Edit User"
+                        title={t('userManagement.editUser')}
                       >
                         <Edit2 className="w-4 h-4" />
                       </button>
@@ -683,7 +685,7 @@ export default function UserManagement() {
                             setShowDeleteModal(true);
                           }}
                           className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                          title="Delete User"
+                          title={t('userManagement.deleteUserBtn')}
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -699,7 +701,7 @@ export default function UserManagement() {
         {filteredUsers.length === 0 && (
           <div className="text-center py-12">
             <UserCog className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500">No users found</p>
+            <p className="text-gray-500">{t('userManagement.noUsersFound')}</p>
           </div>
         )}
       </div>
@@ -709,14 +711,14 @@ export default function UserManagement() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
             <div className="flex items-center justify-between p-4 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900">Add New User</h2>
+              <h2 className="text-xl font-semibold text-gray-900">{t('userManagement.addNewUser')}</h2>
               <button onClick={() => setShowAddModal(false)} className="text-gray-500 hover:text-gray-700">
                 <X className="w-5 h-5" />
               </button>
             </div>
             <form onSubmit={handleAddUser} className="p-4 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('userManagement.email')}</label>
                 <input
                   type="email"
                   value={formData.email}
@@ -726,7 +728,7 @@ export default function UserManagement() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('userManagement.password')}</label>
                 <div className="relative">
                   <input
                     type={showPassword ? 'text' : 'password'}
@@ -744,35 +746,35 @@ export default function UserManagement() {
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
-                <p className="text-xs text-gray-500 mt-1">Minimum 6 characters</p>
+                <p className="text-xs text-gray-500 mt-1">{t('userManagement.minChars')}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('userManagement.role')}</label>
                 <select
                   value={formData.role}
                   onChange={(e) => setFormData({ ...formData, role: e.target.value as 'admin' | 'hr' | 'employee' })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <option value="employee">Employee</option>
-                  <option value="hr">HR</option>
-                  <option value="admin">Admin</option>
+                  <option value="employee">{t('userManagement.employee')}</option>
+                  <option value="hr">{t('userManagement.hr')}</option>
+                  <option value="admin">{t('userManagement.admin')}</option>
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Link to Employee (Optional)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('userManagement.linkToEmployee')}</label>
                 <select
                   value={formData.employee_id || ''}
                   onChange={(e) => setFormData({ ...formData, employee_id: e.target.value || null })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <option value="">-- No Employee Link --</option>
+                  <option value="">{t('userManagement.noEmployeeLink')}</option>
                   {unlinkedEmployees.map((emp) => (
                     <option key={emp.id} value={emp.id}>
                       {emp.first_name} {emp.last_name} ({emp.employee_number})
                     </option>
                   ))}
                 </select>
-                <p className="text-xs text-gray-500 mt-1">Only showing employees not linked to a user</p>
+                <p className="text-xs text-gray-500 mt-1">{t('userManagement.onlyUnlinked')}</p>
               </div>
               <div className="flex justify-end space-x-3 pt-4">
                 <button
@@ -780,14 +782,14 @@ export default function UserManagement() {
                   onClick={() => setShowAddModal(false)}
                   className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
                   className="px-4 py-2 bg-blue-900 text-white rounded-lg hover:bg-blue-800 transition-colors disabled:opacity-50"
                 >
-                  {submitting ? 'Creating...' : 'Create User'}
+                  {submitting ? t('common.creating') : t('userManagement.createUser')}
                 </button>
               </div>
             </form>
@@ -800,49 +802,49 @@ export default function UserManagement() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
             <div className="flex items-center justify-between p-4 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900">Edit User</h2>
+              <h2 className="text-xl font-semibold text-gray-900">{t('userManagement.editUser')}</h2>
               <button onClick={() => setShowEditModal(false)} className="text-gray-500 hover:text-gray-700">
                 <X className="w-5 h-5" />
               </button>
             </div>
             <form onSubmit={handleEditUser} className="p-4 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('userManagement.email')}</label>
                 <input
                   type="email"
                   value={formData.email}
                   disabled
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
                 />
-                <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
+                <p className="text-xs text-gray-500 mt-1">{t('userManagement.emailCannotChange')}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('userManagement.role')}</label>
                 <select
                   value={formData.role}
                   onChange={(e) => setFormData({ ...formData, role: e.target.value as 'admin' | 'hr' | 'employee' })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   disabled={selectedUser.id === currentUser?.id}
                 >
-                  <option value="employee">Employee</option>
-                  <option value="hr">HR</option>
-                  <option value="admin">Admin</option>
+                  <option value="employee">{t('userManagement.employee')}</option>
+                  <option value="hr">{t('userManagement.hr')}</option>
+                  <option value="admin">{t('userManagement.admin')}</option>
                 </select>
                 {selectedUser.id === currentUser?.id && (
-                  <p className="text-xs text-orange-500 mt-1">You cannot change your own role</p>
+                  <p className="text-xs text-orange-500 mt-1">{t('userManagement.cannotChangeOwnRole')}</p>
                 )}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Link to Employee</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('userManagement.linkEmployee')}</label>
                 <select
                   value={formData.employee_id || ''}
                   onChange={(e) => setFormData({ ...formData, employee_id: e.target.value || null })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <option value="">-- No Employee Link --</option>
+                  <option value="">{t('userManagement.noEmployeeLink')}</option>
                   {selectedUser.employee_id && selectedUser.employees && (
                     <option value={selectedUser.employee_id}>
-                      {selectedUser.employees.first_name} {selectedUser.employees.last_name} ({selectedUser.employees.employee_number}) - Current
+                      {selectedUser.employees.first_name} {selectedUser.employees.last_name} ({selectedUser.employees.employee_number}) - {t('userManagement.current')}
                     </option>
                   )}
                   {unlinkedEmployees.map((emp) => (
@@ -858,14 +860,14 @@ export default function UserManagement() {
                   onClick={() => setShowEditModal(false)}
                   className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
                   className="px-4 py-2 bg-blue-900 text-white rounded-lg hover:bg-blue-800 transition-colors disabled:opacity-50"
                 >
-                  {submitting ? 'Saving...' : 'Save Changes'}
+                  {submitting ? t('common.saving') : t('userManagement.saveChanges')}
                 </button>
               </div>
             </form>
@@ -878,14 +880,14 @@ export default function UserManagement() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
             <div className="flex items-center justify-between p-4 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900">Link Employee</h2>
+              <h2 className="text-xl font-semibold text-gray-900">{t('userManagement.linkEmployee')}</h2>
               <button onClick={() => setShowLinkModal(false)} className="text-gray-500 hover:text-gray-700">
                 <X className="w-5 h-5" />
               </button>
             </div>
             <div className="p-4">
               <p className="text-sm text-gray-600 mb-4">
-                Select an employee to link with <strong>{selectedUser.email}</strong>
+                {t('userManagement.selectEmployeeToLink')} <strong>{selectedUser.email}</strong>
               </p>
               {unlinkedEmployees.length > 0 ? (
                 <div className="space-y-2 max-h-64 overflow-y-auto">
@@ -916,7 +918,7 @@ export default function UserManagement() {
               ) : (
                 <div className="text-center py-8 text-gray-500">
                   <UserX className="w-12 h-12 text-gray-300 mx-auto mb-2" />
-                  <p>All employees are already linked to users</p>
+                  <p>{t('userManagement.allLinked')}</p>
                 </div>
               )}
               <div className="flex justify-end mt-4">
@@ -924,7 +926,7 @@ export default function UserManagement() {
                   onClick={() => setShowLinkModal(false)}
                   className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
               </div>
             </div>
@@ -940,23 +942,23 @@ export default function UserManagement() {
               <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <AlertTriangle className="w-8 h-8 text-red-600" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Delete User?</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('userManagement.deleteUser')}</h3>
               <p className="text-gray-600 mb-4">
-                Are you sure you want to delete <strong>{selectedUser.email}</strong>? This action cannot be undone.
+                {t('userManagement.confirmDelete')} <strong>{selectedUser.email}</strong>? {t('userManagement.cannotBeUndone')}
               </p>
               <div className="flex justify-center space-x-3">
                 <button
                   onClick={() => setShowDeleteModal(false)}
                   className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
                 <button
                   onClick={handleDeleteUser}
                   disabled={submitting}
                   className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
                 >
-                  {submitting ? 'Deleting...' : 'Delete User'}
+                  {submitting ? t('common.deleting') : t('userManagement.deleteUserBtn')}
                 </button>
               </div>
             </div>
@@ -972,23 +974,23 @@ export default function UserManagement() {
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Key className="w-8 h-8 text-blue-600" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Reset Password</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('userManagement.resetPassword')}</h3>
               <p className="text-gray-600 mb-4">
-                Send a password reset email to <strong>{selectedUser.email}</strong>?
+                {t('userManagement.sendResetEmail')} <strong>{selectedUser.email}</strong>?
               </p>
               <div className="flex justify-center space-x-3">
                 <button
                   onClick={() => setShowResetPasswordModal(false)}
                   className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
                 <button
                   onClick={handleResetPassword}
                   disabled={submitting}
                   className="px-4 py-2 bg-blue-900 text-white rounded-lg hover:bg-blue-800 transition-colors disabled:opacity-50"
                 >
-                  {submitting ? 'Sending...' : 'Send Reset Email'}
+                  {submitting ? t('common.sending') : t('userManagement.sendResetBtn')}
                 </button>
               </div>
             </div>
