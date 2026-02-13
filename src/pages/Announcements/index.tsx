@@ -44,7 +44,7 @@ export default function Announcements() {
       {announcements.length === 0 ? (
         <Card>
           <EmptyState
-            icon={<Megaphone className="w-16 h-16 text-gray-300" />}
+            icon={Megaphone}
             title={t('announcements.noAnnouncements')}
             message={t('announcements.createFirst')}
             action={

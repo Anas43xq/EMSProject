@@ -84,7 +84,7 @@ export default function Profile() {
   if (!user?.employeeId) {
     return (
       <EmptyState
-        icon={<User className="w-16 h-16 text-gray-400" />}
+        icon={User}
         title={t('profile.noProfileLinked')}
         message={t('profile.contactAdmin')}
       />

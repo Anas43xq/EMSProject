@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabase';
 import { useNotification } from '../contexts/NotificationContext';
 import { ArrowLeft, Edit, Mail, Phone, Calendar, MapPin, Briefcase, User, FileText } from 'lucide-react';
 import { format } from 'date-fns';
-import { PageSpinner, Card, Button } from '../components/ui';
+import { PageSpinner, Button } from '../components/ui';
 
 interface Employee {
   id: string;
