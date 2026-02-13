@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useNotification } from '../contexts/NotificationContext';
 import { notifyLeaveApproval, notifyLeaveRejection, notifyLeavePending } from '../lib/notifications';
+import { logActivity } from '../lib/activityLog';
 import { Plus, Calendar, CheckCircle, XCircle, Clock, X } from 'lucide-react';
 
 interface Leave {
@@ -256,6 +257,16 @@ export default function Leaves() {
 
       showNotification('success', 'Leave request submitted successfully');
 
+      // Log activity
+      if (user) {
+        logActivity(user.id, 'leave_requested', 'leave', undefined, {
+          leave_type: formData.leave_type,
+          start_date: formData.start_date,
+          end_date: formData.end_date,
+          days_count: daysCount,
+        });
+      }
+
       // Send email notification to HR/Admin users about the new pending leave request
       const { data: hrAdminUsers } = await supabase
         .from('users')
@@ -317,6 +328,14 @@ export default function Leaves() {
 
       showNotification('success', 'Leave request approved successfully');
 
+      // Log activity
+      if (user) {
+        logActivity(user.id, 'leave_approved', 'leave', leaveId, {
+          employee_id: leave.employee_id,
+          leave_type: leave.leave_type,
+        });
+      }
+
       if (leave.employees?.email) {
         await notifyLeaveApproval(
           leave.employees.email,
@@ -350,6 +369,14 @@ export default function Leaves() {
       if (error) throw error;
 
       showNotification('success', 'Leave request rejected');
+
+      // Log activity
+      if (user) {
+        logActivity(user.id, 'leave_rejected', 'leave', leaveId, {
+          employee_id: leave.employee_id,
+          leave_type: leave.leave_type,
+        });
+      }
 
       if (leave.employees?.email) {
         await notifyLeaveRejection(

@@ -31,26 +31,14 @@ A comprehensive, production-ready Employee Management System with role-based acc
    - Approval workflow (employee → HR/Admin)
    - Leave calendar and history
    - Status tracking (pending, approved, rejected)
+   - Email notifications for approvals/rejections
 
 5. **Attendance Tracking**
    - Daily attendance marking with check-in/check-out times
    - Multiple status types (present, absent, late, half-day)
+   - Hours worked calculation
    - Historical attendance records
    - Date-based filtering
-
-6. **Performance Management**
-   - Annual performance reviews
-   - 5-point rating system
-   - Goal tracking and achievement documentation
-   - Areas of improvement identification
-   - Review status management (draft, submitted, completed)
-
-7. **Payroll Integration**
-   - Monthly salary management
-   - Allowances and deductions tracking
-   - Gross and net salary calculations
-   - Payslip generation capability
-   - Payment status tracking
 
 8. **Reports & Analytics**
    - Pre-built report templates for all modules
@@ -72,26 +60,23 @@ A comprehensive, production-ready Employee Management System with role-based acc
 - Employee management (create, edit, delete)
 - Department management
 - Leave approval/rejection
-- Performance review access
-- Payroll management
 - System settings
 - All reports access
+- User management
 
 #### HR
 - Employee management
 - Department management
 - Leave approval/rejection
 - Attendance management
-- Performance review management
-- Payroll access
 - Reports generation
+- Announcements
 
 #### Employee
 - View own profile
 - Apply for leave
 - Mark attendance
-- View own performance reviews
-- View own payslips
+- View notifications
 - Update personal settings
 
 ## Technology Stack
@@ -136,8 +121,6 @@ The system includes realistic sample data:
 - 30 employees across different departments and positions
 - Leave applications with various statuses
 - Attendance records for the past week
-- Performance reviews
-- Payroll records for January 2026
 
 ## Design Principles
 
@@ -164,13 +147,16 @@ src/
 ├── pages/             # Main application pages
 │   ├── Dashboard.tsx
 │   ├── Employees.tsx
+│   ├── EmployeeView.tsx
+│   ├── EmployeeEdit.tsx
 │   ├── Departments.tsx
 │   ├── Leaves.tsx
 │   ├── Attendance.tsx
-│   ├── Performance.tsx
-│   ├── Payroll.tsx
+│   ├── Announcements.tsx
 │   ├── Reports.tsx
-│   └── Settings.tsx
+│   ├── UserManagement.tsx
+│   ├── Settings.tsx
+│   └── ResetPassword.tsx
 └── App.tsx            # Main app component with routing
 ```
 
@@ -195,7 +181,6 @@ The application is already configured and ready to use. Simply:
 ## Future Enhancements
 
 Potential areas for expansion:
-- Email notifications for leave approvals
 - Biometric integration for attendance
 - Advanced analytics and charts
 - Multi-language support

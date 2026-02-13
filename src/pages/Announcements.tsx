@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import { logActivity } from '../lib/activityLog';
 import { Megaphone, Plus, Edit2, Trash2, X, AlertCircle, AlertTriangle, Info, Bell } from 'lucide-react';
 
 interface Announcement {
@@ -119,12 +120,28 @@ export default function Announcements() {
           .eq('id', editingAnnouncement.id);
 
         if (error) throw error;
+        
+        // Log activity
+        if (user) {
+          logActivity(user.id, 'announcement_updated', 'announcement', editingAnnouncement.id, {
+            title: announcementData.title,
+          });
+        }
       } else {
-        const { error } = await (supabase
+        const { data, error } = await (supabase
           .from('announcements') as any)
-          .insert(announcementData);
+          .insert(announcementData)
+          .select()
+          .single();
 
         if (error) throw error;
+        
+        // Log activity
+        if (user && data) {
+          logActivity(user.id, 'announcement_created', 'announcement', data.id, {
+            title: announcementData.title,
+          });
+        }
       }
 
       setShowModal(false);
@@ -147,6 +164,12 @@ export default function Announcements() {
         .eq('id', id) as any);
 
       if (error) throw error;
+      
+      // Log activity
+      if (user) {
+        logActivity(user.id, 'announcement_deleted', 'announcement', id);
+      }
+
       loadAnnouncements();
     } catch (err: any) {
       console.error('Error deleting announcement:', err);
@@ -162,6 +185,14 @@ export default function Announcements() {
         .eq('id', announcement.id);
 
       if (error) throw error;
+      
+      // Log activity
+      if (user) {
+        logActivity(user.id, 'announcement_toggled', 'announcement', announcement.id, {
+          is_active: !announcement.is_active,
+        });
+      }
+
       loadAnnouncements();
     } catch (err: any) {
       console.error('Error toggling announcement:', err);

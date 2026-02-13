@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase';
 import { useNotification } from '../contexts/NotificationContext';
 import { Download, Users, Calendar, Clock } from 'lucide-react';
 import { format } from 'date-fns';
+import jsPDF from 'jspdf';
 
 interface Department {
   id: string;
@@ -67,6 +68,7 @@ export default function Reports() {
   const [selectedReport, setSelectedReport] = useState<ReportType>('employee');
   const [dateRange, setDateRange] = useState('30');
   const [selectedDepartment, setSelectedDepartment] = useState('');
+  const [exportFormat, setExportFormat] = useState<'csv' | 'pdf' | 'excel'>('csv');
   const { showNotification } = useNotification();
 
   useEffect(() => {
@@ -279,7 +281,13 @@ export default function Reports() {
       }
 
       if (reportData && reportData.length > 0) {
-        downloadCSV(reportData, filename);
+        if (exportFormat === 'pdf') {
+          downloadPDF(reportData, filename);
+        } else if (exportFormat === 'excel') {
+          downloadExcel(reportData, filename);
+        } else {
+          downloadCSV(reportData, filename);
+        }
         showNotification('success', `Report generated successfully! ${reportData.length} records exported.`);
       } else {
         showNotification('warning', 'No data found for the selected criteria.');
@@ -311,6 +319,89 @@ export default function Reports() {
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
     link.setAttribute('download', `${filename}-${format(new Date(), 'yyyy-MM-dd')}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const downloadPDF = (data: any[], filename: string) => {
+    if (data.length === 0) return;
+
+    const doc = new jsPDF();
+    const headers = Object.keys(data[0]);
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    let yPosition = 10;
+
+    // Add title
+    doc.setFontSize(14);
+    doc.text(filename.replace(/-/g, ' ').toUpperCase(), pageWidth / 2, yPosition, { align: 'center' });
+    yPosition += 10;
+
+    // Add date
+    doc.setFontSize(10);
+    doc.text(`Generated on: ${format(new Date(), 'yyyy-MM-dd HH:mm:ss')}`, pageWidth / 2, yPosition, { align: 'center' });
+    yPosition += 10;
+
+    // Add table headers
+    doc.setFontSize(9);
+    doc.setTextColor(30, 58, 138);
+    const columnWidth = (pageWidth - 20) / headers.length;
+    headers.forEach((header, index) => {
+      doc.text(header, 10 + index * columnWidth, yPosition, { maxWidth: columnWidth });
+    });
+
+    // Add horizontal line under headers
+    yPosition += 7;
+    doc.line(10, yPosition, pageWidth - 10, yPosition);
+    yPosition += 3;
+
+    // Add data rows
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(8);
+
+    data.forEach((row) => {
+      if (yPosition > pageHeight - 15) {
+        doc.addPage();
+        yPosition = 10;
+      }
+
+      headers.forEach((header, colIndex) => {
+        const value = row[header]?.toString() || '';
+        const wrappedText = doc.splitTextToSize(value, columnWidth - 2);
+        doc.text(wrappedText, 10 + colIndex * columnWidth + 1, yPosition, { maxWidth: columnWidth - 2 });
+      });
+
+      yPosition += 5 + (Math.max(...headers.map(h => doc.splitTextToSize(row[h]?.toString() || '', columnWidth - 2).length)) - 1) * 2;
+    });
+
+    // And download the PDF
+    doc.save(`${filename}-${format(new Date(), 'yyyy-MM-dd')}.pdf`);
+  };
+
+  const downloadExcel = (data: any[], filename: string) => {
+    if (data.length === 0) return;
+
+    const headers = Object.keys(data[0]);
+    
+    // Create CSV content with tab separators for better Excel compatibility
+    const csvContent = [
+      headers.join('\t'),
+      ...data.map(row =>
+        headers.map(header => {
+          const value = row[header]?.toString() || '';
+          return value.replace(/\t/g, ' ').replace(/\n/g, ' ');
+        }).join('\t')
+      )
+    ].join('\n');
+
+    // Create blob and download as Excel file
+    const blob = new Blob([csvContent], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `${filename}-${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
@@ -440,12 +531,15 @@ export default function Reports() {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Format</label>
             <select
-              disabled
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 cursor-not-allowed"
+              value={exportFormat}
+              onChange={(e) => setExportFormat(e.target.value as 'csv' | 'pdf' | 'excel')}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option>CSV</option>
+              <option value="csv">CSV</option>
+              <option value="pdf">PDF</option>
+              <option value="excel">Excel</option>
             </select>
-            <p className="text-xs text-gray-500 mt-1">CSV format is currently supported</p>
+            <p className="text-xs text-gray-500 mt-1">Select export format (CSV, PDF, or Excel)</p>
           </div>
         </div>
         <button

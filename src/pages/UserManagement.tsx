@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useNotification } from '../contexts/NotificationContext';
+import { logActivity } from '../lib/activityLog';
 import {
   UserCog,
   Plus,
@@ -202,6 +203,15 @@ export default function UserManagement() {
       }
 
       showNotification('success', 'User created successfully. They will receive a confirmation email.');
+      
+      // Log activity
+      if (authData.user && currentUser) {
+        logActivity(currentUser.id, 'user_created', 'user', authData.user.id, {
+          email: formData.email,
+          role: formData.role,
+        });
+      }
+
       setShowAddModal(false);
       setFormData({ email: '', password: '', role: 'employee', employee_id: null });
       loadUsers();
@@ -232,6 +242,15 @@ export default function UserManagement() {
       if (error) throw error;
 
       showNotification('success', 'User updated successfully');
+      
+      // Log activity
+      if (currentUser) {
+        logActivity(currentUser.id, 'user_updated', 'user', selectedUser.id, {
+          email: selectedUser.email,
+          role: formData.role,
+        });
+      }
+
       setShowEditModal(false);
       setSelectedUser(null);
       loadUsers();
@@ -264,6 +283,14 @@ export default function UserManagement() {
       if (error) throw error;
 
       showNotification('success', 'User deleted successfully');
+      
+      // Log activity
+      if (currentUser) {
+        logActivity(currentUser.id, 'user_deleted', 'user', selectedUser.id, {
+          email: selectedUser.email,
+        });
+      }
+
       setShowDeleteModal(false);
       setSelectedUser(null);
       loadUsers();
@@ -292,6 +319,14 @@ export default function UserManagement() {
       if (error) throw error;
 
       showNotification('success', 'Employee linked successfully');
+      
+      // Log activity
+      if (currentUser) {
+        logActivity(currentUser.id, 'user_employee_linked', 'user', selectedUser.id, {
+          employee_id: employeeId,
+        });
+      }
+
       setShowLinkModal(false);
       setSelectedUser(null);
       loadUsers();
@@ -318,6 +353,12 @@ export default function UserManagement() {
       if (error) throw error;
 
       showNotification('success', 'Employee unlinked successfully');
+      
+      // Log activity
+      if (currentUser) {
+        logActivity(currentUser.id, 'user_employee_unlinked', 'user', userId);
+      }
+
       loadUsers();
       loadEmployees();
     } catch (error: any) {
@@ -341,6 +382,14 @@ export default function UserManagement() {
       if (error) throw error;
 
       showNotification('success', 'Password reset email sent successfully');
+      
+      // Log activity
+      if (currentUser) {
+        logActivity(currentUser.id, 'user_password_reset', 'user', selectedUser.id, {
+          email: selectedUser.email,
+        });
+      }
+
       setShowResetPasswordModal(false);
       setSelectedUser(null);
     } catch (error: any) {

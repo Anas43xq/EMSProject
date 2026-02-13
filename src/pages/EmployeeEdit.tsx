@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useNotification } from '../contexts/NotificationContext';
+import { useAuth } from '../contexts/AuthContext';
+import { logActivity } from '../lib/activityLog';
 import { ArrowLeft, Save } from 'lucide-react';
 
 interface Department {
@@ -36,6 +38,7 @@ export default function EmployeeEdit() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { showNotification } = useNotification();
+  const { user } = useAuth();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -163,6 +166,15 @@ export default function EmployeeEdit() {
       if (error) throw error;
 
       showNotification('success', 'Employee updated successfully');
+      
+      // Log activity
+      if (user) {
+        logActivity(user.id, 'employee_updated', 'employee', id!, {
+          name: `${formData.first_name} ${formData.last_name}`,
+          position: formData.position,
+        });
+      }
+
       navigate(`/employees/${id}`);
     } catch (error: any) {
       console.error('Error updating employee:', error);

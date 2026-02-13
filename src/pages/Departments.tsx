@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase';
 import { useNotification } from '../contexts/NotificationContext';
 import { Plus, Building2, X, Edit2, Trash2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { logActivity } from '../lib/activityLog';
 
 interface Department {
   id: string;
@@ -124,13 +125,31 @@ export default function Departments() {
 
         if (error) throw error;
         showNotification('success', 'Department updated successfully');
+        
+        // Log activity
+        if (user) {
+          logActivity(user.id, 'department_updated', 'department', editingDept.id, {
+            name: payload.name,
+            type: payload.type,
+          });
+        }
       } else {
-        const { error } = await (supabase
+        const { data, error } = await (supabase
           .from('departments') as any)
-          .insert(payload);
+          .insert(payload)
+          .select()
+          .single();
 
         if (error) throw error;
         showNotification('success', 'Department added successfully');
+        
+        // Log activity
+        if (user && data) {
+          logActivity(user.id, 'department_created', 'department', data.id, {
+            name: payload.name,
+            type: payload.type,
+          });
+        }
       }
 
       setShowModal(false);
@@ -160,6 +179,14 @@ export default function Departments() {
 
       if (error) throw error;
       showNotification('success', 'Department deleted successfully');
+      
+      // Log activity
+      if (user) {
+        logActivity(user.id, 'department_deleted', 'department', dept.id, {
+          name: dept.name,
+        });
+      }
+
       loadDepartments();
     } catch (error: any) {
       console.error('Error deleting department:', error);

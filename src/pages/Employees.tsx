@@ -25,6 +25,7 @@ export default function Employees() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [employmentTypeFilter, setEmploymentTypeFilter] = useState('all');
   const { showNotification } = useNotification();
 
   useEffect(() => {
@@ -87,8 +88,10 @@ export default function Employees() {
       emp.employee_number.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesStatus = statusFilter === 'all' || emp.status === statusFilter;
+    
+    const matchesEmploymentType = employmentTypeFilter === 'all' || emp.employment_type === employmentTypeFilter;
 
-    return matchesSearch && matchesStatus;
+    return matchesSearch && matchesStatus && matchesEmploymentType;
   });
 
   if (loading) {
@@ -137,6 +140,16 @@ export default function Employees() {
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
               <option value="on-leave">On Leave</option>
+            </select>
+            <select
+              value={employmentTypeFilter}
+              onChange={(e) => setEmploymentTypeFilter(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="all">All Types</option>
+              <option value="full-time">Full-time</option>
+              <option value="part-time">Part-time</option>
+              <option value="contract">Contract</option>
             </select>
           </div>
         </div>

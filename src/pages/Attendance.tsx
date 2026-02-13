@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import { logActivity } from '../lib/activityLog';
 import { Clock, CheckCircle, XCircle, Calendar, Plus, X } from 'lucide-react';
 
 interface AttendanceRecord {
@@ -50,6 +51,31 @@ export default function Attendance() {
       loadEmployees();
     }
   }, [user, selectedDate]);
+
+  const calculateHoursWorked = (checkIn: string | null, checkOut: string | null): string | null => {
+    if (!checkIn || !checkOut) return null;
+    try {
+      const [inHour, inMin] = checkIn.split(':').map(Number);
+      const [outHour, outMin] = checkOut.split(':').map(Number);
+      
+      const inMinutes = inHour * 60 + inMin;
+      const outMinutes = outHour * 60 + outMin;
+      
+      let diffMinutes = outMinutes - inMinutes;
+      
+      // Handle overnight shifts
+      if (diffMinutes < 0) {
+        diffMinutes += 24 * 60;
+      }
+      
+      const hours = Math.floor(diffMinutes / 60);
+      const minutes = diffMinutes % 60;
+      
+      return `${hours}h ${minutes}m`;
+    } catch {
+      return null;
+    }
+  };
 
   const loadEmployees = async () => {
     try {
@@ -114,6 +140,12 @@ export default function Attendance() {
 
       if (error) throw error;
       
+      // Log activity
+      logActivity(user.id, 'attendance_checked_in', 'attendance', undefined, {
+        date: today,
+        check_in: time,
+      });
+
       // If viewing today, reload to show new record
       if (selectedDate === today) {
         loadAttendance();
@@ -159,6 +191,15 @@ export default function Attendance() {
 
       if (error) throw error;
       
+      // Log activity
+      if (user) {
+        logActivity(user.id, 'attendance_recorded', 'attendance', undefined, {
+          employee_id: formData.employee_id,
+          date: formData.date,
+          status: formData.status,
+        });
+      }
+
       setShowAddModal(false);
       // If the added date matches selected date, reload
       if (formData.date === selectedDate) {
@@ -247,6 +288,9 @@ export default function Attendance() {
                     <div className="flex items-center space-x-4 text-sm text-gray-600">
                       <span>Check In: {record.check_in || 'N/A'}</span>
                       <span>Check Out: {record.check_out || 'N/A'}</span>
+                      {calculateHoursWorked(record.check_in, record.check_out) && (
+                        <span className="font-medium text-gray-900">Hours: {calculateHoursWorked(record.check_in, record.check_out)}</span>
+                      )}
                     </div>
                     {record.notes && (
                       <p className="text-sm text-gray-500 mt-1">{record.notes}</p>
