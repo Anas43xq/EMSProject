@@ -140,8 +140,8 @@ export function useEmployeeEdit() {
 
       if (id === 'new') {
         // Create new employee
-        const { data, error: insertError } = await supabase
-          .from('employees')
+        const { data, error: insertError } = await (supabase
+          .from('employees') as any)
           .insert([submitData])
           .select('id')
           .single();
