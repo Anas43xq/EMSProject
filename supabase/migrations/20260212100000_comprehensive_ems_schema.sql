@@ -257,6 +257,59 @@ CREATE TRIGGER update_announcements_updated_at_trigger
   EXECUTE FUNCTION update_announcements_updated_at();
 
 -- =============================================
+-- EMAIL SYNC TRIGGERS (Single source of truth)
+-- =============================================
+-- The user's login email is authoritative; employee.email auto-syncs from it
+
+-- Trigger to sync employee email when user email changes
+CREATE OR REPLACE FUNCTION sync_employee_email_from_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF NEW.employee_id IS NOT NULL THEN
+    UPDATE public.employees
+    SET email = NEW.email
+    WHERE id = NEW.employee_id;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS sync_employee_email_on_user_update ON public.users;
+CREATE TRIGGER sync_employee_email_on_user_update
+  AFTER UPDATE OF email ON public.users
+  FOR EACH ROW
+  WHEN (OLD.email IS DISTINCT FROM NEW.email)
+  EXECUTE FUNCTION sync_employee_email_from_user();
+
+-- Trigger to sync employee email when user is linked to an employee
+CREATE OR REPLACE FUNCTION sync_employee_email_on_link()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF NEW.employee_id IS NOT NULL THEN
+    UPDATE public.employees
+    SET email = NEW.email
+    WHERE id = NEW.employee_id;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS sync_employee_email_on_user_link ON public.users;
+CREATE TRIGGER sync_employee_email_on_user_link
+  AFTER UPDATE OF employee_id ON public.users
+  FOR EACH ROW
+  WHEN (NEW.employee_id IS NOT NULL AND (OLD.employee_id IS NULL OR OLD.employee_id IS DISTINCT FROM NEW.employee_id))
+  EXECUTE FUNCTION sync_employee_email_on_link();
+
+-- Also trigger on INSERT (when creating new user with employee link)
+DROP TRIGGER IF EXISTS sync_employee_email_on_user_insert ON public.users;
+CREATE TRIGGER sync_employee_email_on_user_insert
+  AFTER INSERT ON public.users
+  FOR EACH ROW
+  WHEN (NEW.employee_id IS NOT NULL)
+  EXECUTE FUNCTION sync_employee_email_on_link();
+
+-- =============================================
 -- ROW LEVEL SECURITY
 -- =============================================
 
@@ -665,3 +718,78 @@ BEGIN
     END IF;
   END IF;
 END $$;
+
+-- =============================================
+-- AUTO-LINK AUTH USERS TO EMPLOYEES
+-- =============================================
+-- This runs automatically when auth users exist. 
+-- Links users to employees and syncs emails.
+
+-- Link auth users to employees in the users table
+INSERT INTO public.users (id, email, role, employee_id)
+SELECT 
+  au.id,
+  au.email,
+  COALESCE(au.raw_app_meta_data->>'role', 'employee') as role,
+  e.id as employee_id
+FROM auth.users au
+LEFT JOIN public.employees e ON (
+  e.email = au.email 
+  OR e.first_name || '.' || LOWER(SUBSTRING(e.last_name FROM 1 FOR 1)) || '@university.edu' = LOWER(au.email)
+  OR LOWER(SUBSTRING(e.first_name FROM 1 FOR 1)) || '.' || LOWER(e.last_name) || '@university.edu' = LOWER(au.email)
+)
+WHERE au.email IS NOT NULL
+ON CONFLICT (id) DO UPDATE SET 
+  role = EXCLUDED.role,
+  employee_id = COALESCE(EXCLUDED.employee_id, public.users.employee_id),
+  updated_at = now();
+
+-- Sync employee emails to match their linked user login emails
+UPDATE public.employees e
+SET email = u.email
+FROM public.users u
+WHERE u.employee_id = e.id
+  AND u.email IS NOT NULL
+  AND e.email IS DISTINCT FROM u.email;
+
+-- Create user preferences for each user
+INSERT INTO public.user_preferences (user_id, email_leave_approvals, email_attendance_reminders)
+SELECT id, true, true FROM public.users
+ON CONFLICT (user_id) DO NOTHING;
+
+-- Insert announcements (only if admin user exists)
+INSERT INTO public.announcements (title, content, priority, created_by, is_active) 
+SELECT 
+  'Welcome to EMS 2026', 
+  'The Employee Management System has been updated with new features including announcements, improved leave management, and better attendance tracking.', 
+  'high', 
+  u.id, 
+  true
+FROM public.users u WHERE u.role = 'admin' LIMIT 1
+ON CONFLICT DO NOTHING;
+
+INSERT INTO public.announcements (title, content, priority, created_by, is_active) 
+SELECT 
+  'Office Closure Notice', 
+  'The office will be closed on February 15th for maintenance. Please plan accordingly.', 
+  'urgent', 
+  u.id, 
+  true
+FROM public.users u WHERE u.role = 'admin' LIMIT 1
+ON CONFLICT DO NOTHING;
+
+INSERT INTO public.announcements (title, content, priority, created_by, is_active) 
+SELECT 
+  'New Health Benefits', 
+  'We are pleased to announce improved health benefits starting March 2026. Details will be shared via email.', 
+  'normal', 
+  u.id, 
+  true
+FROM public.users u WHERE u.role = 'admin' LIMIT 1
+ON CONFLICT DO NOTHING;
+
+-- Add activity log for system init
+INSERT INTO public.activity_logs (user_id, action, entity_type, details)
+SELECT id, 'System initialized with seed data', 'system', '{"version": "2.0", "date": "2026-02-14"}'::jsonb
+FROM public.users WHERE role = 'admin' LIMIT 1
+ON CONFLICT DO NOTHING;
