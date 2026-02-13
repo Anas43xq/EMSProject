@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Bell, X, AlertCircle, CheckCircle, Info, Calendar, Clock, Settings } from 'lucide-react';
+import { Bell, X, Info, Calendar, Clock, Settings } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import {
@@ -13,15 +13,12 @@ import {
 export default function NotificationCenter() {
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<DbNotification[]>([]);
-  const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 
   const loadNotifications = useCallback(async () => {
     if (!user?.id) return;
-    setLoading(true);
     const data = await fetchNotifications(user.id, 50);
     setNotifications(data);
-    setLoading(false);
   }, [user?.id]);
 
   useEffect(() => {
@@ -79,25 +76,17 @@ export default function NotificationCenter() {
     };
   }, [user?.id]);
 
-  const handleMarkRead = async (id: string) => {
-    await markNotificationRead(id);
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
-    );
-  };
-
-  const handleMarkAllRead = async () => {
-    if (!user?.id) return;
-    await markAllNotificationsRead(user.id);
-    setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
-  };
-
   const handleRemove = async (id: string) => {
     await deleteNotification(id);
     setNotifications((prev) => prev.filter((n) => n.id !== id));
   };
 
-  const unreadCount = notifications.filter((n) => !n.is_read).length;
+  const handleClearAll = async () => {
+    for (const n of notifications) {
+      await deleteNotification(n.id);
+    }
+    setNotifications([]);
+  };
 
   const getIcon = (type: string) => {
     switch (type) {
@@ -141,6 +130,10 @@ export default function NotificationCenter() {
     return date.toLocaleDateString();
   };
 
+  // Suppress unused variable warning - kept for future use
+  void markNotificationRead;
+  void markAllNotificationsRead;
+
   return (
     <div className="relative">
       {/* Notification Bell Button */}
@@ -183,7 +176,7 @@ export default function NotificationCenter() {
                 {notifications.map(notification => (
                   <div
                     key={notification.id}
-                    className={`p-4 ${getBackgroundColor(notification.type)} flex items-start space-x-3 hover:shadow-sm transition-shadow`}
+                    className={`p-4 ${getBackgroundColor(notification.type, notification.is_read)} flex items-start space-x-3 hover:shadow-sm transition-shadow`}
                   >
                     <div className="flex-shrink-0 mt-0.5">
                       {getIcon(notification.type)}
@@ -193,11 +186,11 @@ export default function NotificationCenter() {
                         {notification.message}
                       </p>
                       <p className="text-xs text-gray-500 mt-1">
-                        {notification.timestamp.toLocaleTimeString()}
+                        {formatTime(notification.created_at)}
                       </p>
                     </div>
                     <button
-                      onClick={() => removeNotification(notification.id)}
+                      onClick={() => handleRemove(notification.id)}
                       className="flex-shrink-0 text-gray-400 hover:text-gray-600"
                     >
                       <X className="w-4 h-4" />
@@ -212,7 +205,7 @@ export default function NotificationCenter() {
           {notifications.length > 0 && (
             <div className="p-3 border-t border-gray-200 flex justify-center">
               <button
-                onClick={clearAll}
+                onClick={handleClearAll}
                 className="text-sm text-blue-600 hover:text-blue-900 font-medium"
               >
                 Clear All

@@ -1,4 +1,7 @@
 import { supabase } from './supabase';
+import type { Database } from './database.types';
+
+type ActivityLogInsert = Database['public']['Tables']['activity_logs']['Insert'];
 
 export type ActivityAction =
   | 'user_created'
@@ -47,13 +50,15 @@ export async function logActivity(
   details?: Record<string, unknown>
 ): Promise<void> {
   try {
-    const { error } = await supabase.from('activity_logs').insert({
+    const record: ActivityLogInsert = {
       user_id: userId,
       action,
       entity_type: entityType,
       entity_id: entityId || null,
-      details: details || {},
-    });
+      details: details as any,
+    };
+    const { error } = await (supabase
+      .from('activity_logs') as any).insert(record);
 
     if (error) {
       console.error('Failed to log activity:', error);
@@ -76,15 +81,16 @@ export async function logActivities(
   }>
 ): Promise<void> {
   try {
-    const records = activities.map((a) => ({
+    const records: ActivityLogInsert[] = activities.map((a) => ({
       user_id: a.userId,
       action: a.action,
       entity_type: a.entityType,
       entity_id: a.entityId || null,
-      details: a.details || {},
+      details: a.details as any,
     }));
 
-    const { error } = await supabase.from('activity_logs').insert(records);
+    const { error } = await (supabase
+      .from('activity_logs') as any).insert(records);
 
     if (error) {
       console.error('Failed to log activities:', error);

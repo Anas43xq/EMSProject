@@ -1,6 +1,10 @@
 import { supabase } from './supabase';
+import type { Database } from './database.types';
 
 export type NotificationType = 'leave' | 'attendance' | 'system';
+
+type NotificationInsert = Database['public']['Tables']['notifications']['Insert'];
+type NotificationUpdate = Database['public']['Tables']['notifications']['Update'];
 
 export interface DbNotification {
   id: string;
@@ -22,12 +26,14 @@ export async function createNotification(
   type: NotificationType
 ): Promise<void> {
   try {
-    const { error } = await supabase.from('notifications').insert({
+    const record: NotificationInsert = {
       user_id: userId,
       title,
       message,
       type,
-    });
+    };
+    const { error } = await (supabase
+      .from('notifications') as any).insert(record);
 
     if (error) {
       console.error('Failed to create notification:', error);
@@ -49,14 +55,15 @@ export async function createNotifications(
   }>
 ): Promise<void> {
   try {
-    const records = notifications.map((n) => ({
+    const records: NotificationInsert[] = notifications.map((n) => ({
       user_id: n.userId,
       title: n.title,
       message: n.message,
       type: n.type,
     }));
 
-    const { error } = await supabase.from('notifications').insert(records);
+    const { error } = await (supabase
+      .from('notifications') as any).insert(records);
 
     if (error) {
       console.error('Failed to create notifications:', error);
@@ -88,7 +95,7 @@ export async function notifyHRAndAdmins(
 
     if (!users || users.length === 0) return;
 
-    const notifications = users.map((user) => ({
+    const notifications = (users as { id: string }[]).map((user) => ({
       userId: user.id,
       title,
       message,
@@ -159,9 +166,10 @@ export async function fetchNotifications(
  */
 export async function markNotificationRead(notificationId: string): Promise<void> {
   try {
-    const { error } = await supabase
-      .from('notifications')
-      .update({ is_read: true })
+    const update: NotificationUpdate = { is_read: true };
+    const { error } = await (supabase
+      .from('notifications') as any)
+      .update(update)
       .eq('id', notificationId);
 
     if (error) {
@@ -177,9 +185,10 @@ export async function markNotificationRead(notificationId: string): Promise<void
  */
 export async function markAllNotificationsRead(userId: string): Promise<void> {
   try {
-    const { error } = await supabase
-      .from('notifications')
-      .update({ is_read: true })
+    const update: NotificationUpdate = { is_read: true };
+    const { error } = await (supabase
+      .from('notifications') as any)
+      .update(update)
       .eq('user_id', userId)
       .eq('is_read', false);
 
