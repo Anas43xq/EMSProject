@@ -720,10 +720,97 @@ BEGIN
 END $$;
 
 -- =============================================
+-- CREATE AUTH USERS (Demo accounts)
+-- =============================================
+-- Creates auth users directly in the database
+
+-- Enable pgcrypto if not already enabled
+CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA extensions;
+
+-- Delete existing demo users to avoid conflicts
+DELETE FROM auth.users WHERE email IN ('admin@university.edu', 'hr@university.edu', 'employee@university.edu');
+
+INSERT INTO auth.users (
+  instance_id,
+  id,
+  aud,
+  role,
+  email,
+  encrypted_password,
+  email_confirmed_at,
+  raw_app_meta_data,
+  raw_user_meta_data,
+  created_at,
+  updated_at,
+  confirmation_token,
+  email_change,
+  email_change_token_new,
+  recovery_token
+) VALUES 
+-- Admin user
+(
+  '00000000-0000-0000-0000-000000000000',
+  gen_random_uuid(),
+  'authenticated',
+  'authenticated',
+  'admin@university.edu',
+  extensions.crypt('admin123', extensions.gen_salt('bf')),
+  now(),
+  '{"provider": "email", "providers": ["email"], "role": "admin"}'::jsonb,
+  '{}'::jsonb,
+  now(),
+  now(),
+  '',
+  '',
+  '',
+  ''
+),
+-- HR user
+(
+  '00000000-0000-0000-0000-000000000000',
+  gen_random_uuid(),
+  'authenticated',
+  'authenticated',
+  'hr@university.edu',
+  extensions.crypt('hr123', extensions.gen_salt('bf')),
+  now(),
+  '{"provider": "email", "providers": ["email"], "role": "hr"}'::jsonb,
+  '{}'::jsonb,
+  now(),
+  now(),
+  '',
+  '',
+  '',
+  ''
+),
+-- Employee user
+(
+  '00000000-0000-0000-0000-000000000000',
+  gen_random_uuid(),
+  'authenticated',
+  'authenticated',
+  'employee@university.edu',
+  extensions.crypt('emp123', extensions.gen_salt('bf')),
+  now(),
+  '{"provider": "email", "providers": ["email"], "role": "employee"}'::jsonb,
+  '{}'::jsonb,
+  now(),
+  now(),
+  '',
+  '',
+  '',
+  ''
+);
+
+-- =============================================
 -- AUTO-LINK AUTH USERS TO EMPLOYEES
 -- =============================================
--- This runs automatically when auth users exist. 
 -- Links users to employees and syncs emails.
+
+-- Set roles in app_metadata for demo users
+UPDATE auth.users SET raw_app_meta_data = raw_app_meta_data || '{"role": "admin"}' WHERE email = 'admin@university.edu';
+UPDATE auth.users SET raw_app_meta_data = raw_app_meta_data || '{"role": "hr"}' WHERE email = 'hr@university.edu';
+UPDATE auth.users SET raw_app_meta_data = raw_app_meta_data || '{"role": "employee"}' WHERE email = 'employee@university.edu';
 
 -- Link auth users to employees in the users table
 INSERT INTO public.users (id, email, role, employee_id)
@@ -733,11 +820,7 @@ SELECT
   COALESCE(au.raw_app_meta_data->>'role', 'employee') as role,
   e.id as employee_id
 FROM auth.users au
-LEFT JOIN public.employees e ON (
-  e.email = au.email 
-  OR e.first_name || '.' || LOWER(SUBSTRING(e.last_name FROM 1 FOR 1)) || '@university.edu' = LOWER(au.email)
-  OR LOWER(SUBSTRING(e.first_name FROM 1 FOR 1)) || '.' || LOWER(e.last_name) || '@university.edu' = LOWER(au.email)
-)
+LEFT JOIN public.employees e ON e.email = au.email
 WHERE au.email IS NOT NULL
 ON CONFLICT (id) DO UPDATE SET 
   role = EXCLUDED.role,
