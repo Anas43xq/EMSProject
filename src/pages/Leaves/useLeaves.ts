@@ -350,7 +350,6 @@ export function useLeaves() {
         );
 
         // Send email notification to user's login email
-        console.log('Sending leave approval email to:', employeeUser.email);
         await notifyLeaveApproval(
           employeeUser.email,
           leave.leave_type,
@@ -411,7 +410,6 @@ export function useLeaves() {
         );
 
         // Send email notification to user's login email
-        console.log('Sending leave rejection email to:', employeeUser.email);
         await notifyLeaveRejection(
           employeeUser.email,
           leave.leave_type,

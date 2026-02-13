@@ -17,8 +17,6 @@ export async function sendEmailNotification(data: EmailNotificationData): Promis
       return false;
     }
 
-    console.log(`Sending email notification to ${data.to} (${data.type})...`);
-
     const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
@@ -34,8 +32,7 @@ export async function sendEmailNotification(data: EmailNotificationData): Promis
       return false;
     }
 
-    const result = await response.json();
-    console.log('Email notification sent successfully:', result);
+    await response.json();
     return true;
   } catch (error) {
     console.error('Error sending email notification:', error);
