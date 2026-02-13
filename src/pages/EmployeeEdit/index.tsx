@@ -44,7 +44,7 @@ export default function EmployeeEdit() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <PersonalInfoSection formData={formData} onChange={handleChange} />
+        <PersonalInfoSection formData={formData} onChange={handleChange} isNewEmployee={isNewEmployee} />
         <EmploymentDetailsSection formData={formData} onChange={handleChange} departments={departments} />
         <EmergencyContactSection formData={formData} onChange={handleChange} />
 
