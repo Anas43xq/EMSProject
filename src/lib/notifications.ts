@@ -12,6 +12,13 @@ export async function sendEmailNotification(data: EmailNotificationData): Promis
     const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-notification-email`;
     const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+    if (!apiUrl || apiUrl === 'undefined/functions/v1/send-notification-email') {
+      console.error('Email notification failed: VITE_SUPABASE_URL is not configured');
+      return false;
+    }
+
+    console.log(`Sending email notification to ${data.to} (${data.type})...`);
+
     const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
@@ -22,12 +29,13 @@ export async function sendEmailNotification(data: EmailNotificationData): Promis
     });
 
     if (!response.ok) {
-      console.error('Failed to send email notification:', await response.text());
+      const errorText = await response.text();
+      console.error(`Failed to send email notification (${response.status}):`, errorText);
       return false;
     }
 
     const result = await response.json();
-    console.log('Email notification sent:', result);
+    console.log('Email notification sent successfully:', result);
     return true;
   } catch (error) {
     console.error('Error sending email notification:', error);

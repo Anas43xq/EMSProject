@@ -349,13 +349,27 @@ export function useLeaves() {
         );
       }
 
-      if (leave.employees?.email) {
+      // Send email notification - fetch email directly if not available from join
+      let employeeEmail = leave.employees?.email;
+      if (!employeeEmail) {
+        const { data: emp } = await supabase
+          .from('employees')
+          .select('email')
+          .eq('id', leave.employee_id)
+          .single() as { data: { email: string } | null };
+        employeeEmail = emp?.email;
+      }
+
+      if (employeeEmail) {
+        console.log('Sending leave approval email to:', employeeEmail);
         await notifyLeaveApproval(
-          leave.employees.email,
+          employeeEmail,
           leave.leave_type,
           new Date(leave.start_date).toLocaleDateString(),
           new Date(leave.end_date).toLocaleDateString()
         );
+      } else {
+        console.warn('No employee email found for leave approval notification, employee_id:', leave.employee_id);
       }
 
       loadLeaves();
@@ -407,13 +421,27 @@ export function useLeaves() {
         );
       }
 
-      if (leave.employees?.email) {
+      // Send email notification - fetch email directly if not available from join
+      let employeeEmail = leave.employees?.email;
+      if (!employeeEmail) {
+        const { data: emp } = await supabase
+          .from('employees')
+          .select('email')
+          .eq('id', leave.employee_id)
+          .single() as { data: { email: string } | null };
+        employeeEmail = emp?.email;
+      }
+
+      if (employeeEmail) {
+        console.log('Sending leave rejection email to:', employeeEmail);
         await notifyLeaveRejection(
-          leave.employees.email,
+          employeeEmail,
           leave.leave_type,
           new Date(leave.start_date).toLocaleDateString(),
           new Date(leave.end_date).toLocaleDateString()
         );
+      } else {
+        console.warn('No employee email found for leave rejection notification, employee_id:', leave.employee_id);
       }
 
       loadLeaves();
