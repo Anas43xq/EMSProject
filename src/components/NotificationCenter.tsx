@@ -107,13 +107,13 @@ export default function NotificationCenter() {
     if (isRead) return 'bg-gray-50';
     switch (type) {
       case 'leave':
-        return 'bg-purple-50 border-l-4 border-purple-600';
+        return 'bg-purple-50 ltr:border-l-4 rtl:border-r-4 border-purple-600';
       case 'attendance':
-        return 'bg-blue-50 border-l-4 border-blue-600';
+        return 'bg-blue-50 ltr:border-l-4 rtl:border-r-4 border-blue-600';
       case 'system':
-        return 'bg-gray-100 border-l-4 border-gray-600';
+        return 'bg-gray-100 ltr:border-l-4 rtl:border-r-4 border-gray-600';
       default:
-        return 'bg-gray-50 border-l-4 border-gray-600';
+        return 'bg-gray-50 ltr:border-l-4 rtl:border-r-4 border-gray-600';
     }
   };
 
@@ -154,9 +154,9 @@ export default function NotificationCenter() {
 
       {/* Notification Panel */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-96 max-w-[calc(100vw-20px)] bg-white rounded-lg shadow-xl z-50 border border-gray-200">
+        <div className="absolute ltr:right-0 rtl:left-0 mt-2 w-96 max-w-[calc(100vw-20px)] bg-white rounded-lg shadow-xl z-50 border border-gray-200">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-gray-200">
+          <div className="flex items-center justify-between p-4 border-b border-gray-200 ltr:flex-row rtl:flex-row-reverse">
             <h3 className="text-lg font-semibold text-gray-900">{t('notifications.title')}</h3>
             <button
               onClick={() => setIsOpen(false)}
@@ -178,12 +178,12 @@ export default function NotificationCenter() {
                 {notifications.map(notification => (
                   <div
                     key={notification.id}
-                    className={`p-4 ${getBackgroundColor(notification.type, notification.is_read)} flex items-start space-x-3 hover:shadow-sm transition-shadow`}
+                    className={`p-4 ${getBackgroundColor(notification.type, notification.is_read)} flex rtl:flex-row-reverse items-start ltr:space-x-3 rtl:space-x-reverse hover:shadow-sm transition-shadow`}
                   >
                     <div className="flex-shrink-0 mt-0.5">
                       {getIcon(notification.type)}
                     </div>
-                    <div className="flex-1 min-w-0">
+                    <div className="flex-1 min-w-0 ltr:text-left rtl:text-right">
                       <p className="text-sm text-gray-900 font-medium">
                         {notification.message}
                       </p>
