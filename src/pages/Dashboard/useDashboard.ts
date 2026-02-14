@@ -52,7 +52,8 @@ export function useDashboard() {
         rejectedLeavesRes,
         activitiesRes,
         attendanceRes,
-        departmentEmployeesRes
+        departmentEmployeesRes,
+        departmentNamesRes
       ] = await Promise.all([
         supabase.from('employees').select('id, status', { count: 'exact' }),
         supabase.from('departments').select('id', { count: 'exact' }),
@@ -81,7 +82,7 @@ export function useDashboard() {
 
       // Build department data
       const deptMap: { [key: string]: string } = {};
-      departmentsRes.data?.forEach((dept: any) => {
+      departmentNamesRes.data?.forEach((dept: any) => {
         deptMap[dept.id] = dept.name;
       });
 

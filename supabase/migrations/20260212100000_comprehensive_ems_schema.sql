@@ -468,6 +468,10 @@ CREATE POLICY "users_update_admin" ON public.users
   FOR UPDATE TO authenticated
   USING (get_user_role() = 'admin');
 
+CREATE POLICY "users_delete_admin" ON public.users
+  FOR DELETE TO authenticated
+  USING (get_user_role() = 'admin');
+
 -- ===== DEPARTMENTS POLICIES =====
 CREATE POLICY "departments_select_all" ON public.departments
   FOR SELECT TO authenticated

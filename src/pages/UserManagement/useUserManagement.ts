@@ -215,12 +215,18 @@ export function useUserManagement() {
 
     setSubmitting(true);
     try {
-      const { error } = await (supabase
+      // First delete from public.users table
+      const { error: dbError } = await (supabase
         .from('users') as any)
         .delete()
         .eq('id', selectedUser.id);
 
-      if (error) throw error;
+      if (dbError) throw dbError;
+
+      // Then delete from auth.users using edge function or admin API
+      // Note: Deleting from auth.users requires service_role key which should be done server-side
+      // For now, the user record is deleted from public.users
+      // The auth record will remain but won't have access due to RLS policies
 
       showNotification('success', t('userManagement.userDeleted'));
       
